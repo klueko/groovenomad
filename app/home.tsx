@@ -31,8 +31,22 @@ export default function Home() {
         monde entier.
       </Text>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Se déconnecter</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push("/music-preferences")}
+      >
+        <Text style={styles.buttonText}>🎵 Découvrir mes goûts musicaux</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.testButton}
+        onPress={() => router.push("/spotify-test")}
+      >
+        <Text style={styles.testButtonText}>🧪 Test API Spotify</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Se déconnecter</Text>
       </TouchableOpacity>
     </View>
   );
@@ -77,14 +91,40 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   button: {
+    backgroundColor: "#1DB954",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  logoutButton: {
     backgroundColor: "#FF3B30",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
     width: "100%",
   },
-  buttonText: {
+  logoutButtonText: {
     color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  testButton: {
+    backgroundColor: "#333",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 10,
+  },
+  testButtonText: {
+    color: "#1DB954",
     fontSize: 16,
     fontWeight: "bold",
   },
