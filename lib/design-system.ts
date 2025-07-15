@@ -30,12 +30,24 @@ export const FestiFunColors = {
 } as const;
 
 export const FestiFunFonts = {
-  // Fonts du design system avec Poppins (noms des fichiers sans extension)
-  title: "Poppins-SemiBold", // Poppins SemiBold pour les titres
-  body: "Poppins-Regular", // Poppins Regular pour le texte courant
-  bodySemiBold: "Poppins-SemiBold", // Poppins SemiBold pour les textes importants
-  bodyBold: "Poppins-Bold", // Poppins Bold pour les textes en gras
-  logo: "FasterOne-Regular", // Police Faster One pour le logo
+  // ✅ NOUVEAU SYSTÈME : Une seule famille avec variants
+  // Utilisation recommandée 2024 pour Expo SDK 53
+  family: {
+    poppins: "Poppins-Regular", // Police de base
+    logo: "FasterOne-Regular",
+  },
+
+  // ✅ Variants avec noms explicites (sans fontWeight)
+  variants: {
+    // Poppins variants
+    poppinsRegular: "Poppins-Regular",
+    poppinsMedium: "Poppins-Medium",
+    poppinsSemiBold: "Poppins-SemiBold",
+    poppinsBold: "Poppins-Bold",
+
+    // Logo
+    logo: "FasterOne-Regular",
+  },
 
   // Tailles
   sizes: {
@@ -50,12 +62,55 @@ export const FestiFunFonts = {
     hero: 64,
   },
 
-  // Poids
-  weights: {
-    light: "300",
-    regular: "400",
-    medium: "500",
-    bold: "700",
+  // ❌ SUPPRIMÉ : weights (car intégrés dans les fichiers TTF)
+} as const;
+
+// ✅ NOUVEAU : Helpers pour utilisation simplifiée
+export const FestiFunTypography = {
+  // Styles pré-définis SANS fontWeight
+  logo: {
+    fontFamily: FestiFunFonts.variants.logo,
+    fontSize: FestiFunFonts.sizes.logo,
+  },
+
+  heroTitle: {
+    fontFamily: FestiFunFonts.variants.logo,
+    fontSize: FestiFunFonts.sizes.hero,
+  },
+
+  title: {
+    fontFamily: FestiFunFonts.variants.poppinsSemiBold,
+    fontSize: FestiFunFonts.sizes.xxl,
+  },
+
+  subtitle: {
+    fontFamily: FestiFunFonts.variants.poppinsMedium,
+    fontSize: FestiFunFonts.sizes.lg,
+  },
+
+  body: {
+    fontFamily: FestiFunFonts.variants.poppinsRegular,
+    fontSize: FestiFunFonts.sizes.md,
+  },
+
+  bodySemiBold: {
+    fontFamily: FestiFunFonts.variants.poppinsSemiBold,
+    fontSize: FestiFunFonts.sizes.md,
+  },
+
+  bodyBold: {
+    fontFamily: FestiFunFonts.variants.poppinsBold,
+    fontSize: FestiFunFonts.sizes.md,
+  },
+
+  button: {
+    fontFamily: FestiFunFonts.variants.poppinsSemiBold,
+    fontSize: FestiFunFonts.sizes.md,
+  },
+
+  buttonLarge: {
+    fontFamily: FestiFunFonts.variants.poppinsBold,
+    fontSize: FestiFunFonts.sizes.lg,
   },
 } as const;
 
@@ -128,33 +183,26 @@ export const FestiFunCommonStyles = {
   // Texte du bouton primaire
   primaryButtonText: {
     color: FestiFunColors.textOnDark,
-    fontFamily: FestiFunFonts.title,
-    fontSize: FestiFunFonts.sizes.lg,
-    fontWeight: FestiFunFonts.weights.bold,
+    ...FestiFunTypography.button,
     textAlign: "center" as const,
   },
 
   // Titre principal
   heroTitle: {
-    fontFamily: FestiFunFonts.logo,
-    fontSize: FestiFunFonts.sizes.hero,
+    ...FestiFunTypography.heroTitle,
     color: FestiFunColors.primary,
     textAlign: "center" as const,
-    fontWeight: FestiFunFonts.weights.bold,
   },
 
   // Titre section
   sectionTitle: {
-    fontFamily: FestiFunFonts.title,
-    fontSize: FestiFunFonts.sizes.xxl,
+    ...FestiFunTypography.title,
     color: FestiFunColors.text,
-    fontWeight: FestiFunFonts.weights.bold,
   },
 
   // Texte corps
   bodyText: {
-    fontFamily: FestiFunFonts.body,
-    fontSize: FestiFunFonts.sizes.md,
+    ...FestiFunTypography.body,
     color: FestiFunColors.text,
     lineHeight: 24,
   },
@@ -165,8 +213,7 @@ export const FestiFunCommonStyles = {
     borderRadius: FestiFunBorderRadius.md,
     paddingVertical: FestiFunSpacing.md,
     paddingHorizontal: FestiFunSpacing.lg,
-    fontFamily: FestiFunFonts.body,
-    fontSize: FestiFunFonts.sizes.md,
+    ...FestiFunTypography.body,
     color: FestiFunColors.text,
     borderWidth: 2,
     borderColor: FestiFunColors.backgroundLight,
@@ -203,6 +250,7 @@ export const PedroBranding = {
 export default {
   colors: FestiFunColors,
   fonts: FestiFunFonts,
+  typography: FestiFunTypography,
   spacing: FestiFunSpacing,
   borderRadius: FestiFunBorderRadius,
   shadows: FestiFunShadows,

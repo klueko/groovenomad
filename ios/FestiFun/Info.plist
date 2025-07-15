@@ -7,7 +7,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>GrooveNomad</string>
+    <string>FestiFun</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -27,14 +27,14 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>groovenomad</string>
-          <string>com.hugodorus.groovenomad</string>
+          <string>festifun</string>
+          <string>com.hugodorus.festifun</string>
         </array>
       </dict>
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>exp+groovenomad</string>
+          <string>exp+festifun</string>
         </array>
       </dict>
     </array>
@@ -56,6 +56,14 @@
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
+    </array>
+    <key>UIAppFonts</key>
+    <array>
+      <string>Poppins-Regular.ttf</string>
+      <string>Poppins-Medium.ttf</string>
+      <string>Poppins-SemiBold.ttf</string>
+      <string>Poppins-Bold.ttf</string>
+      <string>FasterOne-Regular.ttf</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>

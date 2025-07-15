@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { router } from "expo-router";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { useSession } from "../lib/auth-client";
-import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
+import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
 
 export default function FestiFunSplashScreen() {
   const { data: session, isPending } = useSession();
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   // Titre FESTIFUN avec style logo
   festifun: {
     fontSize: 48,
-    fontFamily: FestiFunFonts.logo, // Police Faster One pour le logo
+    fontFamily: FestiFunTypography.logo.fontFamily, // Police Faster One pour le logo
     color: FestiFunColors.background, // Couleur claire sur fond sombre
     textAlign: "center",
     letterSpacing: 3, // Espacement pour le style logo

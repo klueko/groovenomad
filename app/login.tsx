@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { signIn, useSession, signOut } from "../lib/auth-client";
-import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
+import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
 
 const { width, height } = Dimensions.get("window");
 
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   bienvenueSurFestifun: {
     fontSize: 34,
     lineHeight: 37,
-    fontFamily: FestiFunFonts.title, // Poppins SemiBold pour les titres
+    fontFamily: FestiFunTypography.title.fontFamily, // Poppins SemiBold pour les titres
     color: FestiFunColors.background, // #f5effd
     alignSelf: "stretch",
     textAlign: "left",
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
 
   lagenceDeVoyage: {
     letterSpacing: -0.2,
-    fontFamily: FestiFunFonts.body, // Poppins Regular pour le texte
+    fontFamily: FestiFunTypography.body.fontFamily, // Poppins Regular pour le texte
     fontSize: 14,
     textAlign: "left",
     color: "#ad9cbb",
@@ -284,8 +284,8 @@ const styles = StyleSheet.create({
   // Boutons
   buttonParent: {
     gap: 12,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
     alignSelf: "stretch",
   },
 
@@ -296,15 +296,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 18,
     paddingBottom: 17,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    flexDirection: "row" as const,
   },
 
   commencer: {
     lineHeight: 14,
-    fontWeight: "700",
-    fontFamily: FestiFunFonts.bodyBold, // Poppins Bold
+    fontFamily: FestiFunTypography.bodyBold.fontFamily, // Poppins Bold
     color: FestiFunColors.background, // #f5effd
     fontSize: 14,
     textAlign: "left",
@@ -313,7 +312,7 @@ const styles = StyleSheet.create({
   ou: {
     fontSize: 12,
     lineHeight: 13,
-    fontFamily: FestiFunFonts.body, // Poppins Regular
+    fontFamily: FestiFunTypography.body.fontFamily, // Poppins Regular
     textAlign: "center",
     color: "#ad9cbb",
     alignSelf: "stretch",
@@ -321,10 +320,10 @@ const styles = StyleSheet.create({
 
   // Boutons de services
   continuerAvecParent: {
-    flexDirection: "row",
+    flexDirection: "row" as const,
     gap: 12,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
   },
 
   continuerAvec: {
@@ -334,15 +333,15 @@ const styles = StyleSheet.create({
     borderColor: "#ad9cbb",
     borderStyle: "solid",
     borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
   },
 
   // Bouton Spotify
   spotifyButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
     backgroundColor: "#1DB954", // Couleur officielle Spotify
     paddingHorizontal: 24,
     paddingVertical: 12,
@@ -359,9 +358,8 @@ const styles = StyleSheet.create({
 
   spotifyText: {
     fontSize: 16,
-    fontFamily: FestiFunFonts.bodySemiBold, // Poppins SemiBold pour les boutons
+    fontFamily: FestiFunTypography.bodySemiBold.fontFamily, // Poppins SemiBold pour les boutons
     color: FestiFunColors.white,
-    fontWeight: "600",
   },
 
   buttonDisabled: {

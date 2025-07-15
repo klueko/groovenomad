@@ -11,17 +11,27 @@
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
+		7EC1B7923D5D4AEF87FCEF11 /* Poppins-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FDCA63C9E98A4391A2CBA778 /* Poppins-Regular.ttf */; };
+		AE1099A1C2DE4C02AF053B57 /* Poppins-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D1A6A7F1B3314927A598ADD4 /* Poppins-Medium.ttf */; };
+		36FEC04878A04E9FB4DA5B1D /* Poppins-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A0B4D3C447884AECBA835CA4 /* Poppins-SemiBold.ttf */; };
+		2A21498B1E4A455ABD355B7A /* Poppins-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A38C3B1D7DFE4D08971D7C3E /* Poppins-Bold.ttf */; };
+		EB3804786DB84FC9BE2A99FC /* FasterOne-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E097A5F034B04E4E95D4B969 /* FasterOne-Regular.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		13B07F961A680F5B00A75B9A /* GrooveNomad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GrooveNomad.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = GrooveNomad/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = GrooveNomad/Info.plist; sourceTree = "<group>"; };
-		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = GrooveNomad/SplashScreen.storyboard; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* FestiFun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FestiFun.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = FestiFun/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = FestiFun/Info.plist; sourceTree = "<group>"; };
+		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = FestiFun/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = GrooveNomad/AppDelegate.swift; sourceTree = "<group>"; };
-		F11748442D0722820044C1D9 /* GrooveNomad-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "GrooveNomad-Bridging-Header.h"; path = "GrooveNomad/GrooveNomad-Bridging-Header.h"; sourceTree = "<group>"; };
+		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = FestiFun/AppDelegate.swift; sourceTree = "<group>"; };
+		F11748442D0722820044C1D9 /* FestiFun-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "FestiFun-Bridging-Header.h"; path = "FestiFun/FestiFun-Bridging-Header.h"; sourceTree = "<group>"; };
+		FDCA63C9E98A4391A2CBA778 /* Poppins-Regular.ttf */ = {isa = PBXFileReference; name = "Poppins-Regular.ttf"; path = "../assets/fonts/Poppins-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		D1A6A7F1B3314927A598ADD4 /* Poppins-Medium.ttf */ = {isa = PBXFileReference; name = "Poppins-Medium.ttf"; path = "../assets/fonts/Poppins-Medium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		A0B4D3C447884AECBA835CA4 /* Poppins-SemiBold.ttf */ = {isa = PBXFileReference; name = "Poppins-SemiBold.ttf"; path = "../assets/fonts/Poppins-SemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		A38C3B1D7DFE4D08971D7C3E /* Poppins-Bold.ttf */ = {isa = PBXFileReference; name = "Poppins-Bold.ttf"; path = "../assets/fonts/Poppins-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		E097A5F034B04E4E95D4B969 /* FasterOne-Regular.ttf */ = {isa = PBXFileReference; name = "FasterOne-Regular.ttf"; path = "../assets/fonts/FasterOne-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,17 +45,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		13B07FAE1A68108700A75B9A /* GrooveNomad */ = {
+		13B07FAE1A68108700A75B9A /* FestiFun */ = {
 			isa = PBXGroup;
 			children = (
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
-				F11748442D0722820044C1D9 /* GrooveNomad-Bridging-Header.h */,
+				F11748442D0722820044C1D9 /* FestiFun-Bridging-Header.h */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 			);
-			name = GrooveNomad;
+			name = FestiFun;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
@@ -66,10 +76,11 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* GrooveNomad */,
+				13B07FAE1A68108700A75B9A /* FestiFun */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
+				11181861D0234DD7869B0918 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -79,7 +90,7 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* GrooveNomad.app */,
+				13B07F961A680F5B00A75B9A /* FestiFun.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -90,15 +101,28 @@
 				BB2F792C24A3F905000567C9 /* Expo.plist */,
 			);
 			name = Supporting;
-			path = GrooveNomad/Supporting;
+			path = FestiFun/Supporting;
 			sourceTree = "<group>";
+		};
+		11181861D0234DD7869B0918 /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				FDCA63C9E98A4391A2CBA778 /* Poppins-Regular.ttf */,
+				D1A6A7F1B3314927A598ADD4 /* Poppins-Medium.ttf */,
+				A0B4D3C447884AECBA835CA4 /* Poppins-SemiBold.ttf */,
+				A38C3B1D7DFE4D08971D7C3E /* Poppins-Bold.ttf */,
+				E097A5F034B04E4E95D4B969 /* FasterOne-Regular.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		13B07F861A680F5B00A75B9A /* GrooveNomad */ = {
+		13B07F861A680F5B00A75B9A /* FestiFun */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "GrooveNomad" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "FestiFun" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
@@ -111,9 +135,9 @@
 			);
 			dependencies = (
 			);
-			name = GrooveNomad;
-			productName = GrooveNomad;
-			productReference = 13B07F961A680F5B00A75B9A /* GrooveNomad.app */;
+			name = FestiFun;
+			productName = FestiFun;
+			productReference = 13B07F961A680F5B00A75B9A /* FestiFun.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -129,7 +153,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "GrooveNomad" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "FestiFun" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -142,7 +166,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* GrooveNomad */,
+				13B07F861A680F5B00A75B9A /* FestiFun */,
 			);
 		};
 /* End PBXProject section */
@@ -155,6 +179,11 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
+				7EC1B7923D5D4AEF87FCEF11 /* Poppins-Regular.ttf in Resources */,
+				AE1099A1C2DE4C02AF053B57 /* Poppins-Medium.ttf in Resources */,
+				36FEC04878A04E9FB4DA5B1D /* Poppins-SemiBold.ttf in Resources */,
+				2A21498B1E4A455ABD355B7A /* Poppins-Bold.ttf in Resources */,
+				EB3804786DB84FC9BE2A99FC /* FasterOne-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -191,7 +220,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-GrooveNomad-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-FestiFun-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -204,7 +233,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-GrooveNomad/Pods-GrooveNomad-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-FestiFun/Pods-FestiFun-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXUpdates/EXUpdates.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/RCTI18nStrings.bundle",
@@ -217,7 +246,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GrooveNomad/Pods-GrooveNomad-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FestiFun/Pods-FestiFun-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -245,7 +274,7 @@
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
 				);
-				INFOPLIST_FILE = GrooveNomad/Info.plist;
+				INFOPLIST_FILE = FestiFun/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -257,14 +286,14 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.hugodorus.groovenomad";
-				PRODUCT_NAME = "GrooveNomad";
-				SWIFT_OBJC_BRIDGING_HEADER = "GrooveNomad/GrooveNomad-Bridging-Header.h";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hugodorus.festifun";
+				PRODUCT_NAME = "FestiFun";
+				SWIFT_OBJC_BRIDGING_HEADER = "FestiFun/FestiFun-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				CODE_SIGN_ENTITLEMENTS = GrooveNomad/GrooveNomad.entitlements;
+				CODE_SIGN_ENTITLEMENTS = FestiFun/FestiFun.entitlements;
 			};
 			name = Debug;
 		};
@@ -274,7 +303,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_FILE = GrooveNomad/Info.plist;
+				INFOPLIST_FILE = FestiFun/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -286,13 +315,13 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.hugodorus.groovenomad";
-				PRODUCT_NAME = "GrooveNomad";
-				SWIFT_OBJC_BRIDGING_HEADER = "GrooveNomad/GrooveNomad-Bridging-Header.h";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.hugodorus.festifun";
+				PRODUCT_NAME = "FestiFun";
+				SWIFT_OBJC_BRIDGING_HEADER = "FestiFun/FestiFun-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				CODE_SIGN_ENTITLEMENTS = GrooveNomad/GrooveNomad.entitlements;
+				CODE_SIGN_ENTITLEMENTS = FestiFun/FestiFun.entitlements;
 			};
 			name = Release;
 		};
@@ -410,7 +439,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "GrooveNomad" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "FestiFun" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -419,7 +448,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "GrooveNomad" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "FestiFun" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,

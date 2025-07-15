@@ -1,6 +1,49 @@
 import { Stack } from "expo-router";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+
+// Empêcher l'écran de chargement de se cacher automatiquement
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
+    "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
+    "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
+    "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
+    "FasterOne-Regular": require("../assets/fonts/FasterOne-Regular.ttf"),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+
+    // ✅ LOGS DE DEBUG pour les polices
+    if (fontsLoaded) {
+      console.log("✅ POLICES CHARGÉES AVEC SUCCÈS !");
+      console.log("📝 Polices disponibles :");
+      console.log("- Poppins-Regular");
+      console.log("- Poppins-Medium");
+      console.log("- Poppins-SemiBold");
+      console.log("- Poppins-Bold");
+      console.log("- FasterOne-Regular");
+    }
+
+    if (fontError) {
+      console.error("❌ ERREUR DE CHARGEMENT DES POLICES :");
+      console.error(fontError);
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (fontError) {
+    console.error("❌ Erreur polices:", fontError);
+  }
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />

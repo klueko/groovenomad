@@ -47,3 +47,79 @@ DATABASE_URL=postgresql://postgres.zjkmcqmovbovuafwygbh:ton_mot_de_passe_db@aws-
 # Dans ton terminal
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
+
+---
+
+## 🔤 **GUIDE DE DÉBOGAGE DES POLICES**
+
+### **Problème résolu : Polices personnalisées**
+
+✅ **Solution implementée :**
+
+- Suppression des conflits `fontWeight` avec polices TTF intégrées
+- Nouveau système `FestiFunTypography` pour éviter les erreurs
+- Configuration Android améliorée
+- Cache Metro nettoyé automatiquement
+
+### **Comment vérifier que ça fonctionne :**
+
+1. **Via l'écran de debug :**
+
+   ```bash
+   # Dans l'app, navigue vers /debug
+   # Tu verras différents styles de polices testés
+   ```
+
+2. **Commandes de nettoyage (si problème persiste) :**
+
+   ```bash
+   # Nettoyer complètement le cache
+   cd groovenomad
+   npx expo start --clear
+
+   # Si ça ne marche toujours pas
+   pnpm start --reset-cache
+
+   # Redémarrer Expo Go complètement
+   # (fermer l'app et la relancer)
+   ```
+
+3. **Vérification des fichiers de polices :**
+   ```bash
+   ls -la assets/fonts/
+   # Tu dois voir :
+   # FasterOne-Regular.ttf
+   # Poppins-Regular.ttf
+   # Poppins-Medium.ttf
+   # Poppins-SemiBold.ttf
+   # Poppins-Bold.ttf
+   ```
+
+### **⚠️ Limitations Expo Go :**
+
+- Expo Go peut avoir des limitations avec les polices
+- Si le problème persiste, essaie avec `npx expo run:android`
+- Pour production, un development build sera nécessaire
+
+### **✅ Nouvelles bonnes pratiques :**
+
+```typescript
+// ❌ AVANT (causait le bug)
+style={{
+  fontFamily: "Poppins-Bold",
+  fontWeight: "700" // ❌ Conflit !
+}}
+
+// ✅ MAINTENANT (corrigé)
+style={{
+  fontFamily: FestiFunTypography.bodyBold.fontFamily // ✅ Pas de fontWeight
+}}
+```
+
+### **📱 Test sur Android :**
+
+```bash
+# Si les polices ne s'affichent toujours pas sur Android
+npx expo run:android --device
+# Cela crée un development build avec les polices intégrées
+```

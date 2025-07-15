@@ -12,6 +12,13 @@
       "backgroundColor": "#F5EFFD"
     },
     "assetBundlePatterns": ["**/*"],
+    "fonts": [
+      "./assets/fonts/Poppins-Regular.ttf",
+      "./assets/fonts/Poppins-Medium.ttf",
+      "./assets/fonts/Poppins-SemiBold.ttf",
+      "./assets/fonts/Poppins-Bold.ttf",
+      "./assets/fonts/FasterOne-Regular.ttf"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hugodorus.festifun"
@@ -21,7 +28,9 @@
         "foregroundImage": "./app/assets/adaptive-icon.png",
         "backgroundColor": "#F5EFFD"
       },
-      "package": "com.hugodorus.festifun"
+      "package": "com.hugodorus.festifun",
+      "allowBackup": false,
+      "enableProguardInReleaseBuilds": false
     },
     "web": {
       "favicon": "./app/assets/favicon.png",
@@ -31,18 +40,7 @@
       "expo-router",
       "expo-secure-store",
       "expo-dev-client",
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "./assets/fonts/Poppins-Regular.ttf",
-            "./assets/fonts/Poppins-Medium.ttf",
-            "./assets/fonts/Poppins-SemiBold.ttf",
-            "./assets/fonts/Poppins-Bold.ttf",
-            "./assets/fonts/FasterOne-Regular.ttf"
-          ]
-        }
-      ]
+      "expo-font"
     ],
     "scheme": "festifun",
     "experiments": {
