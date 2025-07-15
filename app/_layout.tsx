@@ -12,6 +12,7 @@ export default function RootLayout() {
     "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Bold": require("../assets/fonts/Poppins-Bold.ttf"),
+    "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
     "FasterOne-Regular": require("../assets/fonts/FasterOne-Regular.ttf"),
   });
 
@@ -28,6 +29,7 @@ export default function RootLayout() {
       console.log("- Poppins-Medium");
       console.log("- Poppins-SemiBold");
       console.log("- Poppins-Bold");
+      console.log("- Poppins-Black");
       console.log("- FasterOne-Regular");
     }
 

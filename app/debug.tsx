@@ -89,7 +89,7 @@ export default function Debug() {
 
       const result = await authClient.signIn.social({
         provider: "spotify",
-        callbackURL: "groovenomad://auth/callback/spotify",
+        callbackURL: "festifun://auth/callback/spotify",
       });
 
       // Sérialisation sécurisée du résultat
@@ -119,14 +119,13 @@ export default function Debug() {
     addLog("✅ Poppins-Medium chargé");
     addLog("✅ Poppins-SemiBold chargé");
     addLog("✅ Poppins-Bold chargé");
+    addLog("✅ Poppins-Black chargé ⚫️ NOUVEAU !");
     addLog("✅ FasterOne-Regular chargé");
-    addLog("📱 Après nouveau build Android avec expo-font plugin");
-    addLog(
-      "🎯 Si les polices s'affichent correctement ci-dessous, c'est résolu !"
-    );
+    addLog("📱 Après nouveau build Android avec VRAI Poppins-Black");
+    addLog("🎯 Regardez la différence entre Bold et BLACK ci-dessous !");
     Alert.alert(
-      "✅ Test Polices",
-      "Vérifiez visuellement les différents styles de polices ci-dessous !\n\nSi elles s'affichent correctement = PROBLÈME RÉSOLU 🎉"
+      "✅ Test Polices BLACK",
+      "Vérifiez visuellement la différence entre :\n• Poppins Bold (gris)\n• Poppins BLACK (noir) ⚫️\n\nLe BLACK est beaucoup plus épais ! 🔥"
     );
   };
 
@@ -144,15 +143,20 @@ export default function Debug() {
         >
           <Text style={styles.backButtonText}>← Retour</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Debug GrooveNomad</Text>
+        <Text style={styles.title}>Debug FestiFun</Text>
       </View>
 
       <View style={styles.fontsTestSection}>
         <Text style={styles.fontsTestTitle}>🔤 Test des Polices</Text>
 
         <Text style={styles.testLogo}>FESTIFUN</Text>
-        <Text style={styles.testTitle}>Titre avec Poppins SemiBold</Text>
-        <Text style={styles.testSubtitle}>Sous-titre avec Poppins Medium</Text>
+        <Text style={styles.testTitle}>Titre avec Poppins BLACK ⚫️</Text>
+        <Text style={styles.testTitleOld}>
+          Titre avec Poppins Bold (ancien)
+        </Text>
+        <Text style={styles.testSubtitle}>
+          Sous-titre avec Poppins BLACK ⚫️
+        </Text>
         <Text style={styles.testBody}>Texte normal avec Poppins Regular</Text>
         <Text style={styles.testBodyBold}>Texte gras avec Poppins Bold</Text>
 
@@ -297,13 +301,19 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   testTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontFamily: FestiFunTypography.title.fontFamily,
     color: FestiFunColors.text,
     marginBottom: 8,
   },
+  testTitleOld: {
+    fontSize: 24,
+    fontFamily: FestiFunTypography.bodyBold.fontFamily,
+    color: "#666",
+    marginBottom: 8,
+  },
   testSubtitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: FestiFunTypography.subtitle.fontFamily,
     color: FestiFunColors.text,
     marginBottom: 8,

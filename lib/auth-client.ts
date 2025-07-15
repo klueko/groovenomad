@@ -18,8 +18,8 @@ export const authClient = createAuthClient({
   baseURL: baseURL,
   plugins: [
     expoClient({
-      scheme: "groovenomad", // Utiliser le scheme personnalisé défini dans app.json
-      storagePrefix: "groovenomad",
+      scheme: "festifun", // Utiliser le scheme personnalisé défini dans app.json
+      storagePrefix: "festifun",
       storage: SecureStore,
     }),
   ],

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as React from "react";
 import {
   View,
@@ -10,18 +10,48 @@ import {
   ScrollView,
   Image,
   Dimensions,
+  Animated,
 } from "react-native";
 import { router } from "expo-router";
 import { signIn, useSession, signOut } from "../lib/auth-client";
 import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
+import { useAudioPlayer, AudioSource } from "expo-audio";
+import Svg, { Path } from "react-native-svg";
 
 const { width, height } = Dimensions.get("window");
+
+// Composant logo Spotify basé sur le SVG des assets
+const SpotifyLogo = ({
+  size = 20,
+  color = "#1ed760",
+}: {
+  size?: number;
+  color?: string;
+}) => (
+  <Svg width={size} height={size} viewBox="0 0 496 512">
+    <Path
+      fill={color}
+      d="M248 8C111.1 8 0 119.1 0 256s111.1 248 248 248 248-111.1 248-248S384.9 8 248 8Z"
+    />
+    <Path
+      fill="#000"
+      d="M406.6 231.1c-5.2 0-8.4-1.3-12.9-3.9-71.2-42.5-198.5-52.7-280.9-29.7-3.6 1-8.1 2.6-12.9 2.6-13.2 0-23.3-10.3-23.3-23.6 0-13.6 8.4-21.3 17.4-23.9 35.2-10.3 74.6-15.2 117.5-15.2 73 0 149.5 15.2 205.4 47.8 7.8 4.5 12.9 10.7 12.9 22.6 0 13.6-11 23.3-23.2 23.3zm-31 76.2c-5.2 0-8.7-2.3-12.3-4.2-62.5-37-155.7-51.9-238.6-29.4-4.8 1.3-7.4 2.6-11.9 2.6-10.7 0-19.4-8.7-19.4-19.4s5.2-17.8 15.5-20.7c27.8-7.8 56.2-13.6 97.8-13.6 64.9 0 127.6 16.1 177 45.5 8.1 4.8 11.3 11 11.3 19.7-.1 10.8-8.5 19.5-19.4 19.5zm-26.9 65.6c-4.2 0-6.8-1.3-10.7-3.6-62.4-37.6-135-39.2-206.7-24.5-3.9 1-9 2.6-11.9 2.6-9.7 0-15.8-7.7-15.8-15.8 0-10.3 6.1-15.2 13.6-16.8 81.9-18.1 165.6-16.5 237 26.2 6.1 3.9 9.7 7.4 9.7 16.5s-7.1 15.4-15.2 15.4z"
+    />
+  </Svg>
+);
 
 export default function FestiFunLoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [spotifyLoading, setSpotifyLoading] = useState(false);
+
+  // Animations pour Pedro
+  const rotationAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  // Audio player pour Pedro
+  const player = useAudioPlayer(require("./assets/pedro.mp3") as AudioSource);
 
   // Hook pour vérifier l'état de connexion
   const { data: session, isPending: sessionLoading } = useSession();
@@ -31,6 +61,55 @@ export default function FestiFunLoginScreen() {
       console.log("✅ Utilisateur connecté !", session.user);
     }
   }, [session, sessionLoading]);
+
+  // Animation de rotation continue pour Pedro
+  useEffect(() => {
+    const rotateAnimation = Animated.loop(
+      Animated.timing(rotationAnim, {
+        toValue: 1,
+        duration: 8000, // 8 secondes pour un tour complet
+        useNativeDriver: true,
+      })
+    );
+    rotateAnimation.start();
+
+    return () => rotateAnimation.stop();
+  }, [rotationAnim]);
+
+  // Animation de réaction musicale (légère pulsation)
+  useEffect(() => {
+    const musicReaction = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.05,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    musicReaction.start();
+
+    return () => musicReaction.stop();
+  }, [scaleAnim]);
+
+  // Lecture de l'audio Pedro avec la nouvelle API
+  useEffect(() => {
+    // Configuration et démarrage automatique
+    player.volume = 0.3; // Volume modéré
+    player.loop = true; // Lecture en boucle
+    player.play(); // Démarrage automatique
+    console.log("🎵 Audio Pedro en lecture avec expo-audio");
+
+    // Nettoyage lors du démontage
+    return () => {
+      player.pause();
+    };
+  }, [player]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -113,18 +192,29 @@ export default function FestiFunLoginScreen() {
     return null;
   }
 
+  // Interpolation pour la rotation
+  const rotateInterpolate = rotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
   // Écran de connexion principal selon le design Figma
   return (
     <ScrollView
       style={styles.connexion}
       contentContainerStyle={styles.connexionContainerContent}
     >
-      {/* Image Pedro depuis les assets - exactement comme le Figma */}
+      {/* Image Pedro depuis les assets - exactement comme le Figma avec animations */}
       <View style={styles.perdoText1Wrapper}>
-        <Image
-          style={styles.perdoText1Icon}
+        <Animated.Image
+          style={[
+            styles.perdoText1Icon,
+            {
+              transform: [{ rotate: rotateInterpolate }, { scale: scaleAnim }],
+            },
+          ]}
           resizeMode="cover"
-          source={require("./assets/pedropedropedro.png")} // Utilise l'image Pedro depuis assets
+          source={require("./assets/pedropedropedro.png")}
         />
       </View>
 
@@ -163,10 +253,8 @@ export default function FestiFunLoginScreen() {
               onPress={handleSpotifyLogin}
               disabled={spotifyLoading}
             >
-              <Text style={styles.spotifyIcon}>♫</Text>
-              <Text style={styles.spotifyText}>
-                {spotifyLoading ? "Connexion..." : "Continuer avec Spotify"}
-              </Text>
+              <SpotifyLogo size={24} color={FestiFunColors.white} />
+              <Text style={styles.spotifyText}>Continuer avec Spotify</Text>
             </TouchableOpacity>
           </View>
 
@@ -294,19 +382,18 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: FestiFunColors.primary, // #7742fe
     paddingHorizontal: 22,
-    paddingTop: 18,
-    paddingBottom: 17,
+    paddingVertical: 24, // Plus généreux pour éviter la coupure
     justifyContent: "center" as const,
     alignItems: "center" as const,
     flexDirection: "row" as const,
   },
 
   commencer: {
-    lineHeight: 14,
+    lineHeight: 22, // Encore plus d'espace pour les descendantes
     fontFamily: FestiFunTypography.bodyBold.fontFamily, // Poppins Bold
     color: FestiFunColors.background, // #f5effd
     fontSize: 14,
-    textAlign: "left",
+    textAlign: "center", // Centré dans le bouton
   },
 
   ou: {
@@ -342,23 +429,24 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    backgroundColor: "#1DB954", // Couleur officielle Spotify
     paddingHorizontal: 24,
+    borderColor: FestiFunColors.white,
+    borderWidth: 1,
     paddingVertical: 12,
-    borderRadius: 25,
+    borderRadius: 250,
     gap: 8,
     minWidth: 200,
   },
 
   spotifyIcon: {
-    fontSize: 18,
+    fontSize: 20,
+    fontFamily: FestiFunTypography.bodySemiBold.fontFamily, // Poppins SemiBold for the button text
     color: FestiFunColors.white,
-    marginRight: 4,
   },
 
   spotifyText: {
     fontSize: 16,
-    fontFamily: FestiFunTypography.bodySemiBold.fontFamily, // Poppins SemiBold pour les boutons
+    fontFamily: FestiFunTypography.bodySemiBold.fontFamily, // Poppins SemiBold for the button text
     color: FestiFunColors.white,
   },
 

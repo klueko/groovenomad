@@ -17,7 +17,7 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenue sur GrooveNomad!</Text>
+      <Text style={styles.title}>Bienvenue sur FestiFun!</Text>
 
       {session?.user && (
         <View style={styles.userInfo}>

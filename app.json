@@ -17,6 +17,7 @@
       "./assets/fonts/Poppins-Medium.ttf",
       "./assets/fonts/Poppins-SemiBold.ttf",
       "./assets/fonts/Poppins-Bold.ttf",
+      "./assets/fonts/Poppins-Black.ttf",
       "./assets/fonts/FasterOne-Regular.ttf"
     ],
     "ios": {
@@ -25,7 +26,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./app/assets/adaptive-icon.png",
+        "foregroundImage": "./app/assets/icon.png",
         "backgroundColor": "#F5EFFD"
       },
       "package": "com.hugodorus.festifun",
@@ -40,7 +41,8 @@
       "expo-router",
       "expo-secure-store",
       "expo-dev-client",
-      "expo-font"
+      "expo-font",
+      "expo-audio"
     ],
     "scheme": "festifun",
     "experiments": {

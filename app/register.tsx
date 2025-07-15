@@ -60,7 +60,7 @@ export default function Register() {
     try {
       const result = await authClient.signIn.social({
         provider: "spotify",
-        callbackURL: "groovenomad://home",
+        callbackURL: "festifun://home",
       });
 
       if (result.error) {

@@ -126,7 +126,7 @@ export default function OnboardingScreen() {
           >
             <Text style={styles.logoText}>🎪</Text>
           </LinearGradient>
-          <Text style={styles.appTitle}>GrooveNomad</Text>
+          <Text style={styles.appTitle}>FestiFun</Text>
           <Text style={styles.appSubtitle}>
             Votre compagnon pour découvrir les festivals parfaits
           </Text>

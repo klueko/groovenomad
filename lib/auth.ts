@@ -52,8 +52,9 @@ export const auth = betterAuth({
     process.env.BETTER_AUTH_URL || "http://localhost:8081",
     "http://10.186.166.166:8081",
     "http://10.224.162.166:8081",
-    "groovenomad://",
-    "groovenomad://*",
+
+    "festifun://",
+    "festifun://*",
     "exp://localhost:8081",
     "exp://10.186.166.166:8081",
     "exp://10.224.162.166:8081",

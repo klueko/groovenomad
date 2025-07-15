@@ -44,6 +44,7 @@ export const FestiFunFonts = {
     poppinsMedium: "Poppins-Medium",
     poppinsSemiBold: "Poppins-SemiBold",
     poppinsBold: "Poppins-Bold",
+    poppinsBlack: "Poppins-Black",
 
     // Logo
     logo: "FasterOne-Regular",
@@ -79,12 +80,12 @@ export const FestiFunTypography = {
   },
 
   title: {
-    fontFamily: FestiFunFonts.variants.poppinsSemiBold,
+    fontFamily: FestiFunFonts.variants.poppinsBlack,
     fontSize: FestiFunFonts.sizes.xxl,
   },
 
   subtitle: {
-    fontFamily: FestiFunFonts.variants.poppinsMedium,
+    fontFamily: FestiFunFonts.variants.poppinsBlack,
     fontSize: FestiFunFonts.sizes.lg,
   },
 
@@ -109,7 +110,7 @@ export const FestiFunTypography = {
   },
 
   buttonLarge: {
-    fontFamily: FestiFunFonts.variants.poppinsBold,
+    fontFamily: FestiFunFonts.variants.poppinsBlack,
     fontSize: FestiFunFonts.sizes.lg,
   },
 } as const;
