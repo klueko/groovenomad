@@ -7,11 +7,17 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
+  ScrollView,
+  Image,
+  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { signIn, useSession, signOut } from "../lib/auth-client";
+import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
 
-export default function Login() {
+const { width, height } = Dimensions.get("window");
+
+export default function FestiFunLoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,20 +27,8 @@ export default function Login() {
   const { data: session, isPending: sessionLoading } = useSession();
 
   useEffect(() => {
-    console.log("🔍 Vérification session utilisateur...");
-    console.log("📊 Session loading:", sessionLoading);
-    console.log("👤 Session data:", session);
-
     if (session?.user) {
-      console.log("✅ Utilisateur connecté !");
-      console.log("📝 Nom:", session.user.name);
-      console.log("📧 Email:", session.user.email);
-      console.log("🎵 Image:", session.user.image);
-      console.log("🆔 ID utilisateur:", session.user.id);
-      console.log("📅 Créé le:", session.user.createdAt);
-      console.log("📋 Session complète:", JSON.stringify(session, null, 2));
-    } else {
-      console.log("❌ Pas de session active");
+      console.log("✅ Utilisateur connecté !", session.user);
     }
   }, [session, sessionLoading]);
 
@@ -75,20 +69,13 @@ export default function Login() {
     setSpotifyLoading(true);
 
     try {
-      console.log(
-        "🔧 Configuration Better Auth URL:",
-        process.env.EXPO_PUBLIC_BETTER_AUTH_URL
-      );
-
       console.log("📱 Tentative de connexion sociale Spotify...");
       const result = await signIn.social({
         provider: "spotify",
-        callbackURL: "/home", // Redirection après auth réussie
+        callbackURL: "/home",
       });
 
       console.log("✅ Réponse connexion Spotify:", result);
-      console.log("✅ Type de réponse:", typeof result);
-      console.log("✅ Clés disponibles:", Object.keys(result || {}));
 
       if (result.error) {
         console.error("❌ Erreur connexion Spotify:", result.error);
@@ -97,10 +84,7 @@ export default function Login() {
           result.error.message || "Erreur de connexion Spotify"
         );
       } else {
-        console.log(
-          "🎉 Connexion Spotify démarrée - Better Auth gère la redirection"
-        );
-        // Better Auth + callbackURL gère automatiquement la redirection
+        console.log("🎉 Connexion Spotify démarrée");
       }
     } catch (error) {
       console.error("💥 Erreur lors de la connexion Spotify:", error);
@@ -123,186 +107,289 @@ export default function Login() {
     }
   };
 
-  // Si l'utilisateur est connecté, afficher ses infos
+  // Si l'utilisateur est connecté, rediriger vers home
   if (session?.user) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Connecté !</Text>
-
-        <View style={styles.userCard}>
-          <Text style={styles.userTitle}>👤 Profil utilisateur</Text>
-          <Text style={styles.userInfo}>
-            Nom: {session.user.name || "Non renseigné"}
-          </Text>
-          <Text style={styles.userInfo}>Email: {session.user.email}</Text>
-          <Text style={styles.userInfo}>ID: {session.user.id}</Text>
-          {session.user.image && (
-            <Text style={styles.userInfo}>Image de profil: Disponible</Text>
-          )}
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/home")}
-        >
-          <Text style={styles.buttonText}>🏠 Aller à l'accueil</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>🚪 Se déconnecter</Text>
-        </TouchableOpacity>
-      </View>
-    );
+    router.replace("/home");
+    return null;
   }
 
-  // Sinon, afficher le formulaire de connexion
+  // Écran de connexion principal selon le design Figma
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Connexion</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Mot de passe"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
-      <TouchableOpacity
-        style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleLogin}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? "Connexion..." : "Se connecter"}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.linkButton}
-        onPress={() => router.push("/register")}
-      >
-        <Text style={styles.linkText}>Pas de compte ? S'inscrire</Text>
-      </TouchableOpacity>
-
-      <View style={styles.separator}>
-        <Text style={styles.separatorText}>ou</Text>
+    <ScrollView
+      style={styles.connexion}
+      contentContainerStyle={styles.connexionContainerContent}
+    >
+      {/* Image Pedro depuis les assets - exactement comme le Figma */}
+      <View style={styles.perdoText1Wrapper}>
+        <Image
+          style={styles.perdoText1Icon}
+          resizeMode="cover"
+          source={require("./assets/pedropedropedro.png")} // Utilise l'image Pedro depuis assets
+        />
       </View>
 
-      <TouchableOpacity
-        style={[
-          styles.spotifyButton,
-          (loading || spotifyLoading) && styles.buttonDisabled,
-        ]}
-        onPress={handleSpotifyLogin}
-        disabled={loading || spotifyLoading}
-      >
-        <Text style={styles.spotifyButtonText}>
-          {spotifyLoading ? "🎵 Connexion..." : "🎵 Se connecter avec Spotify"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+      {/* Contenu principal */}
+      <View style={styles.frameParent}>
+        {/* Titre et description */}
+        <View style={styles.bienvenueSurFestifunParent}>
+          <Text style={styles.bienvenueSurFestifun}>
+            BIENVENUE{"\n"}SUR FESTIFUN
+          </Text>
+          <Text style={styles.lagenceDeVoyage}>
+            L'agence de voyage qui t'aides a organiser tes sortis en festival au
+            meilleure prix.
+          </Text>
+        </View>
+
+        {/* Boutons d'action */}
+        <View style={styles.buttonParent}>
+          {/* Bouton principal d'inscription */}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push("/register")}
+          >
+            <Text style={styles.commencer}>S'inscrire gratuitement</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.ou}>OU</Text>
+
+          {/* Bouton de connexion Spotify */}
+          <View style={styles.continuerAvecParent}>
+            <TouchableOpacity
+              style={[
+                styles.spotifyButton,
+                spotifyLoading && styles.buttonDisabled,
+              ]}
+              onPress={handleSpotifyLogin}
+              disabled={spotifyLoading}
+            >
+              <Text style={styles.spotifyIcon}>♫</Text>
+              <Text style={styles.spotifyText}>
+                {spotifyLoading ? "Connexion..." : "Continuer avec Spotify"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Lien vers connexion classique */}
+          <TouchableOpacity
+            style={styles.loginLinkContainer}
+            onPress={() => {
+              // Pour l'instant on montre un formulaire simple ici même
+              Alert.prompt(
+                "Connexion",
+                "Email",
+                [
+                  { text: "Annuler", style: "cancel" },
+                  {
+                    text: "Continuer",
+                    onPress: (email) => {
+                      if (email) {
+                        Alert.prompt(
+                          "Connexion",
+                          "Mot de passe",
+                          [
+                            { text: "Annuler", style: "cancel" },
+                            {
+                              text: "Se connecter",
+                              onPress: (password) => {
+                                if (password) {
+                                  setEmail(email);
+                                  setPassword(password);
+                                  setTimeout(handleLogin, 100);
+                                }
+                              },
+                            },
+                          ],
+                          "secure-text"
+                        );
+                      }
+                    },
+                  },
+                ],
+                "plain-text"
+              );
+            }}
+          >
+            <Text style={styles.loginLinkText}>
+              Déjà un compte ?{" "}
+              <Text style={styles.loginLinkBold}>Se connecter</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
+  connexionContainerContent: {
+    flexDirection: "column",
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 31,
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 0,
+  },
+
+  // Container Pedro - exactement comme le Figma
+  perdoText1Wrapper: {
+    width: width - 48, // Responsive mais garde les proportions
+    height: 341,
+    paddingHorizontal: 47,
+    paddingVertical: 0,
     justifyContent: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 15,
-    marginBottom: 15,
-    borderRadius: 8,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    padding: 15,
-    borderRadius: 8,
     alignItems: "center",
-    marginBottom: 15,
+    flexDirection: "row",
+    backgroundColor: FestiFunColors.primaryDark, // #19002c
+    borderRadius: 20,
+    marginBottom: 32,
   },
-  buttonDisabled: {
-    backgroundColor: "#ccc",
+
+  perdoText1Icon: {
+    width: 285,
+    height: 285,
   },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+
+  // Contenu principal
+  frameParent: {
+    gap: 32,
+    alignSelf: "stretch",
   },
-  linkButton: {
-    alignItems: "center",
+
+  // Titre et description
+  bienvenueSurFestifunParent: {
+    gap: 16,
+    alignSelf: "stretch",
   },
-  linkText: {
-    color: "#007AFF",
-    fontSize: 16,
+
+  bienvenueSurFestifun: {
+    fontSize: 34,
+    lineHeight: 37,
+    fontFamily: FestiFunFonts.title, // Poppins SemiBold pour les titres
+    color: FestiFunColors.background, // #f5effd
+    alignSelf: "stretch",
+    textAlign: "left",
   },
-  separator: {
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  separatorText: {
-    color: "#666",
-    fontSize: 16,
-  },
-  spotifyButton: {
-    backgroundColor: "#1DB954",
-    padding: 15,
-    borderRadius: 25,
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  spotifyButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  userCard: {
-    backgroundColor: "#f0f0f0",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  userTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  userInfo: {
+
+  lagenceDeVoyage: {
+    letterSpacing: -0.2,
+    fontFamily: FestiFunFonts.body, // Poppins Regular pour le texte
     fontSize: 14,
-    marginBottom: 5,
-    color: "#333",
+    textAlign: "left",
+    color: "#ad9cbb",
+    alignSelf: "stretch",
   },
-  logoutButton: {
-    backgroundColor: "#dc3545",
-    padding: 15,
-    borderRadius: 8,
+
+  // Boutons
+  buttonParent: {
+    gap: 12,
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
+    alignSelf: "stretch",
   },
-  logoutButtonText: {
-    color: "white",
+
+  button: {
+    width: width - 48, // Responsive
+    borderRadius: 24,
+    backgroundColor: FestiFunColors.primary, // #7742fe
+    paddingHorizontal: 22,
+    paddingTop: 18,
+    paddingBottom: 17,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+  },
+
+  commencer: {
+    lineHeight: 14,
+    fontWeight: "700",
+    fontFamily: FestiFunFonts.bodyBold, // Poppins Bold
+    color: FestiFunColors.background, // #f5effd
+    fontSize: 14,
+    textAlign: "left",
+  },
+
+  ou: {
+    fontSize: 12,
+    lineHeight: 13,
+    fontFamily: FestiFunFonts.body, // Poppins Regular
+    textAlign: "center",
+    color: "#ad9cbb",
+    alignSelf: "stretch",
+  },
+
+  // Boutons de services
+  continuerAvecParent: {
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  continuerAvec: {
+    height: 42,
+    width: 42,
+    borderWidth: 1,
+    borderColor: "#ad9cbb",
+    borderStyle: "solid",
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // Bouton Spotify
+  spotifyButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#1DB954", // Couleur officielle Spotify
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 25,
+    gap: 8,
+    minWidth: 200,
+  },
+
+  spotifyIcon: {
+    fontSize: 18,
+    color: FestiFunColors.white,
+    marginRight: 4,
+  },
+
+  spotifyText: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: FestiFunFonts.bodySemiBold, // Poppins SemiBold pour les boutons
+    color: FestiFunColors.white,
+    fontWeight: "600",
+  },
+
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+
+  // Lien de connexion
+  loginLinkContainer: {
+    marginTop: 16,
+    alignItems: "center",
+  },
+
+  loginLinkText: {
+    fontSize: 14,
+    color: "#ad9cbb",
+    textAlign: "center",
+  },
+
+  loginLinkBold: {
+    fontWeight: "700",
+    color: FestiFunColors.primary,
+  },
+
+  // Fond principal
+  connexion: {
+    width: "100%",
+    flex: 1,
+    maxWidth: "100%",
+    backgroundColor: FestiFunColors.primaryDark, // #19002c
   },
 });
