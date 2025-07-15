@@ -1,9 +1,11 @@
 import { createAuthClient } from "better-auth/react";
 import { expoClient } from "@better-auth/expo/client";
 import * as SecureStore from "expo-secure-store";
+import Constants from "expo-constants";
 
-// URL de base pour les API routes Expo
-const baseURL = "http://10.224.162.166:8081";
+// Utiliser la variable d'environnement au lieu d'une IP hardcodée
+const baseURL =
+  Constants.expoConfig?.extra?.betterAuthUrl || "http://localhost:8081";
 
 console.log("🔧 Configuration Better Auth Client:");
 console.log("  - baseURL:", baseURL);

@@ -39,8 +39,9 @@ app.get("/health", (req, res) => {
 async function startServer() {
   await loadAuth();
 
-  app.listen(PORT, "127.0.0.1", () => {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Better Auth server running on http://127.0.0.1:${PORT}`);
+    console.log(`📱 For mobile testing: http://10.186.166.166:${PORT}`);
     console.log(`📋 API endpoints:`);
     console.log(`   - Health: http://127.0.0.1:${PORT}/health`);
     console.log(`   - Auth: http://127.0.0.1:${PORT}/api/auth`);

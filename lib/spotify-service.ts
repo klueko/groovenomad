@@ -1,4 +1,5 @@
 import { authClient } from "./auth-client";
+import Constants from "expo-constants";
 
 export interface SpotifyProfile {
   id: string;
@@ -86,18 +87,17 @@ class SpotifyService {
       console.log("🔍 Récupération du token Spotify via API...");
 
       // Récupérer le token depuis l'API alternative avec l'ID utilisateur
-      const response = await fetch(
-        "http://10.224.162.166:8081/api/spotify-token-alt",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: session.data.user.id,
-          }),
-        }
-      );
+      const baseURL =
+        Constants.expoConfig?.extra?.betterAuthUrl || "http://localhost:8081";
+      const response = await fetch(`${baseURL}/api/spotify-token-alt`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: session.data.user.id,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();

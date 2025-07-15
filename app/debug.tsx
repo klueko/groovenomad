@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
+import Constants from "expo-constants";
 import { authClient } from "../lib/auth-client";
 
 export default function Debug() {
@@ -56,7 +57,9 @@ export default function Debug() {
       // Test de l'API Better Auth
       addLog("🌐 Test API Better Auth...");
       try {
-        const response = await fetch("http://127.0.0.1:8081/api/auth");
+        const baseURL =
+          Constants.expoConfig?.extra?.betterAuthUrl || "http://localhost:8081";
+        const response = await fetch(`${baseURL}/api/auth`);
         addLog(`API Status: ${response.status}`);
         const text = await response.text();
         addLog(`API Response: ${text.substring(0, 200)}...`);
