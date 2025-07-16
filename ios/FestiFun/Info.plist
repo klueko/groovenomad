@@ -53,19 +53,15 @@
     </dict>
     <key>NSFaceIDUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>$(PRODUCT_NAME) utilise votre localisation pour vous recommander des festivals près de chez vous et calculer les distances.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>$(PRODUCT_NAME) utilise votre localisation pour vous recommander des festivals près de chez vous et calculer les distances.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your microphone</string>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
-    </array>
-    <key>UIAppFonts</key>
-    <array>
-      <string>Poppins-Regular.ttf</string>
-      <string>Poppins-Medium.ttf</string>
-      <string>Poppins-SemiBold.ttf</string>
-      <string>Poppins-Bold.ttf</string>
-      <string>FasterOne-Regular.ttf</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>

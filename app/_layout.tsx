@@ -66,8 +66,16 @@ export default function RootLayout() {
         options={{ headerShown: false, title: "Préférences Musicales" }}
       />
       <Stack.Screen
+        name="music-preferences-selection"
+        options={{ headerShown: false, title: "Sélection des Préférences" }}
+      />
+      <Stack.Screen
         name="music-profile"
         options={{ headerShown: false, title: "Profil Musical" }}
+      />
+      <Stack.Screen
+        name="settings"
+        options={{ headerShown: false, title: "Réglages" }}
       />
       <Stack.Screen
         name="home"
@@ -88,6 +96,10 @@ export default function RootLayout() {
       <Stack.Screen
         name="debug"
         options={{ headerShown: false, title: "Debug" }}
+      />
+      <Stack.Screen
+        name="festival-detail"
+        options={{ headerShown: false, title: "Détail Festival" }}
       />
     </Stack>
   );

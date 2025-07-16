@@ -6,516 +6,562 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  ActivityIndicator,
+  StatusBar,
   Dimensions,
-  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSession } from "../lib/auth-client";
-import { spotifyService, MusicPreferences } from "../lib/spotify-service";
 import { LinearGradient } from "expo-linear-gradient";
+import {
+  Settings,
+  Users,
+  Music,
+  Headphones,
+  Activity,
+} from "lucide-react-native";
+import {
+  FestiFunColors,
+  FestiFunTypography,
+  FestiFunFonts,
+} from "../lib/design-system";
+import { userPreferencesService } from "../lib/user-preferences-service";
+import BottomNavigation from "../components/BottomNavigation";
+import Avatar from "../components/Avatar";
+import FriendsList from "../components/FriendsList";
 
 const { width } = Dimensions.get("window");
 
-export default function MusicProfileScreen() {
+export default function ProfileScreen() {
   const router = useRouter();
   const { data: session } = useSession();
-  const [musicPreferences, setMusicPreferences] =
-    useState<MusicPreferences | null>(null);
+  const [userArtists, setUserArtists] = useState<any[]>([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [hasPreferences, setHasPreferences] = useState(false);
+
+  // Données d'amis mockées (à remplacer par de vraies données)
+  const [friends] = useState([
+    { id: "1", name: "Sophie Martin", avatar: null, isOnline: true },
+    { id: "2", name: "Lucas Dubois", avatar: null, isOnline: false },
+    { id: "3", name: "Emma Bernard", avatar: null, isOnline: true },
+    { id: "4", name: "Thomas Roux", avatar: null, isOnline: false },
+    { id: "5", name: "Camille Moreau", avatar: null, isOnline: true },
+    { id: "6", name: "Hugo Leroy", avatar: null, isOnline: false },
+    { id: "7", name: "Léa Petit", avatar: null, isOnline: true },
+  ]);
 
   useEffect(() => {
     if (session?.user) {
-      loadMusicProfile();
+      loadUserData();
     }
   }, [session]);
 
-  const loadMusicProfile = async () => {
+  const loadUserData = async () => {
+    if (!session?.user) return;
+
     try {
       setLoading(true);
-      setError(null);
 
-      console.log("🎵 Chargement du profil musical...");
-      const preferences = await spotifyService.getMusicPreferences();
+      // Vérifier si l'utilisateur a des préférences
+      const hasConfiguredPrefs =
+        await userPreferencesService.hasUserMusicPreferences(session.user.id);
+      setHasPreferences(hasConfiguredPrefs);
 
-      if (!preferences) {
-        throw new Error("Impossible de récupérer votre profil musical Spotify");
+      if (hasConfiguredPrefs) {
+        // Récupérer les préférences utilisateur
+        const preferences =
+          await userPreferencesService.getUserMusicPreferences(session.user.id);
+
+        if (preferences) {
+          setUserArtists(preferences.selectedArtists || []);
+          setUserProfile(preferences.spotifyProfileData);
+        }
       }
-
-      setMusicPreferences(preferences);
-      console.log("✅ Profil musical chargé:", {
-        artists: preferences.topArtists.length,
-        genres: preferences.topGenres.length,
-        tracks: preferences.topTracks.length,
-      });
-    } catch (err) {
-      console.error("❌ Erreur chargement profil:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Erreur lors du chargement du profil"
-      );
+    } catch (error) {
+      console.error("❌ Erreur chargement données profil:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const navigateToRecommendations = () => {
-    console.log("🎪 Navigation vers les recommandations...");
-    router.push("/festival-recommendations");
+  const handleImportArtists = () => {
+    router.push("/music-preferences-selection");
   };
 
-  const renderTopArtists = () => {
-    if (!musicPreferences?.topArtists.length) return null;
+  const StreamingPlatform = ({
+    icon,
+    name,
+  }: {
+    icon: React.ReactNode;
+    name: string;
+  }) => <View style={styles.streamingIcon}>{icon}</View>;
 
-    const topArtists = musicPreferences.topArtists.slice(0, 12);
+  const FriendAvatar = ({
+    image,
+    isActive,
+  }: {
+    image: any;
+    isActive?: boolean;
+  }) => (
+    <View style={[styles.friendAvatar, isActive && styles.friendAvatarActive]}>
+      <Image source={image} style={styles.friendImage} />
+      {isActive && <View style={styles.activeIndicatorFriend} />}
+    </View>
+  );
 
-    return (
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>🎤 Vos Artistes Préférés</Text>
-        <Text style={styles.sectionSubtitle}>
-          Basé sur vos écoutes récentes sur Spotify
-        </Text>
+  const ArtistAvatar = ({ artist }: { artist: any }) => (
+    <View style={styles.artistContainer}>
+      <Image
+        source={{
+          uri: artist.images?.[0]?.url || "https://via.placeholder.com/47x47",
+        }}
+        style={styles.artistImage}
+      />
+      <Text style={styles.artistName} numberOfLines={1}>
+        {artist.name}
+      </Text>
+    </View>
+  );
 
-        <View style={styles.artistsGrid}>
-          {topArtists.map((artist, index) => (
-            <View key={artist.id} style={styles.artistCard}>
-              {artist.images && artist.images.length > 0 && (
-                <Image
-                  source={{ uri: artist.images[0].url }}
-                  style={styles.artistImage}
-                />
-              )}
-              <Text style={styles.artistName} numberOfLines={2}>
-                {artist.name}
-              </Text>
-              <View style={styles.popularityBadge}>
-                <Text style={styles.popularityText}>#{index + 1}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      </View>
-    );
+  // Obtenir le nom d'affichage de l'utilisateur
+  const getDisplayName = () => {
+    if (userProfile?.display_name) {
+      return userProfile.display_name;
+    }
+    if (session?.user?.email) {
+      return session.user.email.split("@")[0];
+    }
+    return "Utilisateur";
   };
 
-  const renderTopGenres = () => {
-    if (!musicPreferences?.topGenres.length) return null;
-
-    const topGenres = musicPreferences.topGenres.slice(0, 15);
-
-    // Couleurs pour les genres
-    const genreColors = [
-      "#FF6B6B",
-      "#4ECDC4",
-      "#45B7D1",
-      "#96CEB4",
-      "#FFEAA7",
-      "#DDA0DD",
-      "#98D8C8",
-      "#F7DC6F",
-      "#BB8FCE",
-      "#85C1E9",
-      "#F8C471",
-      "#82E0AA",
-      "#F1948A",
-      "#85C1E9",
-      "#D2B4DE",
-    ];
-
-    return (
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>🎵 Vos Genres Musicaux</Text>
-        <Text style={styles.sectionSubtitle}>
-          Nous avons identifié {topGenres.length} genres dans vos goûts
-        </Text>
-
-        <View style={styles.genresContainer}>
-          {topGenres.map((genre, index) => (
-            <TouchableOpacity
-              key={genre.genre}
-              style={[
-                styles.genreTag,
-                { backgroundColor: genreColors[index % genreColors.length] },
-              ]}
-            >
-              <Text style={styles.genreText}>{genre.genre}</Text>
-              <Text style={styles.genreCount}>
-                {Math.round(genre.percentage)}%
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-    );
+  // Obtenir le username
+  const getUsername = () => {
+    if (userProfile?.id) {
+      return `@${userProfile.id}`;
+    }
+    if (session?.user?.email) {
+      return `@${session.user.email.split("@")[0]}`;
+    }
+    return "@user";
   };
-
-  const renderMusicSummary = () => {
-    if (!musicPreferences) return null;
-
-    const totalTracks = musicPreferences.topTracks.length;
-    const totalArtists = musicPreferences.topArtists.length;
-    const totalGenres = musicPreferences.topGenres.length;
-
-    return (
-      <View style={styles.summarySection}>
-        <LinearGradient
-          colors={["#1DB954", "#1ed760"]}
-          style={styles.summaryCard}
-        >
-          <Text style={styles.summaryTitle}>🎯 Votre Profil Musical</Text>
-          <Text style={styles.summarySubtitle}>
-            Salut {musicPreferences.profile?.display_name || "Mélomane"} !
-          </Text>
-
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{totalArtists}</Text>
-              <Text style={styles.statLabel}>Artistes</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{totalGenres}</Text>
-              <Text style={styles.statLabel}>Genres</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{totalTracks}</Text>
-              <Text style={styles.statLabel}>Titres</Text>
-            </View>
-          </View>
-
-          <Text style={styles.summaryDescription}>
-            Nous avons analysé vos goûts musicaux pour vous trouver les
-            festivals parfaits !
-          </Text>
-        </LinearGradient>
-      </View>
-    );
-  };
-
-  if (!session?.user) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>
-          Vous devez être connecté pour voir votre profil musical
-        </Text>
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => router.push("/login")}
-        >
-          <Text style={styles.loginButtonText}>Se connecter avec Spotify</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1DB954" />
-        <Text style={styles.loadingText}>
-          🎵 Analyse de votre profil musical Spotify...
-        </Text>
-        <Text style={styles.loadingSubText}>
-          Nous découvrons vos artistes et genres préférés
-        </Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={loadMusicProfile}>
-          <Text style={styles.retryButtonText}>Réessayer</Text>
-        </TouchableOpacity>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={FestiFunColors.primaryDark}
+        />
+        <ActivityIndicator size="large" color={FestiFunColors.primary} />
+        <Text style={styles.loadingText}>Chargement du profil...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* En-tête */}
-      <LinearGradient
-        colors={["#1DB954", "#1ed760", "#21e065"]}
-        style={styles.header}
+    <View style={styles.container}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={FestiFunColors.primaryDark}
+        translucent={false}
+      />
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
+        {/* Header avec dégradé */}
+        <LinearGradient
+          colors={["#8B5CF6", "#A855F7", "#C084FC"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
         >
-          <Text style={styles.backButtonText}>← Retour</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Votre Profil Musical</Text>
-      </LinearGradient>
-
-      {/* Résumé musical */}
-      {renderMusicSummary()}
-
-      {/* Top artistes */}
-      {renderTopArtists()}
-
-      {/* Top genres */}
-      {renderTopGenres()}
-
-      {/* Bouton CTA */}
-      <View style={styles.ctaSection}>
-        <TouchableOpacity
-          style={styles.ctaButton}
-          onPress={navigateToRecommendations}
-        >
-          <LinearGradient
-            colors={["#FF6B6B", "#FF8E53"]}
-            style={styles.ctaGradient}
+          {/* Bouton Settings */}
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => router.push("/settings")}
           >
-            <Text style={styles.ctaButtonText}>🎪 Découvrir mes festivals</Text>
-            <Text style={styles.ctaButtonSubText}>
-              Trouvez des événements parfaits pour vos goûts !
+            <Settings size={24} color={FestiFunColors.background} />
+          </TouchableOpacity>
+
+          {/* Photo de profil */}
+          <View style={styles.profileImageContainer}>
+            <Avatar
+              imageUri={userProfile?.images?.[0]?.url || session?.user?.image}
+              name={getDisplayName()}
+              size={112}
+              style={styles.profileAvatar}
+            />
+          </View>
+
+          {/* Infos profil */}
+          <Text style={styles.profileName}>{getDisplayName()}</Text>
+          <Text style={styles.profileUsername}>{getUsername()}</Text>
+
+          {/* Stats */}
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>0</Text>
+              <Text style={styles.statLabel}>Abonné-e-s</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>0</Text>
+              <Text style={styles.statLabel}>Abonnements</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>0</Text>
+              <Text style={styles.statLabel}>Voyages</Text>
+            </View>
+          </View>
+        </LinearGradient>
+
+        {/* Section Artistes */}
+        <View style={styles.section}>
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>
+              {hasPreferences && userArtists.length > 0
+                ? `Tes ${userArtists.length} artistes préférés`
+                : "Ne manque jamais les lives\nde tes artistes"}
             </Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+            <Text style={styles.sectionSubtitle}>
+              {hasPreferences && userArtists.length > 0
+                ? "Basé sur tes goûts Spotify"
+                : "Synchronise tes artistes, reçois des\nnotifications"}
+            </Text>
+
+            {/* Affichage conditionnel : artistes ou plateformes */}
+            {hasPreferences && userArtists.length > 0 ? (
+              // Afficher les vrais artistes
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.artistsScrollContent}
+              >
+                {userArtists.slice(0, 10).map((artist, index) => (
+                  <ArtistAvatar key={artist.id || index} artist={artist} />
+                ))}
+              </ScrollView>
+            ) : (
+              // Afficher les icônes des plateformes
+              <View style={styles.streamingPlatforms}>
+                <StreamingPlatform
+                  icon={<Activity size={20} color="#E91E63" />}
+                  name="SoundCloud"
+                />
+                <StreamingPlatform
+                  icon={<Music size={20} color="#FF5722" />}
+                  name="SoundCloud"
+                />
+                <StreamingPlatform
+                  icon={<Headphones size={20} color="#4CAF50" />}
+                  name="Spotify"
+                />
+                <StreamingPlatform
+                  icon={<Music size={20} color="#F44336" />}
+                  name="Apple Music"
+                />
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={handleImportArtists}
+            >
+              <Text style={styles.primaryButtonText}>
+                {hasPreferences && userArtists.length > 0
+                  ? "Modifier mes artistes"
+                  : "Importer mes artistes"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Section Amis */}
+        <View style={styles.section}>
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>L'équipe est Toka</Text>
+            <Text style={styles.sectionSubtitle}>
+              Ajoute tes ami-e-s pour voir où ils vont,{"\n"}comparer vos score
+              et plus encore
+            </Text>
+
+            {/* Liste des amis avec nouveau composant */}
+            <FriendsList
+              friends={friends}
+              onAddFriend={() => {
+                console.log("Ajouter un ami");
+                // TODO: Implémenter la logique d'ajout d'ami
+              }}
+              maxVisible={4}
+            />
+
+            <TouchableOpacity style={styles.primaryButton}>
+              <Text style={styles.primaryButtonText}>Ajouter des ami-e-s</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Espace pour la navbar */}
+        <View style={styles.bottomSpace} />
+      </ScrollView>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation
+        activeTab="profile"
+        onTabPress={(tab) => {
+          if (tab === "home") {
+            router.push("/home");
+          }
+          // Ajouter d'autres navigations au fur et à mesure
+        }}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: FestiFunColors.primaryDark,
   },
-  header: {
-    paddingTop: 60,
-    paddingBottom: 30,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  backButton: {
-    padding: 10,
-  },
-  backButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  headerTitle: {
-    flex: 1,
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginRight: 40,
-  },
+
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
-    padding: 20,
+    backgroundColor: FestiFunColors.primaryDark,
+    gap: 16,
   },
+
   loadingText: {
-    marginTop: 20,
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    textAlign: "center",
+    fontSize: 16,
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.body.fontFamily,
   },
-  loadingSubText: {
-    marginTop: 10,
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-  },
-  errorContainer: {
+
+  scrollView: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
   },
-  errorText: {
-    fontSize: 16,
-    color: "#e74c3c",
-    textAlign: "center",
-    marginBottom: 20,
+
+  scrollContent: {
+    paddingBottom: 0,
   },
-  retryButton: {
-    backgroundColor: "#1DB954",
-    paddingVertical: 12,
+
+  header: {
+    paddingTop: 64, // Moins de marge en haut
+    paddingBottom: 32,
     paddingHorizontal: 24,
-    borderRadius: 25,
-  },
-  retryButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  loginButton: {
-    backgroundColor: "#1DB954",
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-  },
-  loginButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  summarySection: {
-    margin: 20,
-    marginTop: -10,
-  },
-  summaryCard: {
-    padding: 25,
-    borderRadius: 20,
     alignItems: "center",
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    position: "relative",
   },
-  summaryTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 5,
+
+  settingsButton: {
+    position: "absolute",
+    top: 60,
+    right: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  summarySubtitle: {
-    fontSize: 18,
-    color: "rgba(255,255,255,0.9)",
-    marginBottom: 20,
+
+  profileImageContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: FestiFunColors.primaryDark,
+    padding: 4,
+    marginBottom: 16,
   },
+
+  profileImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 56,
+  },
+
+  profileName: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.title.fontFamily,
+    marginBottom: 4,
+  },
+
+  profileUsername: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.8)",
+    fontFamily: FestiFunTypography.body.fontFamily,
+    marginBottom: 24,
+  },
+
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",
-    marginBottom: 20,
   },
+
   statItem: {
     alignItems: "center",
   },
+
   statNumber: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
+    fontSize: 24,
+    fontWeight: "700",
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.title.fontFamily,
+    marginBottom: 4,
   },
+
   statLabel: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
-    marginTop: 5,
+    color: "rgba(255, 255, 255, 0.8)",
+    fontFamily: FestiFunTypography.body.fontFamily,
   },
-  summaryDescription: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.9)",
-    textAlign: "center",
-    lineHeight: 22,
-  },
+
   section: {
-    margin: 20,
-    marginTop: 10,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
   },
+
+  sectionCard: {
+    backgroundColor: FestiFunColors.secondaryDark,
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "rgba(245, 239, 253, 0.1)",
+    alignItems: "center",
+  },
+
   sectionTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 5,
+    fontSize: 20,
+    fontWeight: "700",
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.title.fontFamily,
+    textAlign: "center",
+    marginBottom: 8,
+    lineHeight: 24,
   },
+
   sectionSubtitle: {
     fontSize: 14,
-    color: "#666",
-    marginBottom: 20,
+    color: "#ad9cbb",
+    fontFamily: FestiFunTypography.body.fontFamily,
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 18,
   },
-  artistsGrid: {
+
+  streamingPlatforms: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "center",
+    gap: 16,
+    marginBottom: 24,
   },
-  artistCard: {
-    width: (width - 60) / 3,
-    marginBottom: 20,
+
+  streamingIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: FestiFunColors.primaryDark,
     alignItems: "center",
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(245, 239, 253, 0.1)",
   },
+
+  // Styles pour les artistes
+  artistsScrollContent: {
+    paddingHorizontal: 12,
+    gap: 12,
+    marginBottom: 24,
+  },
+
+  artistContainer: {
+    alignItems: "center",
+    gap: 6,
+  },
+
   artistImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginBottom: 10,
+    width: 47,
+    height: 47,
+    borderRadius: 47,
   },
+
+  profileAvatar: {
+    borderWidth: 3,
+  },
+
   artistName: {
     fontSize: 12,
-    fontWeight: "600",
-    color: "#333",
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.body.fontFamily,
     textAlign: "center",
-    minHeight: 30,
+    width: 47,
   },
-  popularityBadge: {
-    position: "absolute",
-    top: 5,
-    right: 5,
-    backgroundColor: "#1DB954",
-    borderRadius: 10,
-    width: 20,
-    height: 20,
+
+  friendsContainer: {
+    flexDirection: "row",
     justifyContent: "center",
+    gap: -8, // Chevauchement des avatars
+    marginBottom: 24,
+  },
+
+  friendAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: FestiFunColors.white,
+    position: "relative",
+  },
+
+  friendAvatarActive: {
+    borderColor: FestiFunColors.white,
+  },
+
+  friendImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 22,
+  },
+
+  activeIndicatorFriend: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#4CAF50",
+    borderWidth: 2,
+    borderColor: FestiFunColors.white,
+  },
+
+  primaryButton: {
+    backgroundColor: FestiFunColors.primary,
+    borderRadius: 100,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    minWidth: 200,
     alignItems: "center",
   },
-  popularityText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  genresContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  genreTag: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    marginBottom: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  genreText: {
-    color: "white",
-    fontSize: 14,
+
+  primaryButtonText: {
+    fontSize: 16,
     fontWeight: "600",
-    textTransform: "capitalize",
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.bodySemiBold.fontFamily,
   },
-  genreCount: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  ctaSection: {
-    margin: 20,
-    marginTop: 30,
-    marginBottom: 40,
-  },
-  ctaButton: {
-    borderRadius: 25,
-    overflow: "hidden",
-  },
-  ctaGradient: {
-    padding: 25,
-    alignItems: "center",
-  },
-  ctaButtonText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  ctaButtonSubText: {
-    color: "rgba(255,255,255,0.9)",
-    fontSize: 14,
-    textAlign: "center",
+
+  bottomSpace: {
+    height: 105,
   },
 });

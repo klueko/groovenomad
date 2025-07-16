@@ -1,80 +1,621 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { router } from "expo-router";
-import { useSession, signOut } from "../lib/auth-client";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  Dimensions,
+  StatusBar,
+  RefreshControl,
+  Modal,
+  TextInput,
+  Alert,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useSession } from "../lib/auth-client";
+import { MapPin, Search, X } from "lucide-react-native";
+import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
+import {
+  festivalMatcher,
+  FestivalMatch,
+  StoredUserPreferences,
+} from "../lib/festival-matcher";
+import { userPreferencesService } from "../lib/user-preferences-service";
+import * as Location from "expo-location";
 
-export default function Home() {
+// Import des nouveaux composants
+import BottomNavigation from "../components/BottomNavigation";
+import FestivalCard from "../components/FestivalCard";
+import DateRangePicker from "../components/DateRangePicker";
+
+const { width, height } = Dimensions.get("window");
+
+interface UserLocation {
+  city: string;
+  country: string;
+  countryCode: string;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
+interface DateRange {
+  startDate: Date | null;
+  endDate: Date | null;
+}
+
+export default function HomeScreen() {
+  const router = useRouter();
   const { data: session } = useSession();
+  const [festivals, setFestivals] = useState<FestivalMatch[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedGenre, setSelectedGenre] = useState("Tous");
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>({
+    startDate: new Date(),
+    endDate: (() => {
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 365);
+      return endDate;
+    })(),
+  });
+  const [hasPreferences, setHasPreferences] = useState(false);
+  const [userArtists, setUserArtists] = useState<any[]>([]);
+  const [availableGenres, setAvailableGenres] = useState<string[]>(["Tous"]);
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [locationModalVisible, setLocationModalVisible] = useState(false);
+  const [newLocationCity, setNewLocationCity] = useState("");
+  const [newLocationCountry, setNewLocationCountry] = useState("");
 
-  const handleLogout = async () => {
+  // Fonction pour capitaliser la première lettre
+  const capitalizeFirst = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
+
+  // Fonction pour obtenir la géolocalisation
+  const getCurrentLocation = async (): Promise<UserLocation | null> => {
     try {
-      await signOut();
-      router.replace("/login");
+      // Demander la permission de géolocalisation
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission de géolocalisation refusée");
+        return {
+          city: "Paris",
+          country: "France",
+          countryCode: "FR",
+        };
+      }
+
+      // Obtenir la position actuelle
+      const location = await Location.getCurrentPositionAsync({});
+
+      // Faire du géocodage inverse pour obtenir l'adresse
+      const reverseGeocode = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+
+      if (reverseGeocode.length > 0) {
+        const address = reverseGeocode[0];
+        return {
+          city: address.city || "Ville inconnue",
+          country: address.country || "Pays inconnu",
+          countryCode: address.isoCountryCode || "XX",
+          coordinates: {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          },
+        };
+      }
     } catch (error) {
-      console.error("Erreur lors de la déconnexion:", error);
-      Alert.alert("Erreur", "Impossible de se déconnecter");
+      console.error("Erreur géolocalisation:", error);
+    }
+
+    // Valeur par défaut si erreur
+    return {
+      city: "Paris",
+      country: "France",
+      countryCode: "FR",
+    };
+  };
+
+  useEffect(() => {
+    if (session?.user) {
+      initializeLocation();
+    }
+  }, [session]);
+
+  const initializeLocation = async () => {
+    const location = await getCurrentLocation();
+    setUserLocation(location);
+    checkUserPreferences();
+  };
+
+  const checkUserPreferences = async () => {
+    if (!session?.user) return;
+
+    try {
+      console.log(
+        "📊 [Home] Vérification préférences pour userId:",
+        session.user.id
+      );
+
+      const hasConfiguredPrefs =
+        await userPreferencesService.hasUserMusicPreferences(session.user.id);
+
+      console.log(
+        "📊 [Home] Utilisateur a des préférences configurées:",
+        hasConfiguredPrefs
+      );
+      setHasPreferences(hasConfiguredPrefs);
+
+      // Redirection automatique vers onboarding si pas de préférences configurées
+      if (!hasConfiguredPrefs) {
+        console.log(
+          "🚀 [Home] Redirection vers onboarding - préférences non configurées"
+        );
+        router.replace("/onboarding");
+        return;
+      }
+
+      // Si on a des préférences, charger les données
+      loadHomeData();
+    } catch (error) {
+      console.error("❌ [Home] Erreur vérification préférences:", error);
+      setHasPreferences(false);
+      // En cas d'erreur, on redirige aussi vers onboarding par sécurité
+      router.replace("/onboarding");
     }
   };
 
+  const loadHomeData = async () => {
+    if (!session?.user) return;
+
+    try {
+      setLoading(true);
+
+      // Récupérer les préférences utilisateur
+      const preferences = await userPreferencesService.getUserMusicPreferences(
+        session.user.id
+      );
+
+      if (!preferences) {
+        console.error("❌ Aucune préférence trouvée pour cet utilisateur");
+        return;
+      }
+
+      // Mapper les préférences au format attendu par festival matcher
+      const storedPreferences: StoredUserPreferences = {
+        spotifyProfileData: preferences.spotifyProfileData,
+        selectedGenres: preferences.selectedGenres.map((g) => ({
+          name: g.genre,
+          count: g.count,
+          percentage: g.percentage,
+        })),
+        selectedArtists: preferences.selectedArtists.map((a) => ({
+          name: a.name,
+          id: a.id,
+          popularity: a.popularity,
+          followers: { total: 0 },
+          genres: a.genres,
+          images: a.images,
+          external_urls: a.external_urls,
+        })),
+        selectedTracks: preferences.selectedTracks,
+      };
+
+      // Charger les festivals recommandés avec les préférences
+      const recommendations = await festivalMatcher.findMatchingFestivals(
+        storedPreferences,
+        {
+          maxResults: 50, // Augmenté pour avoir plus de choix
+          minMatchScore: 0.1,
+          includePopularityBoost: true,
+        }
+      );
+
+      // Trier et dédupliquer les festivals
+      const uniqueFestivals = recommendations.reduce(
+        (acc: FestivalMatch[], current) => {
+          const existingIndex = acc.findIndex(
+            (fest) =>
+              fest.name.toLowerCase() === current.name.toLowerCase() &&
+              fest.location.city.toLowerCase() ===
+                current.location.city.toLowerCase()
+          );
+
+          if (existingIndex === -1) {
+            acc.push(current);
+          } else {
+            // Garder celui avec le meilleur score de match
+            if (current.matchScore > acc[existingIndex].matchScore) {
+              acc[existingIndex] = current;
+            }
+          }
+          return acc;
+        },
+        []
+      );
+
+      // Trier par score de match décroissant
+      uniqueFestivals.sort((a, b) => b.matchScore - a.matchScore);
+
+      setFestivals(uniqueFestivals);
+
+      // Extraire les genres disponibles des festivals récupérés (filtres intelligents)
+      const genresFromFestivals = new Set<string>();
+      uniqueFestivals.forEach((festival) => {
+        festival.matchingGenres.forEach((genre) => {
+          if (genre && genre.trim()) {
+            genresFromFestivals.add(capitalizeFirst(genre.trim()));
+          }
+        });
+      });
+
+      // Ajouter "Tous" et créer la liste finale des genres
+      const availableGenresList = [
+        "Tous",
+        ...Array.from(genresFromFestivals).sort(),
+      ];
+      setAvailableGenres(availableGenresList);
+
+      // Charger tous les artistes de l'utilisateur (liste complète)
+      if (preferences?.selectedArtists) {
+        setUserArtists(preferences.selectedArtists);
+      }
+    } catch (error) {
+      console.error("❌ Erreur chargement données home:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await initializeLocation(); // Réactualiser aussi la localisation
+    await loadHomeData();
+    setRefreshing(false);
+  };
+
+  // Filtrage par genre et plage de dates
+  const filteredFestivals = festivals.filter((festival) => {
+    // Filtre par genre
+    const genreMatch =
+      selectedGenre === "Tous" ||
+      festival.matchingGenres.some((genre) =>
+        capitalizeFirst(genre)
+          .toLowerCase()
+          .includes(selectedGenre.toLowerCase())
+      );
+
+    // Filtre par plage de dates
+    const festivalDate = new Date(festival.dates.start);
+    const dateMatch =
+      !selectedDateRange.startDate ||
+      !selectedDateRange.endDate ||
+      (festivalDate >= selectedDateRange.startDate &&
+        festivalDate <= selectedDateRange.endDate);
+
+    return genreMatch && dateMatch;
+  });
+
+  // Séparation intelligente des festivals
+  const getPopularFestivals = () => {
+    // Populaires = festivals avec haute popularité estimée (top général)
+    return filteredFestivals
+      .filter((f) => f.estimatedPopularity > 0.7)
+      .slice(0, 6);
+  };
+
+  const getPersonalizedFestivals = () => {
+    // Pour vous = festivals avec bon score de match personnel mais pas forcément très populaires
+    const popularIds = new Set(getPopularFestivals().map((f) => f.id));
+    return filteredFestivals
+      .filter((f) => !popularIds.has(f.id)) // Exclure les populaires
+      .filter((f) => f.matchScore > 0.3) // Score de match personnel correct
+      .slice(0, 8);
+  };
+
+  const handleLocationChange = () => {
+    if (newLocationCity.trim() && newLocationCountry.trim()) {
+      setUserLocation({
+        city: newLocationCity.trim(),
+        country: newLocationCountry.trim(),
+        countryCode: "XX", // Code par défaut
+      });
+      setLocationModalVisible(false);
+      setNewLocationCity("");
+      setNewLocationCountry("");
+
+      // Recharger les données avec la nouvelle localisation
+      loadHomeData();
+    } else {
+      Alert.alert("Erreur", "Veuillez renseigner la ville et le pays");
+    }
+  };
+
+  const renderGenreFilter = (genre: string) => (
+    <TouchableOpacity
+      key={genre}
+      style={[
+        styles.genreFilter,
+        selectedGenre === genre && styles.genreFilterActive,
+      ]}
+      onPress={() => setSelectedGenre(genre)}
+    >
+      <Text
+        style={[
+          styles.genreFilterText,
+          selectedGenre === genre && styles.genreFilterTextActive,
+        ]}
+      >
+        {genre}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const renderArtistAvatar = (artist: any, index: number) => (
+    <TouchableOpacity key={index} style={styles.artistContainer}>
+      <Image
+        source={{
+          uri: artist.images?.[0]?.url || "https://via.placeholder.com/47x47",
+        }}
+        style={styles.artistImage}
+      />
+      <Text style={styles.artistName} numberOfLines={1}>
+        {artist.name}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  // Écran de chargement avec le design sombre cohérent
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={FestiFunColors.primaryDark}
+        />
+        <Image
+          style={styles.pedroImage}
+          resizeMode="contain"
+          source={require("./assets/pedropedropedro.png")}
+        />
+        <Text style={styles.loadingTitle}>🎪 Recherche de festivals...</Text>
+        <Text style={styles.loadingSubtitle}>
+          Pedro analyse vos goûts pour vous trouver les meilleurs événements !
+        </Text>
+        <ActivityIndicator size="large" color={FestiFunColors.primary} />
+      </View>
+    );
+  }
+
+  const popularFestivals = getPopularFestivals();
+  const personalizedFestivals = getPersonalizedFestivals();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenue sur FestiFun!</Text>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={FestiFunColors.primaryDark}
+      />
 
-      {session?.user && (
-        <View style={styles.userInfo}>
-          <Text style={styles.userText}>Bonjour, {session.user.name}!</Text>
-          <Text style={styles.emailText}>{session.user.email}</Text>
+      {/* Contenu principal scrollable */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header avec localisation et date */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.locationContainer}
+            onPress={() => setLocationModalVisible(true)}
+          >
+            <View style={styles.locationRow}>
+              <MapPin size={16} color={FestiFunColors.background} />
+              <Text style={styles.locationText}>
+                {userLocation?.city || "Paris"},{" "}
+                {userLocation?.country || "France"}
+              </Text>
+            </View>
+            <Text style={styles.locationSubtext}>Appuyez pour changer</Text>
+          </TouchableOpacity>
+
+          {/* Utilisation du nouveau composant DateRangePicker */}
+          <DateRangePicker
+            value={selectedDateRange}
+            onChange={setSelectedDateRange}
+          />
         </View>
-      )}
 
-      <Text style={styles.description}>
-        Votre application de voyage pour découvrir les meilleurs festivals du
-        monde entier.
-      </Text>
+        {/* Barre de recherche */}
+        <View style={styles.searchContainer}>
+          <TouchableOpacity style={styles.searchBar}>
+            <Search size={20} color="#ad9cbb" />
+            <Text style={styles.searchPlaceholder}>
+              Rechercher un festival...
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("/music-preferences")}
+        {/* Filtres de genres intelligents basés sur les festivals récupérés */}
+        <View style={styles.genreFiltersContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.genreFilters}
+          >
+            {availableGenres.map(renderGenreFilter)}
+          </ScrollView>
+        </View>
+
+        {/* Section Populaires - Festivals avec haute popularité */}
+        {popularFestivals.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Populaires</Text>
+            <Text style={styles.sectionSubtitle}>
+              Les festivals les plus attendus
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.festivalsScrollContent}
+            >
+              {popularFestivals.map((festival) => (
+                <FestivalCard
+                  key={festival.id}
+                  festival={festival}
+                  userLocation={userLocation}
+                  onPress={() =>
+                    router.push(
+                      `/festival-detail?data=${encodeURIComponent(
+                        JSON.stringify(festival)
+                      )}`
+                    )
+                  }
+                  onLikePress={() =>
+                    console.log("Like pressed:", festival.name)
+                  }
+                />
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Section Vos artistes - Liste complète */}
+        {userArtists.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Vos artistes</Text>
+            <Text style={styles.sectionSubtitle}>
+              Basé sur vos goûts Spotify
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.artistsScrollContent}
+            >
+              {userArtists.map(renderArtistAvatar)}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Section Pour vous - Pleine largeur et personnalisée */}
+        {personalizedFestivals.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Pour vous</Text>
+            <Text style={styles.sectionSubtitle}>
+              Sélectionnés selon vos préférences musicales
+            </Text>
+            <View style={styles.forYouGrid}>
+              {personalizedFestivals.map((festival) => (
+                <FestivalCard
+                  key={festival.id}
+                  festival={festival}
+                  userLocation={userLocation}
+                  isFullWidth={true}
+                  onPress={() =>
+                    router.push(
+                      `/festival-detail?data=${encodeURIComponent(
+                        JSON.stringify(festival)
+                      )}`
+                    )
+                  }
+                  onLikePress={() =>
+                    console.log("Like pressed:", festival.name)
+                  }
+                />
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Espace pour la bottom nav */}
+        <View style={styles.bottomSpace} />
+      </ScrollView>
+
+      {/* Modal pour changer la localisation */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={locationModalVisible}
+        onRequestClose={() => setLocationModalVisible(false)}
       >
-        <Text style={styles.buttonText}>🎵 Découvrir mes goûts musicaux</Text>
-      </TouchableOpacity>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Changer de localisation</Text>
+              <TouchableOpacity onPress={() => setLocationModalVisible(false)}>
+                <X size={24} color={FestiFunColors.background} />
+              </TouchableOpacity>
+            </View>
 
-      <TouchableOpacity
-        style={styles.onboardingButton}
-        onPress={() => router.push("/onboarding")}
-      >
-        <Text style={styles.onboardingButtonText}>🚀 Commencer l'aventure</Text>
-        <Text style={styles.onboardingButtonSubText}>
-          Découvrez comment nous trouvons vos festivals parfaits
-        </Text>
-      </TouchableOpacity>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Ville</Text>
+              <TextInput
+                style={styles.textInput}
+                value={newLocationCity}
+                onChangeText={setNewLocationCity}
+                placeholder="Ex: Paris"
+                placeholderTextColor="#ad9cbb"
+              />
+            </View>
 
-      <TouchableOpacity
-        style={styles.profileButton}
-        onPress={() => router.push("/music-profile")}
-      >
-        <Text style={styles.profileButtonText}>🎵 Mon profil musical</Text>
-        <Text style={styles.profileButtonSubText}>
-          Découvrez vos goûts et trouvez vos festivals
-        </Text>
-      </TouchableOpacity>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Pays</Text>
+              <TextInput
+                style={styles.textInput}
+                value={newLocationCountry}
+                onChangeText={setNewLocationCountry}
+                placeholder="Ex: France"
+                placeholderTextColor="#ad9cbb"
+              />
+            </View>
 
-      <TouchableOpacity
-        style={styles.festivalButton}
-        onPress={() => router.push("/festival-recommendations")}
-      >
-        <Text style={styles.festivalButtonText}>🎪 Festivals recommandés</Text>
-      </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleLocationChange}
+            >
+              <Text style={styles.saveButtonText}>Enregistrer</Text>
+            </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.testButton}
-        onPress={() => router.push("/spotify-test")}
-      >
-        <Text style={styles.testButtonText}>🧪 Test API Spotify</Text>
-      </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.getCurrentLocationButton}
+              onPress={async () => {
+                setLocationModalVisible(false);
+                const location = await getCurrentLocation();
+                if (location) {
+                  setUserLocation(location);
+                  loadHomeData();
+                }
+              }}
+            >
+              <MapPin size={16} color={FestiFunColors.primary} />
+              <Text style={styles.getCurrentLocationText}>
+                Utiliser ma position actuelle
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Se déconnecter</Text>
-      </TouchableOpacity>
+      {/* Bottom Navigation avec le nouveau composant */}
+      <BottomNavigation
+        activeTab="home"
+        onTabPress={(tab) => {
+          if (tab === "profile") {
+            router.push("/music-profile");
+          }
+          // Ajouter d'autres navigations au fur et à mesure
+        }}
+      />
     </View>
   );
 }
@@ -82,128 +623,279 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: FestiFunColors.primaryDark,
+  },
+
+  loadingContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: FestiFunColors.primaryDark,
+    paddingHorizontal: 24,
+    gap: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
+
+  pedroImage: {
+    width: 150,
+    height: 150,
+    marginBottom: 16,
+  },
+
+  loadingTitle: {
+    fontSize: 24,
+    fontFamily: FestiFunTypography.title.fontFamily,
+    color: FestiFunColors.background,
     textAlign: "center",
-    marginBottom: 30,
-    color: "#333",
+    marginBottom: 8,
   },
-  userInfo: {
+
+  loadingSubtitle: {
+    fontSize: 16,
+    fontFamily: FestiFunTypography.body.fontFamily,
+    color: "#ad9cbb",
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+
+  scrollView: {
+    flex: 1,
+  },
+
+  scrollContent: {
+    paddingTop: 60,
+  },
+
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 30,
-    padding: 20,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-    width: "100%",
+    paddingHorizontal: 18,
+    paddingBottom: 24,
   },
-  userText: {
-    fontSize: 20,
+
+  locationContainer: {
+    gap: 2,
+  },
+
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+
+  locationText: {
+    fontSize: 16,
     fontWeight: "600",
-    marginBottom: 5,
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.bodySemiBold.fontFamily,
   },
-  emailText: {
-    fontSize: 16,
-    color: "#666",
+
+  locationSubtext: {
+    fontSize: 12,
+    color: "#ad9cbb",
+    fontFamily: FestiFunTypography.body.fontFamily,
   },
-  description: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 40,
-    color: "#666",
-    lineHeight: 24,
+
+  searchContainer: {
+    paddingHorizontal: 18,
+    marginBottom: 20,
   },
-  button: {
-    backgroundColor: "#1DB954",
-    padding: 15,
-    borderRadius: 8,
+
+  searchBar: {
+    flexDirection: "row",
     alignItems: "center",
-    width: "100%",
-    marginBottom: 10,
+    backgroundColor: FestiFunColors.secondaryDark,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
   },
-  buttonText: {
-    color: "white",
+
+  searchPlaceholder: {
     fontSize: 16,
-    fontWeight: "bold",
+    color: "#ad9cbb",
+    fontFamily: FestiFunTypography.body.fontFamily,
   },
-  logoutButton: {
-    backgroundColor: "#FF3B30",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    width: "100%",
+
+  genreFiltersContainer: {
+    marginBottom: 32,
   },
-  logoutButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+
+  genreFilters: {
+    paddingLeft: 18,
+    paddingRight: 18,
+    gap: 8,
   },
-  testButton: {
-    backgroundColor: "#333",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 10,
+
+  genreFilter: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ad9cbb",
+    backgroundColor: "transparent",
+    minHeight: 36,
   },
-  testButtonText: {
-    color: "#1DB954",
-    fontSize: 16,
-    fontWeight: "bold",
+
+  genreFilterActive: {
+    backgroundColor: FestiFunColors.primary,
+    borderColor: FestiFunColors.primary,
   },
-  festivalButton: {
-    backgroundColor: "#FF6B35",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 10,
-  },
-  festivalButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  profileButton: {
-    backgroundColor: "#1DB954",
-    padding: 20,
-    borderRadius: 10,
-    marginVertical: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  profileButtonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  profileButtonSubText: {
-    color: "rgba(255,255,255,0.8)",
+
+  genreFilterText: {
     fontSize: 14,
+    fontWeight: "500",
+    color: "#ad9cbb",
+    fontFamily: FestiFunTypography.bodySemiBold.fontFamily,
     textAlign: "center",
   },
-  onboardingButton: {
-    backgroundColor: "#FF6B6B",
-    padding: 20,
-    borderRadius: 10,
-    marginVertical: 10,
-    width: "80%",
-    alignItems: "center",
+
+  genreFilterTextActive: {
+    color: FestiFunColors.background,
   },
-  onboardingButtonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
+
+  section: {
+    marginBottom: 32,
   },
-  onboardingButtonSubText: {
-    color: "rgba(255,255,255,0.8)",
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.title.fontFamily,
+    marginBottom: 4,
+    paddingHorizontal: 18,
+  },
+
+  sectionSubtitle: {
     fontSize: 14,
+    color: "#ad9cbb",
+    fontFamily: FestiFunTypography.body.fontFamily,
+    marginBottom: 16,
+    paddingHorizontal: 18,
+  },
+
+  festivalsScrollContent: {
+    paddingLeft: 18,
+    paddingRight: 18,
+    gap: 12,
+  },
+
+  artistsScrollContent: {
+    paddingLeft: 18,
+    paddingRight: 18,
+    gap: 12,
+  },
+
+  artistContainer: {
+    alignItems: "center",
+    gap: 6,
+  },
+
+  artistImage: {
+    width: 47,
+    height: 47,
+    borderRadius: 47,
+  },
+
+  artistName: {
+    fontSize: 12,
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.body.fontFamily,
     textAlign: "center",
+    width: 47,
+  },
+
+  forYouGrid: {
+    paddingHorizontal: 18,
+    gap: 12,
+  },
+
+  bottomSpace: {
+    height: 105, // Ajusté pour correspondre au nouveau design de la navbar avec espacement
+  },
+
+  // Styles pour les modals
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+
+  modalContent: {
+    backgroundColor: FestiFunColors.secondaryDark,
+    borderRadius: 20,
+    padding: 20,
+    width: "100%",
+    maxHeight: "80%",
+  },
+
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.title.fontFamily,
+  },
+
+  inputContainer: {
+    marginBottom: 16,
+  },
+
+  inputLabel: {
+    fontSize: 14,
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.bodySemiBold.fontFamily,
+    marginBottom: 8,
+  },
+
+  textInput: {
+    backgroundColor: FestiFunColors.primaryDark,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: FestiFunColors.background,
+    borderWidth: 1,
+    borderColor: "#ad9cbb",
+  },
+
+  saveButton: {
+    backgroundColor: FestiFunColors.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: FestiFunColors.background,
+    fontFamily: FestiFunTypography.bodySemiBold.fontFamily,
+  },
+
+  getCurrentLocationButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    marginTop: 10,
+  },
+
+  getCurrentLocationText: {
+    fontSize: 14,
+    color: FestiFunColors.primary,
+    fontFamily: FestiFunTypography.bodySemiBold.fontFamily,
   },
 });

@@ -151,7 +151,7 @@ export default function FestiFunLoginScreen() {
       console.log("📱 Tentative de connexion sociale Spotify...");
       const result = await signIn.social({
         provider: "spotify",
-        callbackURL: "/home",
+        callbackURL: "/onboarding", // Redirection vers l'onboarding après connexion Spotify
       });
 
       console.log("✅ Réponse connexion Spotify:", result);
@@ -186,17 +186,38 @@ export default function FestiFunLoginScreen() {
     }
   };
 
-  // Si l'utilisateur est connecté, rediriger vers home
-  if (session?.user) {
-    router.replace("/home");
-    return null;
-  }
+  // Redirection automatique si l'utilisateur est déjà connecté
+  useEffect(() => {
+    if (session?.user && !sessionLoading) {
+      console.log("🔄 Utilisateur déjà connecté, redirection vers /home");
+      router.replace("/home");
+    }
+  }, [session?.user, sessionLoading, router]);
 
   // Interpolation pour la rotation
   const rotateInterpolate = rotationAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
   });
+
+  // Ne pas afficher le formulaire si l'utilisateur est connecté ou en cours de chargement
+  if (session?.user || sessionLoading) {
+    return (
+      <View style={styles.loadingScreen}>
+        <Image
+          style={styles.loadingPedroImage}
+          resizeMode="contain"
+          source={require("./assets/pedropedropedro.png")}
+        />
+        <Text style={styles.loadingTitle}>FESTIFUN</Text>
+        {sessionLoading && (
+          <Text style={styles.loadingSubtitle}>
+            Vérification de la session...
+          </Text>
+        )}
+      </View>
+    );
+  }
 
   // Écran de connexion principal selon le design Figma
   return (
@@ -477,5 +498,34 @@ const styles = StyleSheet.create({
     flex: 1,
     maxWidth: "100%",
     backgroundColor: FestiFunColors.primaryDark, // #19002c
+  },
+
+  // Styles pour l'écran de chargement
+  loadingScreen: {
+    flex: 1,
+    backgroundColor: FestiFunColors.primaryDark,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 20,
+  },
+
+  loadingPedroImage: {
+    width: 150,
+    height: 150,
+  },
+
+  loadingTitle: {
+    fontSize: 32,
+    fontFamily: FestiFunTypography.logo.fontFamily,
+    color: FestiFunColors.background,
+    textAlign: "center",
+    letterSpacing: 2,
+  },
+
+  loadingSubtitle: {
+    fontSize: 16,
+    fontFamily: FestiFunTypography.body.fontFamily,
+    color: "#ad9cbb",
+    textAlign: "center",
   },
 });

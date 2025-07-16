@@ -1,5 +1,5 @@
 import { auth } from "../../lib/auth";
-import { db } from "../../lib/database";
+import { db } from "../../lib/database-server";
 import { account } from "../../lib/schema";
 import { eq, and } from "drizzle-orm";
 

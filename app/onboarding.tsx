@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,10 +7,12 @@ import {
   ScrollView,
   Dimensions,
   Image,
+  StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSession } from "../lib/auth-client";
 import { LinearGradient } from "expo-linear-gradient";
+import { FestiFunColors } from "../lib/design-system";
 
 const { width, height } = Dimensions.get("window");
 
@@ -47,6 +49,14 @@ const onboardingSteps: OnboardingStep[] = [
     icon: "🎪",
     color: ["#4ECDC4", "#44A08D"],
   },
+  {
+    id: 4,
+    title: "PAS ENVIE DE RATER\nTON FESTIVAL FAV ?",
+    description:
+      "Pour ne rater aucun festival et toujours rester à l'affût des nouveaux événements.",
+    icon: "notification",
+    color: ["#18002B", "#7742FE"],
+  },
 ];
 
 export default function OnboardingScreen() {
@@ -54,13 +64,30 @@ export default function OnboardingScreen() {
   const { data: session } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
 
+  // Auto-redirection si l'utilisateur vient de se connecter avec Spotify
+  useEffect(() => {
+    if (session?.user && currentStep < 3) {
+      // Seulement si on n'est pas encore arrivé à l'étape notifications
+      console.log(
+        "🎵 Utilisateur connecté détecté dans l'onboarding, passage à l'étape notifications..."
+      );
+      // Passer directement à l'étape notifications
+      const timer = setTimeout(() => {
+        setCurrentStep(3); // Index 3 = étape notifications
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [session, router, currentStep]);
+
   const handleNext = () => {
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       // Dernière étape, rediriger selon l'état de connexion
       if (session?.user) {
-        router.push("/music-profile");
+        // Si l'utilisateur est connecté, on l'emmène directement configurer ses préférences
+        router.push("/music-preferences-selection");
       } else {
         router.push("/login");
       }
@@ -69,13 +96,33 @@ export default function OnboardingScreen() {
 
   const handleSkip = () => {
     if (session?.user) {
-      router.push("/home");
+      // Si l'utilisateur est connecté, on l'emmène directement configurer ses préférences
+      router.push("/music-preferences-selection");
     } else {
       router.push("/login");
     }
   };
 
   const renderStep = (step: OnboardingStep) => {
+    // Cas spécial pour l'étape notifications
+    if (step.icon === "notification") {
+      return (
+        <View style={styles.notificationStepContainer}>
+          {/* Pedro avec la cloche */}
+          <View style={styles.pedroContainer}>
+            <Image
+              source={require("./assets/notif_pedro.png")}
+              style={styles.pedroImage}
+              resizeMode="contain"
+            />
+          </View>
+
+          <Text style={styles.notificationTitle}>{step.title}</Text>
+          <Text style={styles.notificationDescription}>{step.description}</Text>
+        </View>
+      );
+    }
+
     return (
       <View style={styles.stepContainer}>
         <LinearGradient colors={step.color} style={styles.iconContainer}>
@@ -104,12 +151,31 @@ export default function OnboardingScreen() {
     );
   };
 
+  const isNotificationStep =
+    onboardingSteps[currentStep]?.icon === "notification";
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        isNotificationStep && styles.notificationContainer,
+      ]}
+    >
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={FestiFunColors.primaryDark}
+      />
       {/* Header avec skip */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleSkip}>
-          <Text style={styles.skipText}>Passer</Text>
+          <Text
+            style={[
+              styles.skipText,
+              isNotificationStep && styles.skipTextNotification,
+            ]}
+          >
+            Passer
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -147,7 +213,9 @@ export default function OnboardingScreen() {
             style={styles.nextButtonGradient}
           >
             <Text style={styles.nextButtonText}>
-              {currentStep === onboardingSteps.length - 1
+              {isNotificationStep
+                ? "J'active les notif"
+                : currentStep === onboardingSteps.length - 1
                 ? session?.user
                   ? "Voir mon profil"
                   : "Se connecter"
@@ -172,7 +240,10 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: FestiFunColors.primaryDark,
+  },
+  notificationContainer: {
+    backgroundColor: FestiFunColors.primaryDark,
   },
   header: {
     flexDirection: "row",
@@ -183,8 +254,12 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontSize: 16,
-    color: "#666",
+    color: "#ad9cbb",
     fontWeight: "500",
+  },
+  skipTextNotification: {
+    color: "#FFFFFF",
+    opacity: 0.7,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -209,12 +284,12 @@ const styles = StyleSheet.create({
   appTitle: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#333",
+    color: FestiFunColors.background,
     marginBottom: 10,
   },
   appSubtitle: {
     fontSize: 16,
-    color: "#666",
+    color: "#ad9cbb",
     textAlign: "center",
     lineHeight: 22,
   },
@@ -236,13 +311,13 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#333",
+    color: FestiFunColors.background,
     marginBottom: 15,
     textAlign: "center",
   },
   stepDescription: {
     fontSize: 16,
-    color: "#666",
+    color: "#ad9cbb",
     textAlign: "center",
     lineHeight: 24,
     paddingHorizontal: 20,
@@ -257,11 +332,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#ddd",
+    backgroundColor: "#ad9cbb",
     marginHorizontal: 5,
   },
   paginationDotActive: {
-    backgroundColor: "#1DB954",
+    backgroundColor: FestiFunColors.primary,
     width: 20,
   },
   buttonContainer: {
@@ -288,8 +363,40 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   backButtonText: {
-    color: "#666",
+    color: "#ad9cbb",
     fontSize: 16,
     fontWeight: "500",
+  },
+
+  // Styles pour l'étape notifications
+  notificationStepContainer: {
+    alignItems: "center",
+    marginBottom: 50,
+    paddingHorizontal: 20,
+  },
+  pedroContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  pedroImage: {
+    width: 200,
+    height: 200,
+  },
+  notificationTitle: {
+    fontSize: 28,
+    fontWeight: "900",
+    color: "#FFFFFF",
+    textAlign: "center",
+    marginBottom: 20,
+    lineHeight: 34,
+    fontFamily: "System",
+  },
+  notificationDescription: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    textAlign: "center",
+    lineHeight: 22,
+    opacity: 0.9,
+    paddingHorizontal: 10,
   },
 });

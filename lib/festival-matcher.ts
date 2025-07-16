@@ -62,22 +62,46 @@ export interface FestivalMatchingOptions {
   includePopularityBoost?: boolean;
 }
 
+export interface StoredUserPreferences {
+  spotifyProfileData: any;
+  selectedGenres: Array<{
+    name: string;
+    count?: number;
+    percentage?: number;
+  }>;
+  selectedArtists: Array<{
+    name: string;
+    id: string;
+    popularity?: number;
+    followers?: { total: number };
+    genres?: string[];
+    images?: any[];
+    external_urls?: any;
+  }>;
+  selectedTracks?: any[];
+}
+
 class FestivalMatcher {
   async findMatchingFestivals(
-    userId: string,
+    storedPreferences: StoredUserPreferences,
     options: FestivalMatchingOptions = {}
   ): Promise<FestivalMatch[]> {
     try {
       console.log(
-        "🎯 Recherche intelligente de festivals pour l'utilisateur:",
-        userId
+        "🎯 Recherche intelligente de festivals basée sur les préférences stockées"
       );
 
-      // 1. Récupérer les préférences musicales de l'utilisateur
-      const musicPreferences = await spotifyService.getMusicPreferences();
+      if (!storedPreferences) {
+        console.error("❌ Aucune préférence musicale fournie");
+        return [];
+      }
+
+      // 1. Convertir les préférences stockées au format MusicPreferences
+      const musicPreferences =
+        this.convertStoredPreferencesToMusicPreferences(storedPreferences);
 
       if (!musicPreferences) {
-        console.error("❌ Impossible de récupérer les préférences musicales");
+        console.error("❌ Impossible de convertir les préférences musicales");
         return [];
       }
 
@@ -692,6 +716,53 @@ class FestivalMatcher {
     } catch (error) {
       console.error("❌ Erreur recherche par genre:", error);
       return [];
+    }
+  }
+
+  private convertStoredPreferencesToMusicPreferences(
+    storedPreferences: StoredUserPreferences
+  ): MusicPreferences | null {
+    try {
+      // Vérifier que les données Spotify sont disponibles
+      if (!storedPreferences.spotifyProfileData) {
+        console.error(
+          "❌ Données Spotify manquantes dans les préférences stockées"
+        );
+        return null;
+      }
+
+      // Convertir les genres sélectionnés
+      const topGenres = storedPreferences.selectedGenres.map((genre: any) => ({
+        genre: genre.name,
+        count: genre.count || 1,
+        percentage: genre.percentage || 0,
+      }));
+
+      // Convertir les artistes sélectionnés
+      const topArtists = storedPreferences.selectedArtists.map(
+        (artist: any) => ({
+          name: artist.name,
+          id: artist.id,
+          popularity: artist.popularity || 0,
+          followers: artist.followers || { total: 0 },
+          genres: artist.genres || [],
+          images: artist.images || [],
+          external_urls: artist.external_urls || {},
+        })
+      );
+
+      // Utiliser les tracks stockées ou un tableau vide
+      const topTracks = storedPreferences.selectedTracks || [];
+
+      return {
+        topGenres,
+        topArtists,
+        topTracks,
+        profile: storedPreferences.spotifyProfileData,
+      };
+    } catch (error) {
+      console.error("❌ Erreur conversion préférences:", error);
+      return null;
     }
   }
 

@@ -4,6 +4,7 @@ import {
   timestamp,
   boolean,
   integer,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -52,6 +53,35 @@ export const verification = pgTable("verification", {
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
   expiresAt: timestamp("expiresAt").notNull(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+// Table pour stocker les préférences musicales de l'utilisateur
+export const userMusicPreferences = pgTable("user_music_preferences", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+
+  // Genres sélectionnés par l'utilisateur (avec métadonnées)
+  selectedGenres: jsonb("selectedGenres").notNull().default("[]"),
+
+  // Artistes sélectionnés par l'utilisateur (avec métadonnées)
+  selectedArtists: jsonb("selectedArtists").notNull().default("[]"),
+
+  // Tracks sélectionnés par l'utilisateur (optionnel, pour plus de précision)
+  selectedTracks: jsonb("selectedTracks").notNull().default("[]"),
+
+  // Métadonnées sur les préférences Spotify récupérées
+  spotifyProfileData: jsonb("spotifyProfileData"),
+
+  // Timestamp de la dernière synchronisation avec Spotify
+  lastSpotifySync: timestamp("lastSpotifySync"),
+
+  // Version des préférences (pour gérer les migrations)
+  preferencesVersion: integer("preferencesVersion").notNull().default(1),
+
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
