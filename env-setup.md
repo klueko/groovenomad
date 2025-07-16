@@ -19,7 +19,8 @@ EXPO_PUBLIC_APP_URL=http://localhost:8081
 
 # Configuration Better Auth
 BETTER_AUTH_SECRET=un_secret_aleatoire_securise_ici
-BETTER_AUTH_URL=http://localhost:8081/api/auth
+BETTER_AUTH_URL=http://localhost:3000/api/auth
+EXPO_PUBLIC_BETTER_AUTH_URL=http://127.0.0.1:3000/api/auth
 
 # Configuration Base de données
 DATABASE_URL=postgresql://postgres.zjkmcqmovbovuafwygbh:ton_mot_de_passe_db@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
@@ -37,7 +38,7 @@ DATABASE_URL=postgresql://postgres.zjkmcqmovbovuafwygbh:ton_mot_de_passe_db@aws-
 1. Va sur https://developer.spotify.com/dashboard
 2. Crée une nouvelle app ou utilise une existante
 3. Dans les paramètres, ajoute ces Redirect URIs :
-   - `http://localhost:8081/api/auth/callback/spotify`
+   - `http://127.0.0.1:3000/auth/callback/spotify`
    - `groovenomad://auth/callback/spotify`
 4. Copie le Client Secret depuis l'interface
 

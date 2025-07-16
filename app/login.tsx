@@ -231,13 +231,13 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     padding: 15,
     marginBottom: 15,
-    borderRadius: 8,
+    borderRadius: 24,
     fontSize: 16,
   },
   button: {
     backgroundColor: "#007AFF",
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 24,
     alignItems: "center",
     marginBottom: 15,
   },
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   spotifyButton: {
     backgroundColor: "#1DB954",
     padding: 15,
-    borderRadius: 25,
+    borderRadius: 24,
     alignItems: "center",
     marginBottom: 15,
   },
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: "#dc3545",
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 24,
     alignItems: "center",
     marginTop: 10,
   },

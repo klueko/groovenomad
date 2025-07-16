@@ -38,7 +38,7 @@ SUPABASE_PROJECT_REF=your-project-ref
 2. Créez une nouvelle application
 3. **IMPORTANT** : Ajoutez exactement ces URLs de redirection :
 
-   - `http://localhost:8081/api/auth/callback/spotify` (pour développement)
+   - `http://127.0.0.1:3000/auth/callback/spotify` (pour développement)
    - `groovenomad://auth/callback/spotify` (pour mobile)
 
    ⚠️ **Attention** : Spotify ne supporte pas les wildcards comme `groovenomad://` seul. Il faut spécifier le chemin complet.

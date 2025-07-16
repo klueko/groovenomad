@@ -31,7 +31,21 @@ export default function Home() {
         monde entier.
       </Text>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
+      <TouchableOpacity 
+        style={[styles.button, styles.flightsButton]} 
+        onPress={() => router.push("/flights")}
+      >
+        <Text style={styles.buttonText}>Rechercher des vols</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={[styles.button, styles.hotelsButton]} 
+        onPress={() => router.push("/hotels")}
+      >
+        <Text style={styles.buttonText}>Rechercher des hôtels</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
         <Text style={styles.buttonText}>Se déconnecter</Text>
       </TouchableOpacity>
     </View>
@@ -77,11 +91,20 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   button: {
-    backgroundColor: "#FF3B30",
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 24,
     alignItems: "center",
     width: "100%",
+    marginBottom: 15,
+  },
+  flightsButton: {
+    backgroundColor: "#7742FE",
+  },
+  hotelsButton: {
+    backgroundColor: "#7742FE",
+  },
+  logoutButton: {
+    backgroundColor: "#FF3B30",
   },
   buttonText: {
     color: "white",

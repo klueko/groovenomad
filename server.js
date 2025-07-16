@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 
+// Load environment variables
+require('dotenv').config();
+
 // Chargement dynamique du module ES
 let auth;
 async function loadAuth() {
@@ -9,7 +12,7 @@ async function loadAuth() {
 }
 
 const app = express();
-const PORT = 3000;
+const PORT = 8081;
 
 // Configuration CORS pour permettre les requêtes depuis Expo
 app.use(
@@ -27,9 +30,6 @@ app.use(
 // Middleware pour parser JSON
 app.use(express.json());
 
-// Routes Better Auth
-app.use("/api/auth", auth.handler);
-
 // Route de test
 app.get("/health", (req, res) => {
   res.json({ status: "OK", message: "Better Auth server is running" });
@@ -39,12 +39,19 @@ app.get("/health", (req, res) => {
 async function startServer() {
   await loadAuth();
 
-  app.listen(PORT, "127.0.0.1", () => {
-    console.log(`🚀 Better Auth server running on http://127.0.0.1:${PORT}`);
+  // Routes Better Auth (after auth is loaded)
+  app.use("/api/auth", auth.handler);
+
+  // Additional route for Spotify callback (simpler path)
+  app.use("/auth", auth.handler);
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Better Auth server running on http://10.134.199.192:${PORT}`);
     console.log(`📋 API endpoints:`);
-    console.log(`   - Health: http://127.0.0.1:${PORT}/health`);
-    console.log(`   - Auth: http://127.0.0.1:${PORT}/api/auth`);
-    console.log(`   - Session: http://127.0.0.1:${PORT}/api/auth/session`);
+    console.log(`   - Health: http://10.134.199.192:${PORT}/health`);
+    console.log(`   - Auth: http://10.134.199.192:${PORT}/api/auth`);
+    console.log(`   - Auth (Spotify): http://10.134.199.192:${PORT}/auth/callback/spotify`);
+    console.log(`   - Session: http://10.134.199.192:${PORT}/api/auth/session`);
   });
 }
 
