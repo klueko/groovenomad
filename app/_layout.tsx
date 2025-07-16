@@ -101,6 +101,29 @@ export default function RootLayout() {
         name="festival-detail"
         options={{ headerShown: false, title: "Détail Festival" }}
       />
+      <Stack.Screen
+        name="trip-planning"
+        options={{
+          headerShown: false,
+          title: "Planification de Voyage",
+          presentation: "modal",
+        }}
+      />
+      <Stack.Screen
+        name="event-booking"
+        options={{
+          headerShown: false,
+          title: "Réservation de Festival",
+          presentation: "modal",
+        }}
+      />
+      <Stack.Screen
+        name="trip-planning-detail"
+        options={{
+          headerShown: false,
+          title: "Détail Planification de Voyage",
+        }}
+      />
     </Stack>
   );
 }

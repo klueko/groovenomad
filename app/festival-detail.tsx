@@ -584,7 +584,17 @@ export default function FestivalDetailScreen() {
           <TouchableOpacity style={styles.shareButton}>
             <Heart size={19} color={FestiFunColors.background} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.reserveButton}>
+          <TouchableOpacity
+            style={styles.reserveButton}
+            onPress={() =>
+              router.push({
+                pathname: "/event-booking",
+                params: {
+                  festivalData: JSON.stringify(festivalData),
+                },
+              })
+            }
+          >
             <Text style={styles.reserveButtonText}>Réserver mon séjour</Text>
           </TouchableOpacity>
         </View>
