@@ -58,6 +58,25 @@ export default function EventBooking() {
   // Mémoriser les données du festival pour éviter les re-rendus
   const festivalData = useMemo<FestivalData | null>(() => {
     try {
+      // Support pour les nouveaux paramètres individuels (venant de Pedro)
+      if (params.festivalName && params.festivalVenue) {
+        return {
+          name: params.festivalName as string,
+          location: {
+            venue: params.festivalVenue as string,
+            city:
+              (params.festivalCity as string) ||
+              (params.festivalVenue as string),
+            country: (params.festivalCountry as string) || "France",
+          },
+          dates: {
+            start: params.festivalStartDate as string,
+            end: params.festivalEndDate as string,
+          },
+        };
+      }
+
+      // Fallback pour l'ancien format JSON
       if (params.festivalData) {
         return JSON.parse(params.festivalData as string);
       }
@@ -65,7 +84,7 @@ export default function EventBooking() {
       console.error("Erreur parsing festivalData:", error);
     }
     return null;
-  }, [params.festivalData]);
+  }, [params]);
 
   // États pour les sélections
   const [personCount, setPersonCount] = useState(2);
@@ -82,6 +101,30 @@ export default function EventBooking() {
   >([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  // Vérifier si nous avons un transport validé depuis Pedro
+  const validatedTransport = useMemo(() => {
+    if (params.transportValidated === "true") {
+      return {
+        type: params.transportType as string,
+        company: params.transportCompany as string,
+        price: params.transportPrice as string,
+        departureTime: params.transportDepartureTime as string,
+        arrivalTime: params.transportArrivalTime as string,
+        duration: params.transportDuration as string,
+        origin: params.transportOrigin as string,
+        destination: params.transportDestination as string,
+      };
+    }
+    return null;
+  }, [params]);
+
+  // Pré-remplir le point de départ si nous avons des informations du transport validé
+  useEffect(() => {
+    if (params.prefilledDeparturePoint) {
+      setDeparturePoint(params.prefilledDeparturePoint as string);
+    }
+  }, [params.prefilledDeparturePoint]);
 
   // Calculer les dates du festival et les options disponibles
   const festivalDates = useMemo(() => {

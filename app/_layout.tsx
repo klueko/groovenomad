@@ -124,6 +124,14 @@ export default function RootLayout() {
           title: "Détail Planification de Voyage",
         }}
       />
+      <Stack.Screen
+        name="travel-config"
+        options={{
+          headerShown: false,
+          title: "Configuration Voyage",
+          presentation: "modal",
+        }}
+      />
     </Stack>
   );
 }

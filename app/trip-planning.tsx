@@ -78,15 +78,50 @@ export default function TripPlanning() {
   // Récupérer les données de réservation
   const bookingData = useMemo<BookingData | null>(() => {
     try {
-      const data = {
-        festivalData: JSON.parse(params.festivalData as string),
-        arrivalDate: params.arrivalDate as string,
-        departureDate: params.departureDate as string,
-        personCount: parseInt(params.personCount as string),
-        selectedTime: params.selectedTime as string,
-        departurePoint: params.departurePoint as string,
-      };
-      return data;
+      // Si nous avons les nouveaux paramètres individuels du festival
+      if (params.festivalName && params.festivalVenue) {
+        const data = {
+          festivalData: {
+            name: params.festivalName as string,
+            location: {
+              venue: params.festivalVenue as string,
+              city:
+                (params.festivalCity as string) ||
+                (params.festivalVenue as string),
+              country: (params.festivalCountry as string) || "France",
+            },
+            dates: {
+              start:
+                (params.festivalStartDate as string) ||
+                (params.arrivalDate as string),
+              end:
+                (params.festivalEndDate as string) ||
+                (params.departureDate as string),
+            },
+          },
+          arrivalDate: params.arrivalDate as string,
+          departureDate: params.departureDate as string,
+          personCount: parseInt(params.personCount as string) || 1,
+          selectedTime: (params.selectedTime as string) || "flexible",
+          departurePoint: params.departurePoint as string,
+        };
+        return data;
+      }
+
+      // Fallback pour l'ancien format avec JSON
+      if (params.festivalData) {
+        const data = {
+          festivalData: JSON.parse(params.festivalData as string),
+          arrivalDate: params.arrivalDate as string,
+          departureDate: params.departureDate as string,
+          personCount: parseInt(params.personCount as string),
+          selectedTime: params.selectedTime as string,
+          departurePoint: params.departurePoint as string,
+        };
+        return data;
+      }
+
+      return null;
     } catch (error) {
       console.error("Erreur parsing booking data:", error);
       return null;
@@ -288,13 +323,19 @@ export default function TripPlanning() {
   };
 
   const handleAddTravel = (direction: "outbound" | "return") => {
-    Alert.alert(
-      "Ajouter un trajet",
-      `Configuration du trajet ${
-        direction === "outbound" ? "aller" : "retour"
-      }`,
-      [{ text: "OK" }]
-    );
+    if (!bookingData) return;
+
+    router.push({
+      pathname: "/travel-config",
+      params: {
+        direction: direction,
+        festivalName: bookingData.festivalData.name,
+        festivalLocation: bookingData.festivalData.location.city,
+        departurePoint: bookingData.departurePoint,
+        arrivalDate: bookingData.arrivalDate,
+        departureDate: bookingData.departureDate,
+      },
+    });
   };
 
   const handleAddAccommodation = (date: string) => {
