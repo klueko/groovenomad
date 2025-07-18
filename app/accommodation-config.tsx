@@ -125,7 +125,7 @@ export default function AccommodationConfig() {
               personCount:
                 existingParams.personCount || existingParams.guests || "1",
               selectedTime: existingParams.selectedTime || "flexible",
-              departurePoint: existingParams.departurePoint || "Ma position",
+              departurePoint: existingParams.departurePoint,
 
               // ===== AJOUTER UNIQUEMENT LES NOUVELLES INFORMATIONS DE LOGEMENT =====
               accommodationValidated: "true",

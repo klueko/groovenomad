@@ -56,18 +56,6 @@ const AIRTABLE_API_KEY =
 
 export async function GET(request: Request) {
   try {
-    console.log(
-      "📥 [Get User Bookings] Récupération des réservations utilisateur"
-    );
-
-    // Debug configuration
-    console.log("🔧 [Config] Base ID:", AIRTABLE_BASE_ID);
-    console.log("🔧 [Config] Table:", AIRTABLE_TABLE_NAME);
-    console.log(
-      "🔧 [Config] API Key:",
-      AIRTABLE_API_KEY ? "✅ Définie" : "❌ Manquante"
-    );
-
     if (!AIRTABLE_API_KEY) {
       console.error("❌ [Get User Bookings] AIRTABLE_API_KEY manquante");
       return new Response(
@@ -87,16 +75,9 @@ export async function GET(request: Request) {
 
     if (userIdParam) {
       // Si userId est fourni en paramètre (React Native)
-      console.log(
-        "✅ [Get User Bookings] ID utilisateur fourni en paramètre:",
-        userIdParam
-      );
       userId = userIdParam;
     } else {
       // Sinon essayer de récupérer la session via Better Auth (Web)
-      console.log(
-        "🔍 [Get User Bookings] Tentative de récupération de session..."
-      );
 
       try {
         const session = await auth.api.getSession({
@@ -104,9 +85,6 @@ export async function GET(request: Request) {
         });
 
         if (!session?.user?.id) {
-          console.log(
-            "❌ [Get User Bookings] Aucune session utilisateur trouvée"
-          );
           return new Response(
             JSON.stringify({ error: "Utilisateur non authentifié" }),
             {
@@ -116,10 +94,6 @@ export async function GET(request: Request) {
           );
         }
 
-        console.log(
-          "✅ [Get User Bookings] Session utilisateur récupérée:",
-          session.user.id
-        );
         userId = session.user.id;
       } catch (error) {
         console.error(
@@ -136,15 +110,11 @@ export async function GET(request: Request) {
       }
     }
 
-    console.log("✅ [Get User Bookings] ID utilisateur final:", userId);
-
     // Construire l'URL Airtable avec filtre par client_id
     const filterFormula = `{client_id} = '${userId}'`;
     const airtableUrl = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?filterByFormula=${encodeURIComponent(
       filterFormula
     )}&sort[0][field]=date_commande&sort[0][direction]=desc`;
-
-    console.log("🔍 [Get User Bookings] URL Airtable:", airtableUrl);
 
     // Faire la requête à Airtable
     const airtableResponse = await fetch(airtableUrl, {
@@ -175,11 +145,6 @@ export async function GET(request: Request) {
     }
 
     const airtableData: AirtableResponse = await airtableResponse.json();
-    console.log(
-      "✅ [Get User Bookings] Données récupérées:",
-      airtableData.records.length,
-      "réservations"
-    );
 
     // Transformer les données pour l'app
     const bookings = airtableData.records.map((record) => ({
@@ -211,11 +176,6 @@ export async function GET(request: Request) {
       devisHtml: record.fields.devis_html,
       createdTime: record.createdTime,
     }));
-
-    console.log(
-      "✅ [Get User Bookings] Réservations transformées:",
-      bookings.length
-    );
 
     return new Response(JSON.stringify({ bookings }), {
       status: 200,

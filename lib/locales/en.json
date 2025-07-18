@@ -55,6 +55,10 @@
       "title": "For you",
       "subtitle": "Personalized recommendations"
     },
+    "localSection": {
+      "title": "Near you",
+      "subtitle": "Discover festivals in your region"
+    },
     "loadingTitle": "🎪 Searching festivals...",
     "loadingSubtitle": "Analyzing your musical preferences",
     "allGenres": "All"
@@ -332,6 +336,83 @@
       "validation": "Accommodation selected",
       "searching": "Searching..."
     }
+  },
+  "activityConfig": {
+    "header": {
+      "title": "Discover activities",
+      "subtitle": "Chat to select activities that interest you"
+    },
+    "activityTypes": {
+      "culture": {
+        "label": "🎭 Culture",
+        "description": "Museums, theaters, monuments"
+      },
+      "nature": {
+        "label": "🌳 Nature",
+        "description": "Parks, gardens, hiking"
+      },
+      "gastronomy": {
+        "label": "🍽️ Gastronomy",
+        "description": "Restaurants, local markets"
+      }
+    },
+    "searchMessage": "I'm looking for {{activityType}} activities",
+    "toolLabels": {
+      "searchActivities": "Searching activities near the festival",
+      "activityScheduled": "Scheduled activity: {{activityName}}",
+      "searching": "Searching..."
+    },
+    "validationButton": {
+      "text": "🎭 Schedule this activity"
+    },
+    "validationSuccess": {
+      "title": "🎭 Great choice!",
+      "message": "Your activity {{activityName}} is scheduled!\n\n📅 {{scheduledDate}}\n⏰ {{scheduledTime}}\n💰 {{price}}\n📍 {{distance}}km from the festival\n\nNow let's organize your trip!"
+    }
+  },
+  "eventBooking": {
+    "title": "Book your stay",
+    "departurePointTitle": "Departure point",
+    "departurePointDefault": "Click to choose",
+    "departureSearchTitle": "Choose departure point",
+    "departureSearchPlaceholder": "Search for an address...",
+    "locationGetting": "Getting location...",
+    "useCurrentLocation": "Use my current location",
+    "searchLoading": "Searching...",
+    "personCountTitle": "Number of people",
+    "festivalDatesTitle": "Festival dates",
+    "festivalDatesText": "From {{startDate}} to {{endDate}}",
+    "arrivalDateTitle": "Arrival date",
+    "departureDateTitle": "Departure date",
+    "summaryTitle": "Stay summary",
+    "stayDuration": "Duration: {{nights}} night{{nightsPlural}} and {{days}} days",
+    "departurePointSummary": "Departure point: {{departurePoint}}",
+    "personCountSummary": "Number of people: {{personCount}}",
+    "arrivalDateSummary": "From {{arrivalDate}} to {{departureDate}}",
+    "arrivalTime": "Desired arrival time on {{arrivalDate}}",
+    "arrivalTimePlaceholder": "Arrival time",
+    "bookButton": "Plan my stay ({{nights}} night{{nightsPlural}})",
+    "permissionDenied": {
+      "title": "Permission denied",
+      "message": "Location permission is required for this feature."
+    },
+    "locationFound": {
+      "title": "Location found",
+      "message": "Your location: {{addressName}}"
+    },
+    "locationError": {
+      "title": "Error",
+      "message": "Unable to get your location: {{error}}"
+    },
+    "invalidDate": {
+      "title": "Invalid date",
+      "message": "Departure date must be after arrival date"
+    },
+    "missingInfo": {
+      "title": "Missing information",
+      "message": "Please select arrival date, departure date and time"
+    },
+    "festivalDataError": "Error: Festival data not found"
   },
   "alerts": {
     "compris": "Got it",

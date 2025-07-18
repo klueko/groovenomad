@@ -27,6 +27,7 @@ import {
   Plane,
 } from "lucide-react-native";
 import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
+import { useTranslation } from "react-i18next";
 
 type FestivalData = {
   name: string;
@@ -54,6 +55,7 @@ type MapboxSuggestion = {
 export default function EventBooking() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { t } = useTranslation();
 
   // Mémoriser les données du festival pour éviter les re-rendus
   const festivalData = useMemo<FestivalData | null>(() => {
@@ -93,7 +95,9 @@ export default function EventBooking() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   // États pour le point de départ
-  const [departurePoint, setDeparturePoint] = useState("Ma position");
+  const [departurePoint, setDeparturePoint] = useState(
+    t("eventBooking.departurePointDefault")
+  );
   const [showDepartureSearch, setShowDepartureSearch] = useState(false);
   const [departureSearchQuery, setDepartureSearchQuery] = useState("");
   const [mapboxSuggestions, setMapboxSuggestions] = useState<
@@ -263,8 +267,8 @@ export default function EventBooking() {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
-          "Permission refusée",
-          "L'autorisation de localisation est nécessaire pour cette fonctionnalité."
+          t("eventBooking.permissionDenied.title"),
+          t("eventBooking.permissionDenied.message")
         );
         setIsGettingLocation(false);
         return;
@@ -305,15 +309,18 @@ export default function EventBooking() {
         setDeparturePoint(addressName);
         setShowDepartureSearch(false);
         clearSearchState();
-        Alert.alert("Position trouvée", `Votre position : ${addressName}`);
+        Alert.alert(
+          t("eventBooking.locationFound.title"),
+          t("eventBooking.locationFound.message", { addressName })
+        );
       } else {
         throw new Error("Aucune adresse trouvée");
       }
     } catch (error) {
       console.error("Erreur géolocalisation:", error);
       Alert.alert(
-        "Erreur",
-        `Impossible d'obtenir votre position : ${error.message}`
+        t("eventBooking.locationError.title"),
+        t("eventBooking.locationError.message", { error: error.message })
       );
     } finally {
       setIsGettingLocation(false);
@@ -342,8 +349,8 @@ export default function EventBooking() {
       // Vérifier que la date de départ est après l'arrivée
       if (arrivalDate && date <= arrivalDate) {
         Alert.alert(
-          "Date invalide",
-          "La date de départ doit être après la date d'arrivée"
+          t("eventBooking.invalidDate.title"),
+          t("eventBooking.invalidDate.message")
         );
         return;
       }
@@ -381,8 +388,8 @@ export default function EventBooking() {
   const handleBooking = () => {
     if (!arrivalDate || !departureDate || !selectedTime) {
       Alert.alert(
-        "Information manquante",
-        "Veuillez sélectionner les dates d'arrivée, de départ et l'heure"
+        t("eventBooking.missingInfo.title"),
+        t("eventBooking.missingInfo.message")
       );
       return;
     }
@@ -408,7 +415,7 @@ export default function EventBooking() {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.errorText}>
-          Erreur: Données du festival non trouvées
+          {t("eventBooking.festivalDataError")}
         </Text>
       </SafeAreaView>
     );
@@ -428,13 +435,15 @@ export default function EventBooking() {
           >
             <ArrowLeft size={24} color={FestiFunColors.background} />
           </TouchableOpacity>
-          <Text style={styles.pageTitle}>Réserver votre séjour</Text>
+          <Text style={styles.pageTitle}>{t("eventBooking.title")}</Text>
           <Text style={styles.festivalName}>{festivalData.name}</Text>
         </View>
 
         {/* Point de départ */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Point de départ</Text>
+          <Text style={styles.sectionTitle}>
+            {t("eventBooking.departurePointTitle")}
+          </Text>
           <TouchableOpacity
             style={styles.departureButton}
             onPress={() => setShowDepartureSearch(true)}
@@ -453,7 +462,9 @@ export default function EventBooking() {
         {showDepartureSearch && (
           <View style={styles.searchModal}>
             <View style={styles.searchHeader}>
-              <Text style={styles.searchTitle}>Choisir le point de départ</Text>
+              <Text style={styles.searchTitle}>
+                {t("eventBooking.departureSearchTitle")}
+              </Text>
               <TouchableOpacity
                 onPress={() => {
                   setShowDepartureSearch(false);
@@ -472,7 +483,7 @@ export default function EventBooking() {
               />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Rechercher une adresse..."
+                placeholder={t("eventBooking.departureSearchPlaceholder")}
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 value={departureSearchQuery}
                 onChangeText={handleDepartureSearch}
@@ -488,8 +499,8 @@ export default function EventBooking() {
               <Navigation size={20} color={FestiFunColors.primary} />
               <Text style={styles.locationButtonText}>
                 {isGettingLocation
-                  ? "Localisation en cours..."
-                  : "Utiliser ma position actuelle"}
+                  ? t("eventBooking.locationGetting")
+                  : t("eventBooking.useCurrentLocation")}
               </Text>
               {isGettingLocation && (
                 <ActivityIndicator
@@ -505,7 +516,9 @@ export default function EventBooking() {
                   size="small"
                   color={FestiFunColors.primary}
                 />
-                <Text style={styles.loadingText}>Recherche en cours...</Text>
+                <Text style={styles.loadingText}>
+                  {t("eventBooking.searchLoading")}
+                </Text>
               </View>
             )}
 
@@ -533,7 +546,9 @@ export default function EventBooking() {
         {/* Section Personnes */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Nombre de personnes</Text>
+            <Text style={styles.sectionTitle}>
+              {t("eventBooking.personCountTitle")}
+            </Text>
             <View style={styles.counterContainer}>
               <TouchableOpacity
                 style={styles.counterButton}
@@ -557,23 +572,25 @@ export default function EventBooking() {
           <View style={styles.festivalInfo}>
             <View style={styles.festivalHeader}>
               <Calendar size={20} color={FestiFunColors.primary} />
-              <Text style={styles.festivalInfoTitle}>Dates du festival</Text>
+              <Text style={styles.festivalInfoTitle}>
+                {t("eventBooking.festivalDatesTitle")}
+              </Text>
             </View>
             <Text style={styles.festivalDates}>
-              Du{" "}
-              {festivalDates.start.toLocaleDateString("fr-FR", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-              {festivalDates.end.getTime() !== festivalDates.start.getTime() &&
-                ` au ${festivalDates.end.toLocaleDateString("fr-FR", {
+              {t("eventBooking.festivalDatesText", {
+                startDate: festivalDates.start.toLocaleDateString("fr-FR", {
                   weekday: "long",
                   year: "numeric",
                   month: "long",
                   day: "numeric",
-                })}`}
+                }),
+                endDate: festivalDates.end.toLocaleDateString("fr-FR", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }),
+              })}
             </Text>
           </View>
         )}
@@ -582,7 +599,9 @@ export default function EventBooking() {
         <View style={styles.section}>
           <View style={styles.dateHeader}>
             <Plane size={20} color={FestiFunColors.primary} />
-            <Text style={styles.sectionTitle}>Date d'arrivée</Text>
+            <Text style={styles.sectionTitle}>
+              {t("eventBooking.arrivalDateTitle")}
+            </Text>
           </View>
           <ScrollView
             horizontal
@@ -653,7 +672,9 @@ export default function EventBooking() {
               color={FestiFunColors.primary}
               style={styles.departureIcon}
             />
-            <Text style={styles.sectionTitle}>Date de départ</Text>
+            <Text style={styles.sectionTitle}>
+              {t("eventBooking.departureDateTitle")}
+            </Text>
           </View>
           <ScrollView
             horizontal
@@ -734,22 +755,28 @@ export default function EventBooking() {
         {/* Résumé du séjour */}
         {arrivalDate && departureDate && (
           <View style={styles.summarySection}>
-            <Text style={styles.summaryTitle}>Résumé de votre séjour</Text>
-            <Text style={styles.summaryText}>
-              Durée : {calculateStayDuration()} nuit
-              {calculateStayDuration() > 1 ? "s" : ""} et{" "}
-              {calculateStayDuration() + 1} jours
+            <Text style={styles.summaryTitle}>
+              {t("eventBooking.summaryTitle")}
             </Text>
             <Text style={styles.summaryText}>
-              Point de départ : {departurePoint}
+              {t("eventBooking.stayDuration", {
+                nights: calculateStayDuration(),
+                nightsPlural: calculateStayDuration() > 1 ? "s" : "",
+                days: calculateStayDuration() + 1,
+              })}
+            </Text>
+            <Text style={styles.summaryText}>
+              {t("eventBooking.departurePointSummary", { departurePoint })}
             </Text>
 
             <Text style={styles.summaryText}>
-              Nombre de personnes : {personCount}
+              {t("eventBooking.personCountSummary", { personCount })}
             </Text>
             <Text style={styles.summaryText}>
-              Du {arrivalDate.toLocaleDateString("fr-FR")} au{" "}
-              {departureDate.toLocaleDateString("fr-FR")}
+              {t("eventBooking.arrivalDateSummary", {
+                arrivalDate: arrivalDate.toLocaleDateString("fr-FR"),
+                departureDate: departureDate.toLocaleDateString("fr-FR"),
+              })}
             </Text>
           </View>
         )}
@@ -760,27 +787,28 @@ export default function EventBooking() {
             <Clock size={20} color={FestiFunColors.primary} />
             <Text style={styles.sectionTitle}>
               {arrivalDate
-                ? `Heure d'arrivée souhaitée le ${
-                    arrivalDate
-                      .toLocaleDateString("fr-FR", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
-                      .charAt(0)
-                      .toUpperCase() +
-                    arrivalDate
-                      .toLocaleDateString("fr-FR", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
-                      .slice(1)
-                      .toLowerCase()
-                  }`
-                : "Heure d'arrivée"}
+                ? t("eventBooking.arrivalTime", {
+                    arrivalDate:
+                      arrivalDate
+                        .toLocaleDateString("fr-FR", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                        .charAt(0)
+                        .toUpperCase() +
+                      arrivalDate
+                        .toLocaleDateString("fr-FR", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                        .slice(1)
+                        .toLowerCase(),
+                  })
+                : t("eventBooking.arrivalTimePlaceholder")}
             </Text>
           </View>
           <View style={styles.timesContainer}>
@@ -821,8 +849,10 @@ export default function EventBooking() {
           disabled={!arrivalDate || !departureDate || !selectedTime}
         >
           <Text style={styles.bookingButtonText}>
-            Planifier mon séjour ({calculateStayDuration()} nuit
-            {calculateStayDuration() > 1 ? "s" : ""})
+            {t("eventBooking.bookButton", {
+              nights: calculateStayDuration(),
+              nightsPlural: calculateStayDuration() > 1 ? "s" : "",
+            })}
           </Text>
         </TouchableOpacity>
       </View>

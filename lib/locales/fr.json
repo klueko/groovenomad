@@ -55,6 +55,10 @@
       "title": "Pour vous",
       "subtitle": "Recommandations personnalisées"
     },
+    "localSection": {
+      "title": "Près de chez vous",
+      "subtitle": "Découvrez les festivals de votre région"
+    },
     "loadingTitle": "🎪 Recherche de festivals...",
     "loadingSubtitle": "Analyse de vos préférences musicales",
     "allGenres": "Tous"
@@ -332,6 +336,83 @@
       "validation": "Logement sélectionné",
       "searching": "Recherche en cours..."
     }
+  },
+  "activityConfig": {
+    "header": {
+      "title": "Découvrir des activités",
+      "subtitle": "Converser pour sélectionner les activités qui vous intéressent"
+    },
+    "activityTypes": {
+      "culture": {
+        "label": "🎭 Culture",
+        "description": "Musées, théâtres, monuments"
+      },
+      "nature": {
+        "label": "🌳 Nature",
+        "description": "Parcs, jardins, randonnées"
+      },
+      "gastronomy": {
+        "label": "🍽️ Gastronomie",
+        "description": "Restaurants, marchés locaux"
+      }
+    },
+    "searchMessage": "Je cherche des activités {{activityType}}",
+    "toolLabels": {
+      "searchActivities": "Recherche d'activités près du festival",
+      "activityScheduled": "Activité programmée : {{activityName}}",
+      "searching": "Recherche en cours..."
+    },
+    "validationButton": {
+      "text": "🎭 Programmer cette activité"
+    },
+    "validationSuccess": {
+      "title": "🎭 Super choix !",
+      "message": "Ton activité {{activityName}} est programmée !\n\n📅 {{scheduledDate}}\n⏰ {{scheduledTime}}\n💰 {{price}}\n📍 {{distance}}km du festival\n\nPassons maintenant à l'organisation de ton voyage !"
+    }
+  },
+  "eventBooking": {
+    "title": "Réserver votre séjour",
+    "departurePointTitle": "Point de départ",
+    "departurePointDefault": "Cliquer pour choisir",
+    "departureSearchTitle": "Choisir le point de départ",
+    "departureSearchPlaceholder": "Rechercher une adresse...",
+    "locationGetting": "Localisation en cours...",
+    "useCurrentLocation": "Utiliser ma position actuelle",
+    "searchLoading": "Recherche en cours...",
+    "personCountTitle": "Nombre de personnes",
+    "festivalDatesTitle": "Dates du festival",
+    "festivalDatesText": "Du {{startDate}} au {{endDate}}",
+    "arrivalDateTitle": "Date d'arrivée",
+    "departureDateTitle": "Date de départ",
+    "summaryTitle": "Résumé de votre séjour",
+    "stayDuration": "Durée : {{nights}} nuit{{nightsPlural}} et {{days}} jours",
+    "departurePointSummary": "Point de départ : {{departurePoint}}",
+    "personCountSummary": "Nombre de personnes : {{personCount}}",
+    "arrivalDateSummary": "Du {{arrivalDate}} au {{departureDate}}",
+    "arrivalTime": "Heure d'arrivée souhaitée le {{arrivalDate}}",
+    "arrivalTimePlaceholder": "Heure d'arrivée",
+    "bookButton": "Planifier mon séjour ({{nights}} nuit{{nightsPlural}})",
+    "permissionDenied": {
+      "title": "Permission refusée",
+      "message": "L'autorisation de localisation est nécessaire pour cette fonctionnalité."
+    },
+    "locationFound": {
+      "title": "Position trouvée",
+      "message": "Votre position : {{addressName}}"
+    },
+    "locationError": {
+      "title": "Erreur",
+      "message": "Impossible d'obtenir votre position : {{error}}"
+    },
+    "invalidDate": {
+      "title": "Date invalide",
+      "message": "La date de départ doit être après la date d'arrivée"
+    },
+    "missingInfo": {
+      "title": "Information manquante",
+      "message": "Veuillez sélectionner les dates d'arrivée, de départ et l'heure"
+    },
+    "festivalDataError": "Erreur: Données du festival non trouvées"
   },
   "alerts": {
     "compris": "Compris",

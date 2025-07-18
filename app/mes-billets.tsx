@@ -77,14 +77,11 @@ const MesBilletsContent = () => {
   // Fonction pour récupérer les réservations
   const fetchBookings = async (isRefresh = false) => {
     if (!session?.user?.id) {
-      console.log("❌ [Mes Billets] Pas de session utilisateur");
       if (!isRefresh) setLoading(false);
       return;
     }
 
     try {
-      console.log("🔍 [Mes Billets] Récupération des réservations...");
-
       const baseURL =
         Constants.expoConfig?.extra?.betterAuthUrl || "http://localhost:8081";
       const response = await fetch(
@@ -105,18 +102,6 @@ const MesBilletsContent = () => {
       }
 
       const data = await response.json();
-      console.log(
-        "✅ [Mes Billets] Réservations récupérées:",
-        data.bookings.length
-      );
-
-      // Log détaillé des réservations pour voir le contenu HTML du devis
-      data.bookings.forEach((booking: Booking, index: number) => {
-        console.log(
-          `📋 [Réservation ${index + 1}] Status: ${booking.status}`,
-          booking
-        );
-      });
 
       setBookings(data.bookings);
       setError(null);
@@ -148,9 +133,6 @@ const MesBilletsContent = () => {
     // Auto-refresh toutes les 10 secondes
     refreshIntervalRef.current = setInterval(() => {
       if (session?.user?.id) {
-        console.log(
-          "🔄 [Auto-refresh] Mise à jour automatique des réservations"
-        );
         fetchBookings(true);
       }
     }, 10000); // 10 secondes
@@ -254,57 +236,8 @@ const MesBilletsContent = () => {
       statusColor = "#6B7280"; // Gris pour abandonné
     }
 
-    // Créer un design avec gradient et icônes
-    const gradientColors = [statusColor, baseColor];
-
-    // Ajouter des icônes selon le type de festival (version simplifiée)
-    let iconText = "MUSIC"; // Texte par défaut
-    const nameLower = festivalName.toLowerCase();
-    if (nameLower.includes("rock") || nameLower.includes("metal")) {
-      iconText = "ROCK";
-    } else if (nameLower.includes("jazz") || nameLower.includes("blues")) {
-      iconText = "JAZZ";
-    } else if (
-      nameLower.includes("electronic") ||
-      nameLower.includes("techno")
-    ) {
-      iconText = "EDM";
-    } else if (nameLower.includes("pop") || nameLower.includes("indie")) {
-      iconText = "POP";
-    } else if (nameLower.includes("folk") || nameLower.includes("country")) {
-      iconText = "FOLK";
-    } else if (
-      nameLower.includes("classical") ||
-      nameLower.includes("orchestra")
-    ) {
-      iconText = "CLASS";
-    } else if (nameLower.includes("hip") || nameLower.includes("rap")) {
-      iconText = "RAP";
-    }
-
-    // Créer une URL avec design SVG simplifié (sans emojis)
-    const svgContent = `
-      <svg width="106" height="74" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:${
-              gradientColors[0]
-            };stop-opacity:1" />
-            <stop offset="100%" style="stop-color:${
-              gradientColors[1]
-            };stop-opacity:1" />
-          </linearGradient>
-        </defs>
-        <rect width="106" height="74" rx="24" fill="url(#grad)"/>
-        <circle cx="53" cy="37" r="20" fill="rgba(255,255,255,0.2)"/>
-        <text x="53" y="40" font-family="Arial, sans-serif" font-size="10" fill="white" text-anchor="middle" font-weight="bold">${iconText}</text>
-        <text x="53" y="65" font-family="Arial, sans-serif" font-size="8" fill="white" text-anchor="middle" font-weight="bold">${festivalName
-          .substring(0, 8)
-          .toUpperCase()}</text>
-      </svg>
-    `;
-
-    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgContent)}`;
+    // Retourner la couleur pour le fond
+    return statusColor;
   };
 
   const renderBookingItem = (booking: Booking) => {
@@ -316,23 +249,23 @@ const MesBilletsContent = () => {
           style={styles.bookingItem}
           onPress={() => {
             // Navigation vers les détails de la réservation
-            console.log("📱 Navigation vers détails réservation:", booking.id);
           }}
         >
           <View style={styles.imageContainer}>
-            <Image
-              style={styles.festivalImage}
-              source={{
-                uri: getFestivalImage(booking.festivalName, booking.status),
-              }}
-              onError={() => {
-                // Fallback en cas d'erreur de chargement
-                console.log(
-                  "❌ Erreur chargement image pour:",
-                  booking.festivalName
-                );
-              }}
-            />
+            <View
+              style={[
+                styles.festivalImagePlaceholder,
+                {
+                  backgroundColor:
+                    getFestivalImage(booking.festivalName, booking.status) ||
+                    "#6B46C1",
+                },
+              ]}
+            >
+              <Text style={styles.festivalImageText}>
+                {booking.festivalName.substring(0, 3).toUpperCase()}
+              </Text>
+            </View>
             {/* Overlay avec effet de brillance */}
             <View style={styles.imageOverlay} />
             {/* Indicateur de statut */}
@@ -382,7 +315,6 @@ const MesBilletsContent = () => {
             <Pressable
               style={styles.viewQuoteButton}
               onPress={() => {
-                console.log("📄 Ouverture du devis pour:", booking.id);
                 if (booking.devisHtml) {
                   setSelectedQuoteHtml(booking.devisHtml);
                   setQuoteModalVisible(true);
@@ -472,10 +404,6 @@ const MesBilletsContent = () => {
 
       const data = await res.json();
       setPaymentAmount(data.amountInEuros);
-      console.log(
-        "✅ PaymentIntent créé:",
-        data.clientSecret.substring(0, 20) + "..."
-      );
 
       // Configuration de la PaymentSheet
       const { error: initError } = await stripe.initPaymentSheet({
@@ -500,7 +428,6 @@ const MesBilletsContent = () => {
       }
 
       // Paiement réussi ! Maintenant confirmer le paiement côté serveur
-      console.log("✅ Paiement réussi, confirmation côté serveur...");
 
       const confirmResponse = await fetch(
         `${baseURL}/api/sign-quote-with-payment`,
@@ -525,7 +452,6 @@ const MesBilletsContent = () => {
       }
 
       const confirmData = await confirmResponse.json();
-      console.log("✅ Paiement confirmé et devis signé:", confirmData);
 
       Alert.alert(
         "✅ Paiement réussi !",
@@ -982,6 +908,23 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(107, 70, 193, 0.1)", // Couleur de fallback
     borderWidth: 1,
     borderColor: "rgba(107, 70, 193, 0.3)",
+    resizeMode: "cover",
+  },
+  festivalImagePlaceholder: {
+    width: 106,
+    height: 74,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  festivalImageText: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
+    fontFamily: FestiFunFonts.variants.poppinsSemiBold,
+    textAlign: "center",
   },
   imageOverlay: {
     position: "absolute",

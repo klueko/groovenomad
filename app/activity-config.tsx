@@ -19,8 +19,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useChat } from "react-native-vercel-ai";
 import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
 import Markdown from "react-native-markdown-display";
+import { useTranslation } from "react-i18next";
 
 export default function ActivityConfig() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams();
   const scrollViewRef = useRef<ScrollView>(null);
@@ -101,17 +103,17 @@ export default function ActivityConfig() {
     };
 
     Alert.alert(
-      "🎭 Super choix !",
-      `Ton activité ${activityInfo.activityName} est programmée !\n\n📅 ${
-        scheduleInfo.scheduledDate
-      }\n⏰ ${scheduleInfo.scheduledTime}\n💰 ${
-        activityInfo.price
-      }\n📍 ${Math.round(
-        activityInfo.distance / 1000
-      )}km du festival\n\nPassons maintenant à l'organisation de ton voyage !`,
+      t("activityConfig.validationSuccess.title"),
+      t("activityConfig.validationSuccess.message", {
+        activityName: activityInfo.activityName,
+        scheduledDate: scheduleInfo.scheduledDate,
+        scheduledTime: scheduleInfo.scheduledTime,
+        price: activityInfo.price,
+        distance: Math.round(activityInfo.distance / 1000),
+      }),
       [
         {
-          text: "Continuer",
+          text: t("common.continue"),
           style: "default",
           onPress: () => {
             console.log(
@@ -424,18 +426,18 @@ ${dayTypeEmoji} **${dayTypeLabel}** près du ${activityContext.festivalName}
   const activityTypes = [
     {
       type: "culture",
-      label: "🎭 Culture",
-      description: "Musées, théâtres, monuments",
+      label: t("activityConfig.activityTypes.culture.label"),
+      description: t("activityConfig.activityTypes.culture.description"),
     },
     {
       type: "nature",
-      label: "🌳 Nature",
-      description: "Parcs, jardins, randonnées",
+      label: t("activityConfig.activityTypes.nature.label"),
+      description: t("activityConfig.activityTypes.nature.description"),
     },
     {
       type: "gastronomie",
-      label: "🍽️ Gastronomie",
-      description: "Restaurants, marchés locaux",
+      label: t("activityConfig.activityTypes.gastronomy.label"),
+      description: t("activityConfig.activityTypes.gastronomy.description"),
     },
   ];
 
@@ -443,7 +445,9 @@ ${dayTypeEmoji} **${dayTypeLabel}** près du ${activityContext.festivalName}
   const selectActivityType = (type: string, label: string) => {
     append({
       role: "user",
-      content: `Je cherche des activités ${label.toLowerCase()}`,
+      content: t("activityConfig.searchMessage", {
+        activityType: label.toLowerCase(),
+      }),
     });
   };
 
@@ -482,11 +486,13 @@ ${dayTypeEmoji} **${dayTypeLabel}** près du ${activityContext.festivalName}
             >
               <ArrowLeft size={24} color={FestiFunColors.background} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Découvrir des activités</Text>
+            <Text style={styles.headerTitle}>
+              {t("activityConfig.header.title")}
+            </Text>
             <View style={styles.headerSpacer} />
           </View>
           <Text style={styles.headerSubtitle}>
-            Converser pour sélectionner les activités qui vous intéressent
+            {t("activityConfig.header.subtitle")}
           </Text>
         </LinearGradient>
 
@@ -542,13 +548,22 @@ ${dayTypeEmoji} **${dayTypeLabel}** près du ${activityContext.festivalName}
                                 const getToolLabel = () => {
                                   switch (toolName) {
                                     case "searchActivities":
-                                      return `Recherche d'activités près du festival`;
+                                      return t(
+                                        "activityConfig.toolLabels.searchActivities"
+                                      );
                                     case "createActivityValidation":
-                                      return `Activité programmée : ${
-                                        toolCall.args?.activityName || "..."
-                                      }`;
+                                      return t(
+                                        "activityConfig.toolLabels.activityScheduled",
+                                        {
+                                          activityName:
+                                            toolCall.args?.activityName ||
+                                            "...",
+                                        }
+                                      );
                                     default:
-                                      return "Recherche en cours...";
+                                      return t(
+                                        "activityConfig.toolLabels.searching"
+                                      );
                                   }
                                 };
 
@@ -625,7 +640,7 @@ ${dayTypeEmoji} **${dayTypeLabel}** près du ${activityContext.festivalName}
                                 <Text
                                   style={validationStyles.validationButtonText}
                                 >
-                                  🎭 Programmer cette activité
+                                  {t("activityConfig.validationButton.text")}
                                 </Text>
                                 <Text
                                   style={
@@ -709,7 +724,7 @@ ${dayTypeEmoji} **${dayTypeLabel}** près du ${activityContext.festivalName}
                 style={styles.textInput}
                 value={input}
                 onChangeText={setInput}
-                placeholder="Message..."
+                placeholder={t("common.message")}
                 placeholderTextColor={FestiFunColors.textOnDark + "60"}
                 multiline
                 maxLength={500}
