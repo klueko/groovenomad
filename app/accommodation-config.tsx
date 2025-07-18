@@ -369,11 +369,13 @@ Dis-moi quel type de logement tu recherches !`,
             >
               <ArrowLeft size={24} color={FestiFunColors.background} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Trouver un logement</Text>
+            <Text style={styles.headerTitle}>
+              {t("accommodationConfig.title")}
+            </Text>
             <View style={styles.headerSpacer} />
           </View>
           <Text style={styles.headerSubtitle}>
-            Converser pour sélectionner l'hébergement qui vous convient
+            {t("accommodationConfig.subtitle")}
           </Text>
         </LinearGradient>
 
@@ -425,15 +427,19 @@ Dis-moi quel type de logement tu recherches !`,
                                 const getToolLabel = () => {
                                   switch (toolCall.toolName) {
                                     case "searchHotels":
-                                      return `Recherche d'hôtels : ${
-                                        toolCall.args?.cityCode || "..."
-                                      }`;
+                                      return `${t(
+                                        "accommodationConfig.toolCalls.searchHotels"
+                                      )} : ${toolCall.args?.cityCode || "..."}`;
                                     case "createAccommodationValidation":
-                                      return `Logement sélectionné : ${
+                                      return `${t(
+                                        "accommodationConfig.toolCalls.validation"
+                                      )} : ${
                                         toolCall.args?.hotelName || "..."
                                       }`;
                                     default:
-                                      return "Recherche en cours...";
+                                      return t(
+                                        "accommodationConfig.toolCalls.searching"
+                                      );
                                   }
                                 };
 

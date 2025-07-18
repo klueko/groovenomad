@@ -324,6 +324,15 @@
       "searching": "Searching..."
     }
   },
+  "accommodationConfig": {
+    "title": "Find accommodation",
+    "subtitle": "Chat to select the accommodation that suits you",
+    "toolCalls": {
+      "searchHotels": "Hotel search",
+      "validation": "Accommodation selected",
+      "searching": "Searching..."
+    }
+  },
   "alerts": {
     "compris": "Got it",
     "modifier": "Edit",

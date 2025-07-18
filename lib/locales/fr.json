@@ -324,6 +324,15 @@
       "searching": "Recherche en cours..."
     }
   },
+  "accommodationConfig": {
+    "title": "Trouver un logement",
+    "subtitle": "Converser pour sélectionner l'hébergement qui vous convient",
+    "toolCalls": {
+      "searchHotels": "Recherche d'hôtels",
+      "validation": "Logement sélectionné",
+      "searching": "Recherche en cours..."
+    }
+  },
   "alerts": {
     "compris": "Compris",
     "modifier": "Modifier",

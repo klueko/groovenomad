@@ -13,6 +13,8 @@
 - ✅ **Mes Billets** (`app/mes-billets.tsx`) - Gestion des billets
 - ✅ **Festival Detail** (`app/festival-detail.tsx`) - Détails d'un festival
 - ✅ **Trip Planning** (`app/trip-planning.tsx`) - Planification de voyage
+- ✅ **Travel Config** (`app/travel-config.tsx`) - Configuration des voyages
+- ✅ **Accommodation Config** (`app/accommodation-config.tsx`) - Configuration des logements
 
 ### **Composants Traduits**
 
@@ -38,8 +40,6 @@
 ### **Écrans de Planification**
 
 - 🔄 `app/event-booking.tsx` - Réservation d'événement
-- 🔄 `app/travel-config.tsx` - Configuration voyage
-- 🔄 `app/accommodation-config.tsx` - Configuration logement
 - 🔄 `app/activity-config.tsx` - Configuration activités
 
 ### **Composants à Traduire**
@@ -91,15 +91,15 @@
 
 ## 📈 Statistiques
 
-- **Écrans traduits** : 9/15 (60%)
+- **Écrans traduits** : 11/15 (73%)
 - **Composants traduits** : 4/6 (67%)
-- **Total traduit** : 13/21 (62%)
+- **Total traduit** : 15/21 (71%)
 
 ## 🎯 Prochaines Étapes
 
 ### **Priorité Haute**
 
-1. **Écrans de configuration** (travel-config, accommodation-config, activity-config)
+1. **Écrans de configuration restants** (activity-config, event-booking)
 2. **Préférences musicales** (music-preferences, music-preferences-selection)
 3. **Composants restants** (BottomNavigation, Avatar, FriendsList)
 
