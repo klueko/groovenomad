@@ -1,0 +1,423 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Reintentar",
+    "date": "Fecha",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "previous": "Anterior",
+    "close": "Cerrar",
+    "add": "Añadir",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "apply": "Aplicar",
+    "clear": "Limpiar",
+    "ok": "OK",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "tickets": "Mis entradas",
+    "festivals": "Festivales",
+    "planning": "Planificación",
+    "activities": "Actividades",
+    "accommodation": "Alojamiento",
+    "travel": "Viaje"
+  },
+  "home": {
+    "title": "🎪 FestiFun",
+    "searchPlaceholder": "Buscar festivales...",
+    "locationText": "📍 Ubicación",
+    "locationSubtext": "Toca para cambiar",
+    "changeLocation": "Cambiar ubicación",
+    "getCurrentLocation": "📍 Usar mi ubicación",
+    "city": "Ciudad",
+    "country": "País",
+    "popularSection": {
+      "title": "Populares",
+      "subtitle": "Los festivales más populares"
+    },
+    "artistsSection": {
+      "title": "Tus artistas",
+      "subtitle": "Basado en tus preferencias de Spotify"
+    },
+    "personalizedSection": {
+      "title": "Para ti",
+      "subtitle": "Recomendaciones personalizadas"
+    },
+    "localSection": {
+      "title": "Cerca de ti",
+      "subtitle": "Descubre festivales en tu región"
+    },
+    "loadingTitle": "🎪 Buscando festivales...",
+    "loadingSubtitle": "Analizando tus preferencias musicales",
+    "allGenres": "Todos"
+  },
+  "festival": {
+    "card": {
+      "distance": "{{distance}} km",
+      "artists": "Artistas",
+      "genres": "Géneros"
+    },
+    "detail": {
+      "title": "Detalles del festival",
+      "description": "Descripción",
+      "date": "Fecha",
+      "location": "Ubicación",
+      "price": "Precio",
+      "artists": "Artistas",
+      "genres": "Géneros",
+      "tickets": "Ver entradas",
+      "book": "Reservar"
+    },
+    "recommendations": {
+      "title": "Festivales para ti",
+      "matchScore": "{{score}}% de compatibilidad",
+      "genresLabel": "Géneros:",
+      "reasonsLabel": "Por qué este festival:",
+      "priceText": "Precio estimado: {{price}}",
+      "filtersTitle": "🔍 Filtros avanzados",
+      "filtersInfo": "Refina tus recomendaciones",
+      "filtersSubInfo": "Más filtros = resultados más precisos",
+      "geographicLabel": "Zona geográfica preferida:",
+      "seasonalTitle": "🌤️ Bono Estacional Activo",
+      "seasonalText": "Los festivales de verano son favorecidos",
+      "resultsLabel": "Número de resultados:",
+      "applyFilters": "🔍 Aplicar filtros",
+      "loginRequired": "Inicia sesión para ver tus recomendaciones personalizadas",
+      "loginButton": "Iniciar sesión"
+    }
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "register": "Registrarse gratis",
+    "logout": "Cerrar sesión",
+    "email": "Email",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "spotifyLogin": "Continuar con Spotify",
+    "welcome": "BIENVENIDO\nA FESTIFUN",
+    "description": "La agencia de viajes que te ayuda a organizar tus viajes a festivales al mejor precio.",
+    "createAccount": "Crear cuenta",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "or": "O",
+    "fillFields": "Por favor completa todos los campos",
+    "loginError": "Error de inicio de sesión",
+    "name": "Nombre",
+    "registering": "Registrando...",
+    "registerError": "Error de registro",
+    "spotifyRegister": "Registrarse con Spotify"
+  },
+  "profile": {
+    "title": "Perfil musical",
+    "username": "Nombre de usuario",
+    "displayName": "Nombre de pantalla",
+    "defaultUser": "Usuario",
+    "defaultUsername": "@usuario",
+    "loading": "Cargando perfil...",
+    "stats": {
+      "followers": "Seguidores",
+      "following": "Siguiendo",
+      "trips": "Viajes"
+    },
+    "artistsSection": {
+      "title": "Tus {{count}} artistas favoritos",
+      "emptyTitle": "Nunca te pierdas los conciertos\nde tus artistas",
+      "subtitle": "Basado en tus gustos de Spotify",
+      "emptySubtitle": "Sincroniza tus artistas, recibe\nnotificaciones",
+      "editButton": "Editar mis artistas",
+      "importButton": "Importar mis artistas"
+    },
+    "spotifySection": {
+      "title": "Perfil de Spotify",
+      "subtitle": "Tus preferencias musicales"
+    },
+    "teamSection": {
+      "title": "El equipo es Toka",
+      "subtitle": "Añade a tus amigos para ver dónde van,\ncomparar tus puntuaciones y más"
+    },
+    "addFriends": "Añadir amigos"
+  },
+  "tickets": {
+    "title": "Mis entradas",
+    "status": {
+      "pending": "Pendiente",
+      "confirmed": "Confirmado",
+      "cancelled": "Cancelado"
+    },
+    "date": "Fecha",
+    "destination": "Destino",
+    "quoteReady": {
+      "title": "¡Presupuesto listo!",
+      "subtitle": "Tu presupuesto personalizado está disponible"
+    },
+    "viewQuote": "Ver mi presupuesto",
+    "emptyState": {
+      "title": "Aún no hay entradas",
+      "subtitle": "¡Comienza explorando festivales!"
+    }
+  },
+  "planning": {
+    "title": "Planificación de viaje",
+    "festivalTitle": "Festival",
+    "subtitle": "Añade los diferentes pasos de tu estancia antes de reservar",
+    "transport": {
+      "outbound": "Viaje de ida",
+      "return": "Viaje de vuelta",
+      "addTransport": "Añadir transporte",
+      "validated": "✓ Validado",
+      "details": "Detalles del transporte"
+    },
+    "accommodation": {
+      "title": "Alojamiento",
+      "addAccommodation": "Añadir alojamiento",
+      "validated": "✓ Reservado",
+      "details": "Detalles del alojamiento",
+      "stars": "estrellas",
+      "price": "Precio por noche",
+      "amenities": "Servicios"
+    },
+    "activities": {
+      "title": "Actividades",
+      "addActivity": "Añadir actividad",
+      "customActivity": "Actividad personalizada",
+      "pedroActivity": "Actividad Pedro",
+      "time": "Hora"
+    },
+    "day": {
+      "title": "Día {{day}}",
+      "fullDay": "Día completo ({{max}} actividades máx + festival)"
+    },
+    "bookButton": {
+      "sending": "Enviando...",
+      "requestQuote": "Solicitar presupuesto",
+      "incomplete": "Reserva incompleta"
+    }
+  },
+  "activities": {
+    "title": "Descubrir actividades",
+    "subtitle": "Encuentra actividades cerca del festival",
+    "toolCall": {
+      "icon": "🤖",
+      "label": "Pedro está buscando actividades..."
+    },
+    "loading": "Buscando actividades...",
+    "inputPlaceholder": "Describe lo que buscas...",
+    "transportLabel": "Transporte",
+    "userMessage": "{{message}}"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "notifications": "Notificaciones",
+    "sound": "Sonido",
+    "account": "Cuenta",
+    "editProfile": "Editar perfil",
+    "privacy": "Privacidad",
+    "about": "Acerca de",
+    "help": "Ayuda",
+    "feedback": "Comentarios"
+  },
+  "dateRange": {
+    "title": "Seleccionar período",
+    "subtitle": "Filtrar por período",
+    "options": {
+      "all": "Todas las fechas",
+      "thisWeek": "Esta semana",
+      "thisMonth": "Este mes",
+      "nextMonth": "Próximo mes",
+      "next3Months": "Próximos 3 meses",
+      "next6Months": "Próximos 6 meses",
+      "nextYear": "Próximo año",
+      "custom": "Período personalizado",
+      "recommended": "Recomendado para ver todos los eventos"
+    }
+  },
+  "errors": {
+    "network": "Error de conexión",
+    "permission": "Permiso denegado",
+    "location": "No se pudo obtener tu ubicación",
+    "spotify": "Error de Spotify",
+    "festival": "Error al cargar festivales",
+    "booking": "Error al reservar",
+    "activity": "Error al buscar actividades"
+  },
+  "onboarding": {
+    "skip": "Saltar",
+    "subtitle": "Tu compañero para descubrir festivales perfectos",
+    "activateNotifications": "Activar notificaciones",
+    "viewProfile": "Ver mi perfil",
+    "steps": {
+      "spotify": {
+        "title": "Conecta tu Spotify",
+        "description": "Analizamos tus gustos musicales para sugerirte festivales perfectos"
+      },
+      "profile": {
+        "title": "Descubre tu perfil",
+        "description": "Visualiza tus artistas y géneros favoritos analizados inteligentemente"
+      },
+      "festivals": {
+        "title": "Encuentra tus festivales",
+        "description": "Nuestros algoritmos recomiendan eventos basados en tus gustos"
+      },
+      "notifications": {
+        "title": "¿NO QUIERES PERDERTE\nTU FESTIVAL FAVORITO?",
+        "description": "Para no perderte ningún festival y siempre estar al tanto de nuevos eventos."
+      }
+    }
+  },
+  "tickets": {
+    "title": "Mis entradas",
+    "tabs": {
+      "upcoming": "Próximos",
+      "past": "Pasados"
+    },
+    "emptyState": {
+      "upcoming": "No hay reservas próximas",
+      "past": "No hay reservas pasadas",
+      "subtitle": "Tus reservas aparecerán aquí"
+    },
+    "quoteReady": {
+      "title": "🎉 ¡Tu presupuesto está listo!",
+      "subtitle": "Consulta tu presupuesto personalizado para este viaje"
+    },
+    "viewQuote": "Ver mi presupuesto",
+    "loading": "Cargando tus reservas..."
+  },
+  "festivalDetail": {
+    "friends": {
+      "title": "Encuentra a tus amigos",
+      "count": "+ 3 personas",
+      "total": " y 10,905 personas"
+    },
+    "about": "Acerca de",
+    "lineup": "Lineup",
+    "genres": "Géneros",
+    "reviews": "Reseñas",
+    "bookStay": "Reservar mi estancia"
+  },
+  "festivalCard": {
+    "defaultGenre": "Festival",
+    "distance": {
+      "lessThan1km": "< 1 km",
+      "km": "km"
+    }
+  },
+  "travelConfig": {
+    "title": "Configurar un viaje",
+    "subtitle": "Conversa para seleccionar el paso que te conviene",
+    "inputPlaceholder": "Mensaje...",
+    "transport": "transporte",
+    "toolCalls": {
+      "searchAirports": "Búsqueda de aeropuertos",
+      "searchFlights": "Búsqueda de vuelos",
+      "searchTrains": "Búsqueda de trenes",
+      "searchBuses": "Búsqueda de autobuses",
+      "validation": "Opción de",
+      "searching": "Buscando..."
+    }
+  },
+  "accommodationConfig": {
+    "title": "Encontrar alojamiento",
+    "subtitle": "Conversa para seleccionar el alojamiento que te conviene",
+    "toolCalls": {
+      "searchHotels": "Búsqueda de hoteles",
+      "validation": "Alojamiento seleccionado",
+      "searching": "Buscando..."
+    }
+  },
+  "activityConfig": {
+    "header": {
+      "title": "Descubrir actividades",
+      "subtitle": "Conversa para seleccionar las actividades que te interesan"
+    },
+    "activityTypes": {
+      "culture": {
+        "label": "🎭 Cultura",
+        "description": "Museos, teatros, monumentos"
+      },
+      "nature": {
+        "label": "🌳 Naturaleza",
+        "description": "Parques, jardines, senderismo"
+      },
+      "gastronomy": {
+        "label": "🍽️ Gastronomía",
+        "description": "Restaurantes, mercados locales"
+      }
+    },
+    "searchMessage": "Busco actividades {{activityType}}",
+    "toolLabels": {
+      "searchActivities": "Buscando actividades cerca del festival",
+      "activityScheduled": "Actividad programada: {{activityName}}",
+      "searching": "Buscando..."
+    },
+    "validationButton": {
+      "text": "🎭 Programar esta actividad"
+    },
+    "validationSuccess": {
+      "title": "🎭 ¡Excelente elección!",
+      "message": "¡Tu actividad {{activityName}} está programada!\n\n📅 {{scheduledDate}}\n⏰ {{scheduledTime}}\n💰 {{price}}\n📍 {{distance}}km del festival\n\n¡Ahora organicemos tu viaje!"
+    }
+  },
+  "eventBooking": {
+    "title": "Reservar tu estancia",
+    "departurePointTitle": "Punto de partida",
+    "departurePointDefault": "Hacer clic para elegir",
+    "departureSearchTitle": "Elegir punto de partida",
+    "departureSearchPlaceholder": "Buscar una dirección...",
+    "locationGetting": "Obteniendo ubicación...",
+    "useCurrentLocation": "Usar mi ubicación actual",
+    "searchLoading": "Buscando...",
+    "personCountTitle": "Número de personas",
+    "festivalDatesTitle": "Fechas del festival",
+    "festivalDatesText": "Del {{startDate}} al {{endDate}}",
+    "arrivalDateTitle": "Fecha de llegada",
+    "departureDateTitle": "Fecha de salida",
+    "summaryTitle": "Resumen de tu estancia",
+    "stayDuration": "Duración: {{nights}} noche{{nightsPlural}} y {{days}} días",
+    "departurePointSummary": "Punto de partida: {{departurePoint}}",
+    "personCountSummary": "Número de personas: {{personCount}}",
+    "arrivalDateSummary": "Del {{arrivalDate}} al {{departureDate}}",
+    "arrivalTime": "Hora de llegada deseada el {{arrivalDate}}",
+    "arrivalTimePlaceholder": "Hora de llegada",
+    "bookButton": "Planificar mi estancia ({{nights}} noche{{nightsPlural}})",
+    "permissionDenied": {
+      "title": "Permiso denegado",
+      "message": "Se requiere permiso de ubicación para esta función."
+    },
+    "locationFound": {
+      "title": "Ubicación encontrada",
+      "message": "Tu ubicación: {{addressName}}"
+    },
+    "locationError": {
+      "title": "Error",
+      "message": "No se pudo obtener tu ubicación: {{error}}"
+    },
+    "invalidDate": {
+      "title": "Fecha inválida",
+      "message": "La fecha de salida debe ser después de la fecha de llegada"
+    },
+    "missingInfo": {
+      "title": "Información faltante",
+      "message": "Por favor selecciona fecha de llegada, fecha de salida y hora"
+    },
+    "festivalDataError": "Error: Datos del festival no encontrados"
+  },
+  "alerts": {
+    "compris": "Entendido",
+    "modifier": "Editar",
+    "demanderDevis": "Solicitar presupuesto",
+    "parfait": "Perfecto"
+  }
+}

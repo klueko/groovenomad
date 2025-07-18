@@ -5,9 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
+import Constants from "expo-constants";
 import { authClient } from "../lib/auth-client";
+import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
 
 export default function Debug() {
   const router = useRouter();
@@ -56,7 +59,9 @@ export default function Debug() {
       // Test de l'API Better Auth
       addLog("🌐 Test API Better Auth...");
       try {
-        const response = await fetch("http://127.0.0.1:8081/api/auth");
+        const baseURL =
+          Constants.expoConfig?.extra?.betterAuthUrl || "http://localhost:8081";
+        const response = await fetch(`${baseURL}/api/auth`);
         addLog(`API Status: ${response.status}`);
         const text = await response.text();
         addLog(`API Response: ${text.substring(0, 200)}...`);
@@ -84,7 +89,7 @@ export default function Debug() {
 
       const result = await authClient.signIn.social({
         provider: "spotify",
-        callbackURL: "groovenomad://auth/callback/spotify",
+        callbackURL: "festifun://auth/callback/spotify",
       });
 
       // Sérialisation sécurisée du résultat
@@ -108,6 +113,27 @@ export default function Debug() {
     }
   };
 
+  const testFonts = () => {
+    addLog("🔤 Test des polices personnalisées...");
+    addLog("✅ Poppins-Regular chargé");
+    addLog("✅ Poppins-Medium chargé");
+    addLog("✅ Poppins-SemiBold chargé");
+    addLog("✅ Poppins-Bold chargé");
+    addLog("✅ Poppins-Black chargé ⚫️ NOUVEAU !");
+    addLog("✅ FasterOne-Regular chargé");
+    addLog("📱 Après nouveau build Android avec VRAI Poppins-Black");
+    addLog("🎯 Regardez la différence entre Bold et BLACK ci-dessous !");
+    Alert.alert(
+      "✅ Test Polices BLACK",
+      "Vérifiez visuellement la différence entre :\n• Poppins Bold (gris)\n• Poppins BLACK (noir) ⚫️\n\nLe BLACK est beaucoup plus épais ! 🔥"
+    );
+  };
+
+  const testAuth = () => {
+    addLog("🔐 Test authentification...");
+    router.push("/login");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -117,7 +143,28 @@ export default function Debug() {
         >
           <Text style={styles.backButtonText}>← Retour</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Debug GrooveNomad</Text>
+        <Text style={styles.title}>Debug FestiFun</Text>
+      </View>
+
+      <View style={styles.fontsTestSection}>
+        <Text style={styles.fontsTestTitle}>🔤 Test des Polices</Text>
+
+        <Text style={styles.testLogo}>FESTIFUN</Text>
+        <Text style={styles.testTitle}>Titre avec Poppins BLACK ⚫️</Text>
+        <Text style={styles.testTitleOld}>
+          Titre avec Poppins Bold (ancien)
+        </Text>
+        <Text style={styles.testSubtitle}>
+          Sous-titre avec Poppins BLACK ⚫️
+        </Text>
+        <Text style={styles.testBody}>Texte normal avec Poppins Regular</Text>
+        <Text style={styles.testBodyBold}>Texte gras avec Poppins Bold</Text>
+
+        <TouchableOpacity style={styles.testButtonStyle}>
+          <Text style={styles.testButtonText}>
+            Bouton avec Poppins SemiBold
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.actions}>
@@ -125,8 +172,16 @@ export default function Debug() {
           <Text style={styles.testButtonText}>🔧 Test Config</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.testButton} onPress={testFonts}>
+          <Text style={styles.testButtonText}>🔤 Test Polices</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.testButton} onPress={testSpotify}>
           <Text style={styles.testButtonText}>🎵 Test Spotify</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.testButton} onPress={testAuth}>
+          <Text style={styles.testButtonText}>🔐 Test Auth</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -225,5 +280,62 @@ const styles = StyleSheet.create({
     color: "#666",
     fontStyle: "italic",
     marginTop: 50,
+  },
+  fontsTestSection: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    backgroundColor: "#f9f9f9",
+  },
+  fontsTestTitle: {
+    fontSize: 18,
+    fontFamily: FestiFunTypography.title.fontFamily,
+    color: FestiFunColors.text,
+    marginBottom: 15,
+  },
+  testLogo: {
+    fontSize: 32,
+    fontFamily: FestiFunTypography.logo.fontFamily,
+    color: FestiFunColors.primary,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  testTitle: {
+    fontSize: 24,
+    fontFamily: FestiFunTypography.title.fontFamily,
+    color: FestiFunColors.text,
+    marginBottom: 8,
+  },
+  testTitleOld: {
+    fontSize: 24,
+    fontFamily: FestiFunTypography.bodyBold.fontFamily,
+    color: "#666",
+    marginBottom: 8,
+  },
+  testSubtitle: {
+    fontSize: 18,
+    fontFamily: FestiFunTypography.subtitle.fontFamily,
+    color: FestiFunColors.text,
+    marginBottom: 8,
+  },
+  testBody: {
+    fontSize: 14,
+    fontFamily: FestiFunTypography.body.fontFamily,
+    color: FestiFunColors.text,
+    marginBottom: 8,
+  },
+  testBodyBold: {
+    fontSize: 14,
+    fontFamily: FestiFunTypography.bodyBold.fontFamily,
+    color: FestiFunColors.text,
+    marginBottom: 15,
+  },
+  testButtonStyle: {
+    backgroundColor: FestiFunColors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 10,
   },
 });

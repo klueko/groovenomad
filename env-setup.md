@@ -23,6 +23,16 @@ BETTER_AUTH_URL=http://localhost:8081/api/auth
 
 # Configuration Base de données
 DATABASE_URL=postgresql://postgres.zjkmcqmovbovuafwygbh:ton_mot_de_passe_db@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
+
+# Configuration APIs externes
+TICKETMASTER_API_KEY=ton_api_key_ticketmaster_ici
+TICKETMASTER_SECRET=ton_secret_ticketmaster_ici
+GROQ_API_KEY=ton_api_key_groq_ici
+AMADEUS_CLIENT_ID=ton_client_id_amadeus_ici
+AMADEUS_CLIENT_SECRET=ton_secret_amadeus_ici
+OPENTRIPMAP_API_KEY=ton_api_key_opentripmap_ici
+MAPBOX_API_KEY=ton_api_key_mapbox_ici
+EXPO_PUBLIC_MAPBOX_API_KEY=ton_api_key_mapbox_ici
 ```
 
 ## 🎯 Points importants :
@@ -46,4 +56,90 @@ DATABASE_URL=postgresql://postgres.zjkmcqmovbovuafwygbh:ton_mot_de_passe_db@aws-
 ```bash
 # Dans ton terminal
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+## 🗺️ Obtenir la clé OpenTripMap (pour Pedro Activités) :
+
+1. Va sur https://opentripmap.io/docs
+2. Clique sur "Get API Key" et crée un compte gratuit
+3. Confirme ton email et connecte-toi
+4. Va dans ton profil pour récupérer ta clé API
+5. Copie la clé dans `OPENTRIPMAP_API_KEY=ta_cle_ici`
+
+**Note :** OpenTripMap est gratuit sans limite stricte, parfait pour les activités touristiques !
+
+---
+
+## 🔤 **GUIDE DE DÉBOGAGE DES POLICES**
+
+### **Problème résolu : Polices personnalisées**
+
+✅ **Solution implementée :**
+
+- Suppression des conflits `fontWeight` avec polices TTF intégrées
+- Nouveau système `FestiFunTypography` pour éviter les erreurs
+- Configuration Android améliorée
+- Cache Metro nettoyé automatiquement
+
+### **Comment vérifier que ça fonctionne :**
+
+1. **Via l'écran de debug :**
+
+   ```bash
+   # Dans l'app, navigue vers /debug
+   # Tu verras différents styles de polices testés
+   ```
+
+2. **Commandes de nettoyage (si problème persiste) :**
+
+   ```bash
+   # Nettoyer complètement le cache
+   cd groovenomad
+   npx expo start --clear
+
+   # Si ça ne marche toujours pas
+   pnpm start --reset-cache
+
+   # Redémarrer Expo Go complètement
+   # (fermer l'app et la relancer)
+   ```
+
+3. **Vérification des fichiers de polices :**
+   ```bash
+   ls -la assets/fonts/
+   # Tu dois voir :
+   # FasterOne-Regular.ttf
+   # Poppins-Regular.ttf
+   # Poppins-Medium.ttf
+   # Poppins-SemiBold.ttf
+   # Poppins-Bold.ttf
+   ```
+
+### **⚠️ Limitations Expo Go :**
+
+- Expo Go peut avoir des limitations avec les polices
+- Si le problème persiste, essaie avec `npx expo run:android`
+- Pour production, un development build sera nécessaire
+
+### **✅ Nouvelles bonnes pratiques :**
+
+```typescript
+// ❌ AVANT (causait le bug)
+style={{
+  fontFamily: "Poppins-Bold",
+  fontWeight: "700" // ❌ Conflit !
+}}
+
+// ✅ MAINTENANT (corrigé)
+style={{
+  fontFamily: FestiFunTypography.bodyBold.fontFamily // ✅ Pas de fontWeight
+}}
+```
+
+### **📱 Test sur Android :**
+
+```bash
+# Si les polices ne s'affichent toujours pas sur Android
+npx expo run:android --device
+# Cela crée un development build avec les polices intégrées
 ```
