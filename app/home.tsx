@@ -37,7 +37,7 @@ const { width, height } = Dimensions.get("window");
 
 // Constantes pour le cache
 const CACHE_KEY_PREFIX = "festival_cache_";
-const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 heures en millisecondes
+const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 heures en millisecondes (augmenté)
 
 interface UserLocation {
   city: string;
@@ -324,14 +324,53 @@ export default function HomeScreen() {
       const recommendations = await festivalMatcher.findMatchingFestivals(
         storedPreferences,
         {
-          maxResults: 50, // Augmenté pour avoir plus de choix
-          minMatchScore: 0.1,
+          maxResults: 100, // Augmenté significativement pour avoir plus de choix
+          minMatchScore: 0.05, // Score minimum plus bas pour inclure plus de festivals
           includePopularityBoost: true,
+          location: {
+            countryCode: userLocation?.countryCode || "FR",
+            city: userLocation?.city,
+            radius: 500, // Rayon de recherche plus large (500km)
+          },
         }
       );
 
+      // Recherche supplémentaire pour les festivals populaires sans filtres stricts
+      const additionalRecommendations =
+        await festivalMatcher.searchFestivalsByGenre(
+          storedPreferences.selectedGenres.map((g) => g.name),
+          {
+            maxResults: 30,
+            minMatchScore: 0.1,
+            location: {
+              countryCode: userLocation?.countryCode || "FR",
+              radius: 300,
+            },
+          }
+        );
+
+      // Recherche par localisation pour découvrir des festivals locaux
+      const localFestivals = await festivalMatcher.searchFestivalsInLocation(
+        {
+          countryCode: userLocation?.countryCode || "FR",
+          city: userLocation?.city,
+          radius: 200,
+        },
+        {
+          maxResults: 20,
+          minMatchScore: 0.05,
+        }
+      );
+
+      // Combiner les résultats avec priorité sur les recommandations personnalisées
+      const allRecommendations = [
+        ...recommendations, // Recommandations personnalisées (priorité haute)
+        ...localFestivals, // Festivals locaux (priorité moyenne)
+        ...additionalRecommendations, // Festivals par genre (priorité basse)
+      ];
+
       // Trier et dédupliquer les festivals
-      const uniqueFestivals = recommendations.reduce(
+      const uniqueFestivals = allRecommendations.reduce(
         (acc: FestivalMatch[], current) => {
           const existingIndex = acc.findIndex(
             (fest) =>
@@ -389,6 +428,16 @@ export default function HomeScreen() {
       );
 
       console.log("✅ [API] Données chargées et sauvegardées en cache");
+      console.log(
+        `📊 [Stats] ${uniqueFestivals.length} festivals trouvés au total`
+      );
+      console.log(
+        `🎯 [Stats] ${recommendations.length} recommandations personnalisées`
+      );
+      console.log(`🌍 [Stats] ${localFestivals.length} festivals locaux`);
+      console.log(
+        `🎵 [Stats] ${additionalRecommendations.length} festivals par genre`
+      );
     } catch (error) {
       console.error("❌ Erreur chargement données home:", error);
     } finally {
@@ -425,12 +474,12 @@ export default function HomeScreen() {
     return genreMatch && dateMatch;
   });
 
-  // Séparation intelligente des festivals
+  // Séparation intelligente des festivals avec plus de variété
   const getPopularFestivals = () => {
     // Populaires = festivals avec haute popularité estimée (top général)
     return filteredFestivals
-      .filter((f) => f.estimatedPopularity > 0.7)
-      .slice(0, 6);
+      .filter((f) => f.estimatedPopularity > 0.6) // Seuil plus bas pour plus de festivals
+      .slice(0, 8); // Plus de festivals populaires
   };
 
   const getPersonalizedFestivals = () => {
@@ -438,8 +487,30 @@ export default function HomeScreen() {
     const popularIds = new Set(getPopularFestivals().map((f) => f.id));
     return filteredFestivals
       .filter((f) => !popularIds.has(f.id)) // Exclure les populaires
-      .filter((f) => f.matchScore > 0.3) // Score de match personnel correct
-      .slice(0, 8);
+      .filter((f) => f.matchScore > 0.2) // Score de match personnel plus bas pour plus de variété
+      .slice(0, 12); // Plus de festivals personnalisés
+  };
+
+  const getLocalFestivals = () => {
+    // Festivals locaux = festivals proches de l'utilisateur
+    const popularIds = new Set(getPopularFestivals().map((f) => f.id));
+    const personalizedIds = new Set(
+      getPersonalizedFestivals().map((f) => f.id)
+    );
+
+    return filteredFestivals
+      .filter((f) => !popularIds.has(f.id) && !personalizedIds.has(f.id))
+      .filter((f) => {
+        // Prioriser les festivals proches géographiquement
+        const userCity = userLocation?.city?.toLowerCase();
+        const festivalCity = f.location.city.toLowerCase();
+        return (
+          (userCity && festivalCity.includes(userCity)) ||
+          f.location.country.toLowerCase() ===
+            (userLocation?.country?.toLowerCase() || "france")
+        );
+      })
+      .slice(0, 6);
   };
 
   const handleLocationChange = async () => {
@@ -521,6 +592,7 @@ export default function HomeScreen() {
 
   const popularFestivals = getPopularFestivals();
   const personalizedFestivals = getPersonalizedFestivals();
+  const localFestivals = getLocalFestivals();
 
   return (
     <View style={styles.container}>
@@ -634,6 +706,42 @@ export default function HomeScreen() {
               contentContainerStyle={styles.artistsScrollContent}
             >
               {userArtists.map(renderArtistAvatar)}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Section Festivals locaux - Découvertes près de chez vous */}
+        {localFestivals.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {t("home.localSection.title") || "Près de chez vous"}
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              {t("home.localSection.subtitle") ||
+                "Découvrez les festivals de votre région"}
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.festivalsScrollContent}
+            >
+              {localFestivals.map((festival) => (
+                <FestivalCard
+                  key={festival.id}
+                  festival={festival}
+                  userLocation={userLocation}
+                  onPress={() =>
+                    router.push(
+                      `/festival-detail?data=${encodeURIComponent(
+                        JSON.stringify(festival)
+                      )}`
+                    )
+                  }
+                  onLikePress={() =>
+                    console.log("Like pressed:", festival.name)
+                  }
+                />
+              ))}
             </ScrollView>
           </View>
         )}

@@ -167,7 +167,7 @@
   "planning": {
     "title": "Planification de voyage",
     "festivalTitle": "Festival",
-    "subtitle": "Organisez votre voyage",
+    "subtitle": "Ajoutez les différentes étapes de votre séjour avant de réserver",
     "transport": {
       "outbound": "Trajet aller",
       "return": "Trajet retour",
@@ -193,9 +193,13 @@
     },
     "day": {
       "title": "Jour {{day}}",
-      "fullDay": "Journée complète"
+      "fullDay": "Journée complète ({{max}} activités max + festival)"
     },
-    "bookButton": "🎫 Réserver ce voyage"
+    "bookButton": {
+      "sending": "Envoi en cours...",
+      "requestQuote": "Demander un devis",
+      "incomplete": "Réservation incomplète"
+    }
   },
   "activities": {
     "title": "Découvrir des activités",
@@ -232,7 +236,8 @@
       "next3Months": "3 prochains mois",
       "next6Months": "6 prochains mois",
       "nextYear": "Prochaine année",
-      "custom": "Période personnalisée"
+      "custom": "Période personnalisée",
+      "recommended": "Recommandé pour voir tous les événements"
     }
   },
   "errors": {
@@ -297,6 +302,13 @@
     "genres": "Genre",
     "reviews": "Avis",
     "bookStay": "Réserver mon séjour"
+  },
+  "festivalCard": {
+    "defaultGenre": "Festival",
+    "distance": {
+      "lessThan1km": "< 1 km",
+      "km": "km"
+    }
   },
   "alerts": {
     "compris": "Compris",

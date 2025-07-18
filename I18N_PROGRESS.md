@@ -12,11 +12,14 @@
 - ✅ **Onboarding** (`app/onboarding.tsx`) - Introduction à l'application
 - ✅ **Mes Billets** (`app/mes-billets.tsx`) - Gestion des billets
 - ✅ **Festival Detail** (`app/festival-detail.tsx`) - Détails d'un festival
+- ✅ **Trip Planning** (`app/trip-planning.tsx`) - Planification de voyage
 
 ### **Composants Traduits**
 
 - ✅ **LanguageSelector** (`components/LanguageSelector.tsx`) - Sélecteur de langue
 - ✅ **Festival Recommendations** (`app/festival-recommendations.tsx`) - Recommandations
+- ✅ **FestivalCard** (`components/FestivalCard.tsx`) - Carte de festival
+- ✅ **DateRangePicker** (`components/DateRangePicker.tsx`) - Sélecteur de dates
 
 ## 🔄 Écrans à Traduire
 
@@ -34,7 +37,6 @@
 
 ### **Écrans de Planification**
 
-- 🔄 `app/trip-planning.tsx` - Planification de voyage
 - 🔄 `app/event-booking.tsx` - Réservation d'événement
 - 🔄 `app/travel-config.tsx` - Configuration voyage
 - 🔄 `app/accommodation-config.tsx` - Configuration logement
@@ -42,8 +44,6 @@
 
 ### **Composants à Traduire**
 
-- 🔄 `components/FestivalCard.tsx` - Carte de festival
-- 🔄 `components/DateRangePicker.tsx` - Sélecteur de dates
 - 🔄 `components/BottomNavigation.tsx` - Navigation inférieure
 - 🔄 `components/Avatar.tsx` - Avatar utilisateur
 - 🔄 `components/FriendsList.tsx` - Liste d'amis
@@ -91,17 +91,17 @@
 
 ## 📈 Statistiques
 
-- **Écrans traduits** : 8/15 (53%)
-- **Composants traduits** : 2/6 (33%)
-- **Total traduit** : 10/21 (48%)
+- **Écrans traduits** : 9/15 (60%)
+- **Composants traduits** : 4/6 (67%)
+- **Total traduit** : 13/21 (62%)
 
 ## 🎯 Prochaines Étapes
 
 ### **Priorité Haute**
 
-1. **Composants réutilisables** (FestivalCard, DateRangePicker, BottomNavigation)
-2. **Planification** (trip-planning, activity-config)
-3. **Préférences musicales** (music-preferences, music-preferences-selection)
+1. **Écrans de configuration** (travel-config, accommodation-config, activity-config)
+2. **Préférences musicales** (music-preferences, music-preferences-selection)
+3. **Composants restants** (BottomNavigation, Avatar, FriendsList)
 
 ### **Priorité Moyenne**
 

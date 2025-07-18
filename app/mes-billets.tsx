@@ -221,14 +221,90 @@ const MesBilletsContent = () => {
     }
   };
 
-  // Fonction pour obtenir l'image du festival (placeholder pour l'instant)
-  const getFestivalImage = (festivalName: string) => {
-    // Pour l'instant, on utilise une image placeholder
-    // Plus tard, on pourra mapper les noms de festivals avec leurs vraies images
-    return (
-      "https://via.placeholder.com/106x74/6B46C1/FFFFFF?text=" +
-      encodeURIComponent(festivalName.substring(0, 3))
-    );
+  // Fonction pour obtenir l'image du festival avec design amélioré
+  const getFestivalImage = (festivalName: string, status: string) => {
+    // Couleurs dynamiques basées sur le nom du festival et le statut
+    const colors = [
+      "#6B46C1", // Violet principal
+      "#8B5CF6", // Violet clair
+      "#A855F7", // Violet moyen
+      "#7C3AED", // Violet foncé
+      "#EC4899", // Rose
+      "#F59E0B", // Orange
+      "#10B981", // Vert
+      "#3B82F6", // Bleu
+      "#EF4444", // Rouge
+      "#8B5A2B", // Marron
+    ];
+
+    // Générer une couleur basée sur le nom du festival
+    const nameHash = festivalName
+      .split("")
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const colorIndex = nameHash % colors.length;
+    const baseColor = colors[colorIndex];
+
+    // Ajuster la couleur selon le statut
+    let statusColor = baseColor;
+    if (status.toLowerCase() === "acceptée") {
+      statusColor = "#10B981"; // Vert pour accepté
+    } else if (status.toLowerCase() === "refusée") {
+      statusColor = "#EF4444"; // Rouge pour refusé
+    } else if (status.toLowerCase() === "abandonnée") {
+      statusColor = "#6B7280"; // Gris pour abandonné
+    }
+
+    // Créer un design avec gradient et icônes
+    const gradientColors = [statusColor, baseColor];
+
+    // Ajouter des icônes selon le type de festival (version simplifiée)
+    let iconText = "MUSIC"; // Texte par défaut
+    const nameLower = festivalName.toLowerCase();
+    if (nameLower.includes("rock") || nameLower.includes("metal")) {
+      iconText = "ROCK";
+    } else if (nameLower.includes("jazz") || nameLower.includes("blues")) {
+      iconText = "JAZZ";
+    } else if (
+      nameLower.includes("electronic") ||
+      nameLower.includes("techno")
+    ) {
+      iconText = "EDM";
+    } else if (nameLower.includes("pop") || nameLower.includes("indie")) {
+      iconText = "POP";
+    } else if (nameLower.includes("folk") || nameLower.includes("country")) {
+      iconText = "FOLK";
+    } else if (
+      nameLower.includes("classical") ||
+      nameLower.includes("orchestra")
+    ) {
+      iconText = "CLASS";
+    } else if (nameLower.includes("hip") || nameLower.includes("rap")) {
+      iconText = "RAP";
+    }
+
+    // Créer une URL avec design SVG simplifié (sans emojis)
+    const svgContent = `
+      <svg width="106" height="74" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${
+              gradientColors[0]
+            };stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${
+              gradientColors[1]
+            };stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect width="106" height="74" rx="24" fill="url(#grad)"/>
+        <circle cx="53" cy="37" r="20" fill="rgba(255,255,255,0.2)"/>
+        <text x="53" y="40" font-family="Arial, sans-serif" font-size="10" fill="white" text-anchor="middle" font-weight="bold">${iconText}</text>
+        <text x="53" y="65" font-family="Arial, sans-serif" font-size="8" fill="white" text-anchor="middle" font-weight="bold">${festivalName
+          .substring(0, 8)
+          .toUpperCase()}</text>
+      </svg>
+    `;
+
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgContent)}`;
   };
 
   const renderBookingItem = (booking: Booking) => {
@@ -243,10 +319,30 @@ const MesBilletsContent = () => {
             console.log("📱 Navigation vers détails réservation:", booking.id);
           }}
         >
-          <Image
-            style={styles.festivalImage}
-            source={{ uri: getFestivalImage(booking.festivalName) }}
-          />
+          <View style={styles.imageContainer}>
+            <Image
+              style={styles.festivalImage}
+              source={{
+                uri: getFestivalImage(booking.festivalName, booking.status),
+              }}
+              onError={() => {
+                // Fallback en cas d'erreur de chargement
+                console.log(
+                  "❌ Erreur chargement image pour:",
+                  booking.festivalName
+                );
+              }}
+            />
+            {/* Overlay avec effet de brillance */}
+            <View style={styles.imageOverlay} />
+            {/* Indicateur de statut */}
+            <View
+              style={[
+                styles.statusIndicator,
+                { backgroundColor: getStatusColor(booking.status) },
+              ]}
+            />
+          </View>
           <View style={styles.bookingInfo}>
             <View style={styles.bookingHeader}>
               <Text style={styles.festivalName}>{booking.festivalName}</Text>
@@ -859,12 +955,54 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 18,
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  imageContainer: {
+    position: "relative",
+    borderRadius: 24,
+    overflow: "hidden",
   },
   festivalImage: {
     width: 106,
     height: 74,
     borderRadius: 24,
+    backgroundColor: "rgba(107, 70, 193, 0.1)", // Couleur de fallback
+    borderWidth: 1,
+    borderColor: "rgba(107, 70, 193, 0.3)",
+  },
+  imageOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  statusIndicator: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.8)",
   },
   bookingInfo: {
     flex: 1,
@@ -883,15 +1021,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
     marginLeft: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
   },
   statusText: {
     fontSize: 10,
     fontFamily: FestiFunFonts.variants.poppinsMedium,
     color: "#000000",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   dateInfo: {
     gap: 2,
@@ -941,6 +1090,14 @@ const styles = StyleSheet.create({
   },
   bookingContainer: {
     marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   quoteReadyContainer: {
     backgroundColor: "rgba(153, 95, 255, 0.1)",

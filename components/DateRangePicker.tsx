@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Calendar, ChevronDown, X } from "lucide-react-native";
 import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
+import { useTranslation } from "../lib/useTranslation";
 
 interface DateRange {
   startDate: Date | null;
@@ -26,6 +27,7 @@ export default function DateRangePicker({
   onChange,
   placeholder = "Toutes les dates",
 }: DateRangePickerProps) {
+  const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [tempRange, setTempRange] = useState<DateRange>(value);
 
@@ -38,7 +40,7 @@ export default function DateRangePicker({
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + 365);
     options.push({
-      label: "Toutes les dates (365 jours)",
+      label: t("dateRange.options.all"),
       startDate: new Date(),
       endDate,
       isDefault: true,
@@ -48,7 +50,7 @@ export default function DateRangePicker({
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     options.push({
-      label: "Ce mois-ci",
+      label: t("dateRange.options.thisMonth"),
       startDate: thisMonthStart,
       endDate: thisMonthEnd,
     });
@@ -86,7 +88,7 @@ export default function DateRangePicker({
       value.startDate.getTime() === defaultOption.startDate.getTime() &&
       value.endDate.getTime() === defaultOption.endDate.getTime()
     ) {
-      return "Toutes les dates";
+      return t("dateRange.options.all");
     }
 
     // Vérifier si c'est un mois complet
@@ -143,7 +145,7 @@ export default function DateRangePicker({
           <Text style={styles.dateText}>{formatDisplayText()}</Text>
           <ChevronDown size={14} color={FestiFunColors.background} />
         </View>
-        <Text style={styles.dateSubtext}>Filtrer par période</Text>
+        <Text style={styles.dateSubtext}>{t("dateRange.subtitle")}</Text>
       </TouchableOpacity>
 
       <Modal
@@ -155,7 +157,7 @@ export default function DateRangePicker({
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Sélectionner une période</Text>
+              <Text style={styles.modalTitle}>{t("dateRange.title")}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <X size={24} color={FestiFunColors.background} />
               </TouchableOpacity>
@@ -184,7 +186,7 @@ export default function DateRangePicker({
                   </Text>
                   {option.isDefault && (
                     <Text style={styles.optionSubtext}>
-                      Recommandé pour voir tous les événements
+                      {t("dateRange.options.recommended")}
                     </Text>
                   )}
                 </TouchableOpacity>

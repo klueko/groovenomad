@@ -43,6 +43,7 @@ export default function FestivalCard({
   onLikePress,
   showArtists = true,
 }: FestivalCardProps) {
+  const { t } = useTranslation();
   // Fonction pour capitaliser la première lettre
   const capitalizeFirst = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -62,11 +63,13 @@ export default function FestivalCard({
     );
 
     if (distance < 1) {
-      return "< 1 km";
+      return t("festivalCard.distance.lessThan1km");
     } else if (distance < 100) {
-      return `${Math.round(distance)} km`;
+      return `${Math.round(distance)} ${t("festivalCard.distance.km")}`;
     } else {
-      return `${Math.round(distance / 10) * 10} km`;
+      return `${Math.round(distance / 10) * 10} ${t(
+        "festivalCard.distance.km"
+      )}`;
     }
   };
 
@@ -91,7 +94,9 @@ export default function FestivalCard({
           <View style={styles.festivalHeader}>
             <View style={styles.genreTag}>
               <Text style={styles.genreTagText}>
-                {capitalizeFirst(festival.matchingGenres[0] || "Festival")}
+                {capitalizeFirst(
+                  festival.matchingGenres[0] || t("festivalCard.defaultGenre")
+                )}
               </Text>
             </View>
             <TouchableOpacity onPress={onLikePress}>

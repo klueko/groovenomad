@@ -25,6 +25,7 @@ import {
 } from "lucide-react-native";
 import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
 import { useSession } from "../lib/auth-client";
+import { useTranslation } from "../lib/useTranslation";
 
 type FestivalData = {
   name: string;
@@ -136,6 +137,7 @@ function calculateEndTime(startTime: string, duration: string): string {
 
 export default function TripPlanning() {
   const router = useRouter();
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const { data: session } = useSession();
 
@@ -1066,14 +1068,14 @@ export default function TripPlanning() {
         </View>
 
         <View style={styles.subtitle}>
-          <Text style={styles.subtitleText}>
-            Ajoutez les différentes étapes de votre séjour avant de réserver
-          </Text>
+          <Text style={styles.subtitleText}>{t("planning.subtitle")}</Text>
         </View>
 
         {/* Trajet Aller */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Trajet aller</Text>
+          <Text style={styles.sectionTitle}>
+            {t("planning.transport.outbound")}
+          </Text>
           {params.transportValidated === "true" ? (
             // Transport validé - Afficher la carte validée
             <View style={styles.validatedTransportCard}>
@@ -1101,7 +1103,9 @@ export default function TripPlanning() {
                   </Text>
                 </View>
                 <View style={styles.validatedTransportBadge}>
-                  <Text style={styles.validatedBadgeText}>✓ Validé</Text>
+                  <Text style={styles.validatedBadgeText}>
+                    {t("planning.transport.validated")}
+                  </Text>
                 </View>
               </View>
               <View style={styles.validatedTransportDetails}>
@@ -1119,7 +1123,9 @@ export default function TripPlanning() {
               onPress={() => handleAddTravel("outbound")}
             >
               <Plus size={24} color={FestiFunColors.accent} />
-              <Text style={styles.addButtonText}>Ajouter un trajet</Text>
+              <Text style={styles.addButtonText}>
+                {t("planning.transport.addTransport")}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1127,7 +1133,9 @@ export default function TripPlanning() {
         {/* Logement */}
         {params.accommodationValidated === "true" && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Logement</Text>
+            <Text style={styles.sectionTitle}>
+              {t("planning.accommodation.title")}
+            </Text>
             <View style={styles.validatedAccommodationCard}>
               <View style={styles.validatedAccommodationHeader}>
                 <View style={styles.validatedAccommodationIcon}>
@@ -1155,7 +1163,9 @@ export default function TripPlanning() {
                   </Text>
                 </View>
                 <View style={styles.validatedAccommodationBadge}>
-                  <Text style={styles.validatedBadgeText}>✓ Réservé</Text>
+                  <Text style={styles.validatedBadgeText}>
+                    {t("planning.accommodation.validated")}
+                  </Text>
                 </View>
               </View>
               <View style={styles.validatedAccommodationDetails}>
@@ -1204,7 +1214,7 @@ export default function TripPlanning() {
                 <View style={styles.accommodationValidatedBadge}>
                   <Bed size={16} color="#22c55e" />
                   <Text style={styles.accommodationValidatedText}>
-                    Logement validé
+                    {t("planning.accommodation.validated")}
                   </Text>
                 </View>
               ) : (
@@ -1215,7 +1225,9 @@ export default function TripPlanning() {
                   }
                 >
                   <Plus size={18} color={FestiFunColors.accent} />
-                  <Text style={styles.accommodationButtonText}>Logement</Text>
+                  <Text style={styles.accommodationButtonText}>
+                    {t("planning.accommodation.title")}
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -1234,7 +1246,7 @@ export default function TripPlanning() {
                   >
                     <Plus size={24} color={FestiFunColors.accent} />
                     <Text style={styles.addButtonText}>
-                      Ajouter une activité
+                      {t("planning.activities.addActivity")}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -1355,8 +1367,9 @@ export default function TripPlanning() {
                   day.activities.filter((a) => !a.isFixed).length > 0 && (
                     <View style={styles.dayFullMessage}>
                       <Text style={styles.dayFullText}>
-                        Journée complète ({MAX_ACTIVITIES_PER_DAY} activités max
-                        + festival)
+                        {t("planning.day.fullDay", {
+                          max: MAX_ACTIVITIES_PER_DAY,
+                        })}
                       </Text>
                     </View>
                   )
@@ -1371,7 +1384,9 @@ export default function TripPlanning() {
 
         {/* Trajet Retour */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Trajet Retour</Text>
+          <Text style={styles.sectionTitle}>
+            {t("planning.transport.return")}
+          </Text>
           {params.transportValidated === "true" &&
           params.transportDirection === "return" ? (
             // Transport retour validé - Afficher la carte validée
@@ -1418,7 +1433,9 @@ export default function TripPlanning() {
               onPress={() => handleAddTravel("return")}
             >
               <Plus size={24} color={FestiFunColors.accent} />
-              <Text style={styles.addButtonText}>Ajouter un trajet</Text>
+              <Text style={styles.addButtonText}>
+                {t("planning.transport.addTransport")}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1442,10 +1459,10 @@ export default function TripPlanning() {
         >
           <Text style={styles.bookButtonText}>
             {isCreatingQuote
-              ? "Envoi en cours..."
+              ? t("planning.bookButton.sending")
               : isBookingComplete()
-              ? "Demander un devis"
-              : "Réservation incomplète"}
+              ? t("planning.bookButton.requestQuote")
+              : t("planning.bookButton.incomplete")}
           </Text>
         </TouchableOpacity>
       </View>

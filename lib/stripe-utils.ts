@@ -14,10 +14,36 @@ export function extractTotalPriceFromHTML(htmlContent: string): number {
   try {
     console.log("🔍 Extraction du prix depuis le HTML du devis");
 
+    // Rechercher le prix total TTC dans le nouveau format HTML
+    // Format: <td>964.1024999999997 €</td> (dernière ligne du tableau)
+    const totalTTCMatch = htmlContent.match(
+      /<td[^>]*>(\d+(?:\.\d+)?)\s*€<\/td>/g
+    );
+    if (totalTTCMatch && totalTTCMatch.length > 0) {
+      // Prendre le dernier prix trouvé (qui devrait être le total TTC)
+      const lastPriceMatch =
+        totalTTCMatch[totalTTCMatch.length - 1].match(/(\d+(?:\.\d+)?)/);
+      if (lastPriceMatch && lastPriceMatch[1]) {
+        const priceInEuros = parseFloat(lastPriceMatch[1]);
+        console.log("✅ Prix trouvé (dernier du tableau):", priceInEuros, "€");
+        return Math.round(priceInEuros * 100);
+      }
+    }
+
+    // Rechercher spécifiquement la ligne "Total TTC :" suivie du prix
+    const totalTTCLineMatch = htmlContent.match(
+      /Total TTC :[\s\S]*?<td[^>]*>(\d+(?:\.\d+)?)\s*€<\/td>/
+    );
+    if (totalTTCLineMatch && totalTTCLineMatch[1]) {
+      const priceInEuros = parseFloat(totalTTCLineMatch[1]);
+      console.log("✅ Prix trouvé dans ligne Total TTC:", priceInEuros, "€");
+      return Math.round(priceInEuros * 100);
+    }
+
     // Rechercher le prix total TTC dans le HTML (format: "Total TTC :703.8€")
-    const totalTTCMatch = htmlContent.match(/Total TTC :(\d+(?:\.\d+)?)/);
-    if (totalTTCMatch && totalTTCMatch[1]) {
-      const priceInEuros = parseFloat(totalTTCMatch[1]);
+    const totalTTCMatchOld = htmlContent.match(/Total TTC :(\d+(?:\.\d+)?)/);
+    if (totalTTCMatchOld && totalTTCMatchOld[1]) {
+      const priceInEuros = parseFloat(totalTTCMatchOld[1]);
       console.log("✅ Prix trouvé dans Total TTC:", priceInEuros, "€");
       return Math.round(priceInEuros * 100);
     }
@@ -44,20 +70,6 @@ export function extractTotalPriceFromHTML(htmlContent: string): number {
       const priceInEuros = parseFloat(totalRowMatch[1]);
       console.log("✅ Prix trouvé dans le tableau:", priceInEuros, "€");
       return Math.round(priceInEuros * 100);
-    }
-
-    // Rechercher tous les prix dans le tableau et prendre le dernier
-    const allPricesMatch = htmlContent.match(
-      /<td[^>]*>(\d+(?:\.\d+)?)€<\/td>/g
-    );
-    if (allPricesMatch && allPricesMatch.length > 0) {
-      const lastPriceMatch =
-        allPricesMatch[allPricesMatch.length - 1].match(/(\d+(?:\.\d+)?)/);
-      if (lastPriceMatch && lastPriceMatch[1]) {
-        const priceInEuros = parseFloat(lastPriceMatch[1]);
-        console.log("✅ Prix trouvé (dernier du tableau):", priceInEuros, "€");
-        return Math.round(priceInEuros * 100);
-      }
     }
 
     // Rechercher le prix dans le format spécifique du devis
