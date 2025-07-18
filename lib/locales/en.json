@@ -1,0 +1,307 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "date": "Date",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "previous": "Previous",
+    "close": "Close",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "apply": "Apply",
+    "clear": "Clear",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "navigation": {
+    "home": "Home",
+    "profile": "Profile",
+    "settings": "Settings",
+    "tickets": "My Tickets",
+    "festivals": "Festivals",
+    "planning": "Planning",
+    "activities": "Activities",
+    "accommodation": "Accommodation",
+    "travel": "Travel"
+  },
+  "home": {
+    "title": "🎪 FestiFun",
+    "searchPlaceholder": "Search festivals...",
+    "locationText": "📍 Location",
+    "locationSubtext": "Tap to change",
+    "changeLocation": "Change location",
+    "getCurrentLocation": "📍 Use my location",
+    "city": "City",
+    "country": "Country",
+    "popularSection": {
+      "title": "Popular",
+      "subtitle": "Most popular festivals"
+    },
+    "artistsSection": {
+      "title": "Your artists",
+      "subtitle": "Based on your Spotify preferences"
+    },
+    "personalizedSection": {
+      "title": "For you",
+      "subtitle": "Personalized recommendations"
+    },
+    "loadingTitle": "🎪 Searching festivals...",
+    "loadingSubtitle": "Analyzing your musical preferences",
+    "allGenres": "All"
+  },
+  "festival": {
+    "card": {
+      "distance": "{{distance}} km",
+      "artists": "Artists",
+      "genres": "Genres"
+    },
+    "detail": {
+      "title": "Festival details",
+      "description": "Description",
+      "date": "Date",
+      "location": "Location",
+      "price": "Price",
+      "artists": "Artists",
+      "genres": "Genres",
+      "tickets": "View tickets",
+      "book": "Book"
+    },
+    "recommendations": {
+      "title": "Festivals for you",
+      "matchScore": "{{score}}% match",
+      "genresLabel": "Genres:",
+      "reasonsLabel": "Why this festival:",
+      "priceText": "Estimated price: {{price}}",
+      "filtersTitle": "🔍 Advanced filters",
+      "filtersInfo": "Refine your recommendations",
+      "filtersSubInfo": "More filters = more precise results",
+      "geographicLabel": "Preferred geographic area:",
+      "seasonalTitle": "🌤️ Seasonal Bonus Active",
+      "seasonalText": "Summer festivals are favored",
+      "resultsLabel": "Number of results:",
+      "applyFilters": "🔍 Apply filters",
+      "loginRequired": "Sign in to see your personalized recommendations",
+      "loginButton": "Sign in"
+    }
+  },
+  "auth": {
+    "login": "Sign in",
+    "register": "Sign up for free",
+    "logout": "Sign out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "forgotPassword": "Forgot password?",
+    "spotifyLogin": "Continue with Spotify",
+    "welcome": "WELCOME\nTO FESTIFUN",
+    "description": "The travel agency that helps you organize your festival trips at the best price.",
+    "createAccount": "Create account",
+    "alreadyHaveAccount": "Already have an account?",
+    "or": "OR",
+    "fillFields": "Please fill in all fields",
+    "loginError": "Login error",
+    "name": "Name",
+    "registering": "Registering...",
+    "registerError": "Registration error",
+    "spotifyRegister": "Sign up with Spotify"
+  },
+  "profile": {
+    "title": "Music profile",
+    "username": "Username",
+    "displayName": "Display name",
+    "defaultUser": "User",
+    "defaultUsername": "@user",
+    "loading": "Loading profile...",
+    "stats": {
+      "followers": "Followers",
+      "following": "Following",
+      "trips": "Trips"
+    },
+    "artistsSection": {
+      "title": "Your {{count}} favorite artists",
+      "emptyTitle": "Never miss your artists'\nlive shows",
+      "subtitle": "Based on your Spotify tastes",
+      "emptySubtitle": "Sync your artists, receive\nnotifications",
+      "editButton": "Edit my artists",
+      "importButton": "Import my artists"
+    },
+    "spotifySection": {
+      "title": "Spotify profile",
+      "subtitle": "Your musical preferences"
+    },
+    "teamSection": {
+      "title": "Team is Toka",
+      "subtitle": "Add your friends to see where they're going,\ncompare your scores and more"
+    },
+    "addFriends": "Add friends"
+  },
+  "tickets": {
+    "title": "My tickets",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled"
+    },
+    "date": "Date",
+    "destination": "Destination",
+    "quoteReady": {
+      "title": "Quote ready!",
+      "subtitle": "Your personalized quote is available"
+    },
+    "viewQuote": "View my quote",
+    "emptyState": {
+      "title": "No tickets yet",
+      "subtitle": "Start by exploring festivals!"
+    }
+  },
+  "planning": {
+    "title": "Trip planning",
+    "festivalTitle": "Festival",
+    "subtitle": "Organize your trip",
+    "transport": {
+      "outbound": "Outbound journey",
+      "return": "Return journey",
+      "addTransport": "Add transport",
+      "validated": "✓ Validated",
+      "details": "Transport details"
+    },
+    "accommodation": {
+      "title": "Accommodation",
+      "addAccommodation": "Add accommodation",
+      "validated": "✓ Booked",
+      "details": "Accommodation details",
+      "stars": "stars",
+      "price": "Price per night",
+      "amenities": "Amenities"
+    },
+    "activities": {
+      "title": "Activities",
+      "addActivity": "Add activity",
+      "customActivity": "Custom activity",
+      "pedroActivity": "Pedro activity",
+      "time": "Time"
+    },
+    "day": {
+      "title": "Day {{day}}",
+      "fullDay": "Full day"
+    },
+    "bookButton": "🎫 Book this trip"
+  },
+  "activities": {
+    "title": "Discover activities",
+    "subtitle": "Find activities near the festival",
+    "toolCall": {
+      "icon": "🤖",
+      "label": "Pedro is searching for activities..."
+    },
+    "loading": "Searching for activities...",
+    "inputPlaceholder": "Describe what you're looking for...",
+    "transportLabel": "Transport",
+    "userMessage": "{{message}}"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "notifications": "Notifications",
+    "sound": "Sound",
+    "account": "Account",
+    "editProfile": "Edit profile",
+    "privacy": "Privacy",
+    "about": "About",
+    "help": "Help",
+    "feedback": "Feedback"
+  },
+  "dateRange": {
+    "title": "Select a period",
+    "subtitle": "Filter by period",
+    "options": {
+      "all": "All dates",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
+      "nextMonth": "Next month",
+      "next3Months": "Next 3 months",
+      "next6Months": "Next 6 months",
+      "nextYear": "Next year",
+      "custom": "Custom period"
+    }
+  },
+  "errors": {
+    "network": "Connection error",
+    "permission": "Permission denied",
+    "location": "Unable to get your location",
+    "spotify": "Spotify error",
+    "festival": "Error loading festivals",
+    "booking": "Booking error",
+    "activity": "Error searching activities"
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "subtitle": "Your companion to discover perfect festivals",
+    "activateNotifications": "Activate notifications",
+    "viewProfile": "View my profile",
+    "steps": {
+      "spotify": {
+        "title": "Connect your Spotify",
+        "description": "We analyze your musical tastes to suggest perfect festivals"
+      },
+      "profile": {
+        "title": "Discover your profile",
+        "description": "Visualize your favorite artists and genres intelligently analyzed"
+      },
+      "festivals": {
+        "title": "Find your festivals",
+        "description": "Our algorithms recommend events based on your tastes"
+      },
+      "notifications": {
+        "title": "DON'T WANT TO MISS\nYOUR FAVORITE FESTIVAL?",
+        "description": "To never miss a festival and always stay on the lookout for new events."
+      }
+    }
+  },
+  "tickets": {
+    "title": "My tickets",
+    "tabs": {
+      "upcoming": "Upcoming",
+      "past": "Past"
+    },
+    "emptyState": {
+      "upcoming": "No upcoming reservations",
+      "past": "No past reservations",
+      "subtitle": "Your reservations will appear here"
+    },
+    "quoteReady": {
+      "title": "🎉 Your quote is ready!",
+      "subtitle": "Check your personalized quote for this trip"
+    },
+    "viewQuote": "View my quote",
+    "loading": "Loading your reservations..."
+  },
+  "festivalDetail": {
+    "friends": {
+      "title": "Find your friends",
+      "count": "+ 3 people",
+      "total": " and 10,905 people"
+    },
+    "about": "About",
+    "lineup": "Lineup",
+    "genres": "Genres",
+    "reviews": "Reviews",
+    "bookStay": "Book my stay"
+  },
+  "alerts": {
+    "compris": "Got it",
+    "modifier": "Edit",
+    "demanderDevis": "Request quote",
+    "parfait": "Perfect"
+  }
+}

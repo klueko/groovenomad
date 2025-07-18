@@ -9,8 +9,10 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { signUp, authClient } from "../lib/auth-client";
+import { useTranslation } from "../lib/useTranslation";
 
 export default function Register() {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +20,7 @@ export default function Register() {
 
   const handleRegister = async () => {
     if (!name || !email || !password) {
-      Alert.alert("Erreur", "Veuillez remplir tous les champs");
+      Alert.alert(t("common.error"), t("auth.fillFields"));
       return;
     }
 
@@ -40,14 +42,17 @@ export default function Register() {
 
       if (result.error) {
         console.error("❌ Erreur d'inscription:", result.error);
-        Alert.alert("Erreur", result.error.message || "Erreur d'inscription");
+        Alert.alert(
+          t("common.error"),
+          result.error.message || t("auth.registerError")
+        );
       } else {
         console.log("🎉 Inscription réussie, redirection vers /home");
         router.replace("/home");
       }
     } catch (error) {
       console.error("💥 Erreur lors de l'inscription:", error);
-      Alert.alert("Erreur", "Une erreur est survenue lors de l'inscription");
+      Alert.alert(t("common.error"), t("auth.registerError"));
     } finally {
       setLoading(false);
     }
@@ -66,8 +71,8 @@ export default function Register() {
       if (result.error) {
         console.error("❌ Erreur inscription Spotify:", result.error);
         Alert.alert(
-          "Erreur",
-          result.error.message || "Erreur d'inscription Spotify"
+          t("common.error"),
+          result.error.message || t("errors.spotify")
         );
       } else {
         console.log("🎉 Inscription Spotify réussie");
@@ -75,10 +80,7 @@ export default function Register() {
       }
     } catch (error) {
       console.error("💥 Erreur inscription Spotify:", error);
-      Alert.alert(
-        "Erreur",
-        "Une erreur est survenue lors de l'inscription Spotify"
-      );
+      Alert.alert(t("common.error"), t("errors.spotify"));
     } finally {
       setLoading(false);
     }
@@ -86,18 +88,18 @@ export default function Register() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Inscription</Text>
+      <Text style={styles.title}>{t("auth.createAccount")}</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Nom"
+        placeholder={t("auth.name")}
         value={name}
         onChangeText={setName}
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder={t("auth.email")}
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -106,7 +108,7 @@ export default function Register() {
 
       <TextInput
         style={styles.input}
-        placeholder="Mot de passe"
+        placeholder={t("auth.password")}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -118,7 +120,7 @@ export default function Register() {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? "Inscription..." : "S'inscrire"}
+          {loading ? t("auth.registering") : t("auth.register")}
         </Text>
       </TouchableOpacity>
 
@@ -126,11 +128,13 @@ export default function Register() {
         style={styles.linkButton}
         onPress={() => router.push("/login")}
       >
-        <Text style={styles.linkText}>Déjà un compte ? Se connecter</Text>
+        <Text style={styles.linkText}>
+          {t("auth.alreadyHaveAccount")} {t("auth.login")}
+        </Text>
       </TouchableOpacity>
 
       <View style={styles.separator}>
-        <Text style={styles.separatorText}>ou</Text>
+        <Text style={styles.separatorText}>{t("auth.or")}</Text>
       </View>
 
       <TouchableOpacity
@@ -138,7 +142,9 @@ export default function Register() {
         onPress={handleSpotifyRegister}
         disabled={loading}
       >
-        <Text style={styles.spotifyButtonText}>🎵 S'inscrire avec Spotify</Text>
+        <Text style={styles.spotifyButtonText}>
+          🎵 {t("auth.spotifyRegister")}
+        </Text>
       </TouchableOpacity>
     </View>
   );

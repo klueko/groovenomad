@@ -20,28 +20,31 @@ import {
   Shield,
 } from "lucide-react-native";
 import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
+import { useTranslation } from "../lib/useTranslation";
+import LanguageSelector from "../components/LanguageSelector";
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   const handleLogout = async () => {
-    Alert.alert("Déconnexion", "Êtes-vous sûr de vouloir vous déconnecter ?", [
+    Alert.alert(t("auth.logout"), t("common.confirm"), [
       {
-        text: "Annuler",
+        text: t("common.cancel"),
         style: "cancel",
       },
       {
-        text: "Déconnexion",
+        text: t("auth.logout"),
         style: "destructive",
         onPress: async () => {
           try {
             await signOut();
             router.replace("/login");
           } catch (error) {
-            Alert.alert("Erreur", "Impossible de se déconnecter");
+            Alert.alert(t("common.error"), t("errors.network"));
           }
         },
       },
@@ -69,18 +72,20 @@ export default function SettingsScreen() {
           >
             <ArrowLeft size={24} color={FestiFunColors.background} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Réglages</Text>
+          <Text style={styles.headerTitle}>{t("settings.title")}</Text>
         </View>
 
         {/* Section Préférences */}
         <View style={styles.section}>
           <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Préférences</Text>
+            <Text style={styles.sectionTitle}>{t("settings.title")}</Text>
 
             {/* Notifications */}
             <View style={styles.menuItem}>
               <Bell size={24} color={FestiFunColors.primary} />
-              <Text style={styles.menuItemText}>Notifications</Text>
+              <Text style={styles.menuItemText}>
+                {t("settings.notifications")}
+              </Text>
               <Switch
                 value={notificationsEnabled}
                 onValueChange={setNotificationsEnabled}
@@ -95,7 +100,7 @@ export default function SettingsScreen() {
             {/* Son */}
             <View style={styles.menuItem}>
               <Volume2 size={24} color={FestiFunColors.primary} />
-              <Text style={styles.menuItemText}>Son</Text>
+              <Text style={styles.menuItemText}>{t("settings.sound")}</Text>
               <Switch
                 value={soundEnabled}
                 onValueChange={setSoundEnabled}
@@ -109,15 +114,24 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* Section Langue */}
+        <View style={styles.section}>
+          <View style={styles.sectionCard}>
+            <LanguageSelector />
+          </View>
+        </View>
+
         {/* Section Compte */}
         <View style={styles.section}>
           <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Compte</Text>
+            <Text style={styles.sectionTitle}>{t("settings.account")}</Text>
 
             {/* Modifier profil */}
             <TouchableOpacity style={styles.menuItem}>
               <User size={24} color={FestiFunColors.primary} />
-              <Text style={styles.menuItemText}>Modifier profil</Text>
+              <Text style={styles.menuItemText}>
+                {t("settings.editProfile")}
+              </Text>
               <ArrowLeft
                 size={20}
                 color="#ad9cbb"
@@ -128,7 +142,7 @@ export default function SettingsScreen() {
             {/* Confidentialité */}
             <TouchableOpacity style={styles.menuItem}>
               <Shield size={24} color={FestiFunColors.primary} />
-              <Text style={styles.menuItemText}>Confidentialité</Text>
+              <Text style={styles.menuItemText}>{t("settings.privacy")}</Text>
               <ArrowLeft
                 size={20}
                 color="#ad9cbb"
@@ -146,7 +160,7 @@ export default function SettingsScreen() {
               onPress={handleLogout}
             >
               <LogOut size={24} color={FestiFunColors.background} />
-              <Text style={styles.logoutButtonText}>Déconnexion</Text>
+              <Text style={styles.logoutButtonText}>{t("auth.logout")}</Text>
             </TouchableOpacity>
           </View>
         </View>

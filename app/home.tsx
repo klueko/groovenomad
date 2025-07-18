@@ -26,6 +26,7 @@ import {
 import { userPreferencesService } from "../lib/user-preferences-service";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTranslation } from "../lib/useTranslation";
 
 // Import des nouveaux composants
 import BottomNavigation from "../components/BottomNavigation";
@@ -64,10 +65,11 @@ interface DateRange {
 export default function HomeScreen() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [festivals, setFestivals] = useState<FestivalMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedGenre, setSelectedGenre] = useState("Tous");
+  const [selectedGenre, setSelectedGenre] = useState(t("home.allGenres"));
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange>({
     startDate: new Date(),
     endDate: (() => {
@@ -78,7 +80,9 @@ export default function HomeScreen() {
   });
   const [hasPreferences, setHasPreferences] = useState(false);
   const [userArtists, setUserArtists] = useState<any[]>([]);
-  const [availableGenres, setAvailableGenres] = useState<string[]>(["Tous"]);
+  const [availableGenres, setAvailableGenres] = useState<string[]>([
+    t("home.allGenres"),
+  ]);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [locationModalVisible, setLocationModalVisible] = useState(false);
   const [newLocationCity, setNewLocationCity] = useState("");
@@ -175,7 +179,7 @@ export default function HomeScreen() {
       // Demander la permission de géolocalisation
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log("Permission de géolocalisation refusée");
+        console.log(t("errors.permission"));
         return {
           city: "Paris",
           country: "France",
@@ -195,8 +199,8 @@ export default function HomeScreen() {
       if (reverseGeocode.length > 0) {
         const address = reverseGeocode[0];
         return {
-          city: address.city || "Ville inconnue",
-          country: address.country || "Pays inconnu",
+          city: address.city || t("errors.location"),
+          country: address.country || t("errors.location"),
           countryCode: address.isoCountryCode || "XX",
           coordinates: {
             latitude: location.coords.latitude,
@@ -508,10 +512,8 @@ export default function HomeScreen() {
           resizeMode="contain"
           source={require("./assets/pedropedropedro.png")}
         />
-        <Text style={styles.loadingTitle}>🎪 Recherche de festivals...</Text>
-        <Text style={styles.loadingSubtitle}>
-          Pedro analyse vos goûts pour vous trouver les meilleurs événements !
-        </Text>
+        <Text style={styles.loadingTitle}>{t("home.loadingTitle")}</Text>
+        <Text style={styles.loadingSubtitle}>{t("home.loadingSubtitle")}</Text>
         <ActivityIndicator size="large" color={FestiFunColors.primary} />
       </View>
     );
@@ -549,7 +551,9 @@ export default function HomeScreen() {
                 {userLocation?.country || "France"}
               </Text>
             </View>
-            <Text style={styles.locationSubtext}>Appuyez pour changer</Text>
+            <Text style={styles.locationSubtext}>
+              {t("home.locationSubtext")}
+            </Text>
           </TouchableOpacity>
 
           {/* Utilisation du nouveau composant DateRangePicker */}
@@ -564,7 +568,7 @@ export default function HomeScreen() {
           <TouchableOpacity style={styles.searchBar}>
             <Search size={20} color="#ad9cbb" />
             <Text style={styles.searchPlaceholder}>
-              Rechercher un festival...
+              {t("home.searchPlaceholder")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -583,9 +587,11 @@ export default function HomeScreen() {
         {/* Section Populaires - Festivals avec haute popularité */}
         {popularFestivals.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Populaires</Text>
+            <Text style={styles.sectionTitle}>
+              {t("home.popularSection.title")}
+            </Text>
             <Text style={styles.sectionSubtitle}>
-              Les festivals les plus attendus
+              {t("home.popularSection.subtitle")}
             </Text>
             <ScrollView
               horizontal
@@ -616,9 +622,11 @@ export default function HomeScreen() {
         {/* Section Vos artistes - Liste complète */}
         {userArtists.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Vos artistes</Text>
+            <Text style={styles.sectionTitle}>
+              {t("home.artistsSection.title")}
+            </Text>
             <Text style={styles.sectionSubtitle}>
-              Basé sur vos goûts Spotify
+              {t("home.artistsSection.subtitle")}
             </Text>
             <ScrollView
               horizontal
@@ -633,9 +641,11 @@ export default function HomeScreen() {
         {/* Section Pour vous - Pleine largeur et personnalisée */}
         {personalizedFestivals.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Pour vous</Text>
+            <Text style={styles.sectionTitle}>
+              {t("home.personalizedSection.title")}
+            </Text>
             <Text style={styles.sectionSubtitle}>
-              Sélectionnés selon vos préférences musicales
+              {t("home.personalizedSection.subtitle")}
             </Text>
             <View style={styles.forYouGrid}>
               {personalizedFestivals.map((festival) => (
@@ -674,14 +684,14 @@ export default function HomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Changer de localisation</Text>
+              <Text style={styles.modalTitle}>{t("home.changeLocation")}</Text>
               <TouchableOpacity onPress={() => setLocationModalVisible(false)}>
                 <X size={24} color={FestiFunColors.background} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Ville</Text>
+              <Text style={styles.inputLabel}>{t("home.city")}</Text>
               <TextInput
                 style={styles.textInput}
                 value={newLocationCity}
@@ -692,7 +702,7 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Pays</Text>
+              <Text style={styles.inputLabel}>{t("home.country")}</Text>
               <TextInput
                 style={styles.textInput}
                 value={newLocationCountry}
@@ -706,7 +716,7 @@ export default function HomeScreen() {
               style={styles.saveButton}
               onPress={handleLocationChange}
             >
-              <Text style={styles.saveButtonText}>Enregistrer</Text>
+              <Text style={styles.saveButtonText}>{t("common.save")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -726,7 +736,7 @@ export default function HomeScreen() {
             >
               <MapPin size={16} color={FestiFunColors.primary} />
               <Text style={styles.getCurrentLocationText}>
-                Utiliser ma position actuelle
+                {t("home.getCurrentLocation")}
               </Text>
             </TouchableOpacity>
           </View>

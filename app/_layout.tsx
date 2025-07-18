@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import "../lib/i18n"; // Initialiser i18n
 
 // Empêcher l'écran de chargement de se cacher automatiquement
 SplashScreen.preventAutoHideAsync();

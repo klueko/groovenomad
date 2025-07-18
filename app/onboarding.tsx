@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { useSession } from "../lib/auth-client";
 import { LinearGradient } from "expo-linear-gradient";
 import { FestiFunColors } from "../lib/design-system";
+import { useTranslation } from "../lib/useTranslation";
 
 const { width, height } = Dimensions.get("window");
 
@@ -62,6 +63,7 @@ const onboardingSteps: OnboardingStep[] = [
 export default function OnboardingScreen() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
 
   // Auto-redirection si l'utilisateur vient de se connecter avec Spotify
@@ -174,7 +176,7 @@ export default function OnboardingScreen() {
               isNotificationStep && styles.skipTextNotification,
             ]}
           >
-            Passer
+            {t("onboarding.skip")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -192,10 +194,8 @@ export default function OnboardingScreen() {
           >
             <Text style={styles.logoText}>🎪</Text>
           </LinearGradient>
-          <Text style={styles.appTitle}>FestiFun</Text>
-          <Text style={styles.appSubtitle}>
-            Votre compagnon pour découvrir les festivals parfaits
-          </Text>
+          <Text style={styles.appTitle}>{t("home.title")}</Text>
+          <Text style={styles.appSubtitle}>{t("onboarding.subtitle")}</Text>
         </View>
 
         {/* Étape actuelle */}
@@ -214,12 +214,12 @@ export default function OnboardingScreen() {
           >
             <Text style={styles.nextButtonText}>
               {isNotificationStep
-                ? "J'active les notif"
+                ? t("onboarding.activateNotifications")
                 : currentStep === onboardingSteps.length - 1
                 ? session?.user
-                  ? "Voir mon profil"
-                  : "Se connecter"
-                : "Suivant"}
+                  ? t("onboarding.viewProfile")
+                  : t("auth.login")
+                : t("common.next")}
             </Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -229,7 +229,7 @@ export default function OnboardingScreen() {
             style={styles.backButton}
             onPress={() => setCurrentStep(currentStep - 1)}
           >
-            <Text style={styles.backButtonText}>Précédent</Text>
+            <Text style={styles.backButtonText}>{t("common.previous")}</Text>
           </TouchableOpacity>
         )}
       </View>

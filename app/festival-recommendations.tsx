@@ -19,6 +19,7 @@ import {
   FestivalMatch,
   FestivalMatchingOptions,
 } from "../lib/festival-matcher";
+import { useTranslation } from "../lib/useTranslation";
 
 const { width } = Dimensions.get("window");
 
@@ -32,6 +33,7 @@ interface FilterState {
 export default function FestivalRecommendationsScreen() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [festivals, setFestivals] = useState<FestivalMatch[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -73,13 +75,11 @@ export default function FestivalRecommendationsScreen() {
       setFestivals(recommendations);
 
       if (recommendations.length === 0) {
-        setError(
-          "Aucun festival trouvé correspondant à vos goûts. Essayez de modifier les filtres."
-        );
+        setError(t("festival.recommendations.loginRequired"));
       }
     } catch (err) {
       console.error("❌ Erreur chargement festivals:", err);
-      setError("Erreur lors du chargement des festivals. Veuillez réessayer.");
+      setError(t("errors.festival"));
     } finally {
       setLoading(false);
     }
@@ -97,14 +97,11 @@ export default function FestivalRecommendationsScreen() {
       if (canOpen) {
         await Linking.openURL(festival.ticketUrl);
       } else {
-        Alert.alert(
-          "Impossible d'ouvrir le lien",
-          "Le lien vers les billets ne peut pas être ouvert."
-        );
+        Alert.alert(t("common.error"), t("errors.network"));
       }
     } catch (error) {
       console.error("❌ Erreur ouverture lien:", error);
-      Alert.alert("Erreur", "Impossible d'ouvrir le lien vers les billets.");
+      Alert.alert(t("common.error"), t("errors.network"));
     }
   };
 

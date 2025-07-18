@@ -12,6 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
 import { FestivalMatch } from "../lib/festival-matcher";
 import { geoSearchService } from "../lib/geo-search-service";
+import { useTranslation } from "../lib/useTranslation";
 
 const { width } = Dimensions.get("window");
 

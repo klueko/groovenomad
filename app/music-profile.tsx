@@ -29,12 +29,14 @@ import { userPreferencesService } from "../lib/user-preferences-service";
 import BottomNavigation from "../components/BottomNavigation";
 import Avatar from "../components/Avatar";
 import FriendsList from "../components/FriendsList";
+import { useTranslation } from "../lib/useTranslation";
 
 const { width } = Dimensions.get("window");
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [userArtists, setUserArtists] = useState<any[]>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -132,7 +134,7 @@ export default function ProfileScreen() {
     if (session?.user?.email) {
       return session.user.email.split("@")[0];
     }
-    return "Utilisateur";
+    return t("profile.defaultUser");
   };
 
   // Obtenir le username
@@ -143,7 +145,7 @@ export default function ProfileScreen() {
     if (session?.user?.email) {
       return `@${session.user.email.split("@")[0]}`;
     }
-    return "@user";
+    return t("profile.defaultUsername");
   };
 
   if (loading) {
@@ -154,7 +156,7 @@ export default function ProfileScreen() {
           backgroundColor={FestiFunColors.primaryDark}
         />
         <ActivityIndicator size="large" color={FestiFunColors.primary} />
-        <Text style={styles.loadingText}>Chargement du profil...</Text>
+        <Text style={styles.loadingText}>{t("profile.loading")}</Text>
       </View>
     );
   }
@@ -205,15 +207,19 @@ export default function ProfileScreen() {
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
               <Text style={styles.statNumber}>0</Text>
-              <Text style={styles.statLabel}>Abonné-e-s</Text>
+              <Text style={styles.statLabel}>
+                {t("profile.stats.followers")}
+              </Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statNumber}>0</Text>
-              <Text style={styles.statLabel}>Abonnements</Text>
+              <Text style={styles.statLabel}>
+                {t("profile.stats.following")}
+              </Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statNumber}>0</Text>
-              <Text style={styles.statLabel}>Voyages</Text>
+              <Text style={styles.statLabel}>{t("profile.stats.trips")}</Text>
             </View>
           </View>
         </LinearGradient>
@@ -223,13 +229,15 @@ export default function ProfileScreen() {
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>
               {hasPreferences && userArtists.length > 0
-                ? `Tes ${userArtists.length} artistes préférés`
-                : "Ne manque jamais les lives\nde tes artistes"}
+                ? t("profile.artistsSection.title", {
+                    count: userArtists.length,
+                  })
+                : t("profile.artistsSection.emptyTitle")}
             </Text>
             <Text style={styles.sectionSubtitle}>
               {hasPreferences && userArtists.length > 0
-                ? "Basé sur tes goûts Spotify"
-                : "Synchronise tes artistes, reçois des\nnotifications"}
+                ? t("profile.artistsSection.subtitle")
+                : t("profile.artistsSection.emptySubtitle")}
             </Text>
 
             {/* Affichage conditionnel : artistes ou plateformes */}
@@ -272,8 +280,8 @@ export default function ProfileScreen() {
             >
               <Text style={styles.primaryButtonText}>
                 {hasPreferences && userArtists.length > 0
-                  ? "Modifier mes artistes"
-                  : "Importer mes artistes"}
+                  ? t("profile.artistsSection.editButton")
+                  : t("profile.artistsSection.importButton")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -282,10 +290,11 @@ export default function ProfileScreen() {
         {/* Section Amis */}
         <View style={styles.section}>
           <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>L'équipe est Toka</Text>
+            <Text style={styles.sectionTitle}>
+              {t("profile.teamSection.title")}
+            </Text>
             <Text style={styles.sectionSubtitle}>
-              Ajoute tes ami-e-s pour voir où ils vont,{"\n"}comparer vos score
-              et plus encore
+              {t("profile.teamSection.subtitle")}
             </Text>
 
             {/* Liste des amis avec nouveau composant */}
@@ -299,7 +308,9 @@ export default function ProfileScreen() {
             />
 
             <TouchableOpacity style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>Ajouter des ami-e-s</Text>
+              <Text style={styles.primaryButtonText}>
+                {t("profile.addFriends")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

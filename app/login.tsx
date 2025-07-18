@@ -17,6 +17,7 @@ import { signIn, useSession, signOut } from "../lib/auth-client";
 import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
 import { useAudioPlayer, AudioSource } from "expo-audio";
 import Svg, { Path } from "react-native-svg";
+import { useTranslation } from "../lib/useTranslation";
 
 const { width, height } = Dimensions.get("window");
 
@@ -41,6 +42,7 @@ const SpotifyLogo = ({
 );
 
 export default function FestiFunLoginScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -119,7 +121,7 @@ export default function FestiFunLoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Erreur", "Veuillez remplir tous les champs");
+      Alert.alert(t("common.error"), t("auth.fillFields"));
       return;
     }
 
@@ -136,14 +138,17 @@ export default function FestiFunLoginScreen() {
 
       if (result.error) {
         console.error("❌ Erreur de connexion:", result.error);
-        Alert.alert("Erreur", result.error.message || "Erreur de connexion");
+        Alert.alert(
+          t("common.error"),
+          result.error.message || t("auth.loginError")
+        );
       } else {
         console.log("🎉 Connexion réussie, redirection vers /home");
         router.replace("/home");
       }
     } catch (error) {
       console.error("💥 Erreur lors de la connexion:", error);
-      Alert.alert("Erreur", "Une erreur est survenue lors de la connexion");
+      Alert.alert(t("common.error"), t("auth.loginError"));
     } finally {
       setLoading(false);
     }
@@ -165,18 +170,15 @@ export default function FestiFunLoginScreen() {
       if (result.error) {
         console.error("❌ Erreur connexion Spotify:", result.error);
         Alert.alert(
-          "Erreur",
-          result.error.message || "Erreur de connexion Spotify"
+          t("common.error"),
+          result.error.message || t("errors.spotify")
         );
       } else {
         console.log("🎉 Connexion Spotify démarrée");
       }
     } catch (error) {
       console.error("💥 Erreur lors de la connexion Spotify:", error);
-      Alert.alert(
-        "Erreur",
-        "Une erreur est survenue lors de la connexion Spotify"
-      );
+      Alert.alert(t("common.error"), t("errors.spotify"));
     } finally {
       setSpotifyLoading(false);
     }
@@ -215,11 +217,9 @@ export default function FestiFunLoginScreen() {
           resizeMode="contain"
           source={require("./assets/pedropedropedro.png")}
         />
-        <Text style={styles.loadingTitle}>FESTIFUN</Text>
+        <Text style={styles.loadingTitle}>{t("home.title")}</Text>
         {sessionLoading && (
-          <Text style={styles.loadingSubtitle}>
-            Vérification de la session...
-          </Text>
+          <Text style={styles.loadingSubtitle}>{t("common.loading")}</Text>
         )}
       </View>
     );
@@ -249,13 +249,8 @@ export default function FestiFunLoginScreen() {
       <View style={styles.frameParent}>
         {/* Titre et description */}
         <View style={styles.bienvenueSurFestifunParent}>
-          <Text style={styles.bienvenueSurFestifun}>
-            BIENVENUE{"\n"}SUR FESTIFUN
-          </Text>
-          <Text style={styles.lagenceDeVoyage}>
-            L'agence de voyage qui t'aides a organiser tes sortis en festival au
-            meilleure prix.
-          </Text>
+          <Text style={styles.bienvenueSurFestifun}>{t("auth.welcome")}</Text>
+          <Text style={styles.lagenceDeVoyage}>{t("auth.description")}</Text>
         </View>
 
         {/* Boutons d'action */}
@@ -265,10 +260,10 @@ export default function FestiFunLoginScreen() {
             style={styles.button}
             onPress={() => router.push("/register")}
           >
-            <Text style={styles.commencer}>S'inscrire gratuitement</Text>
+            <Text style={styles.commencer}>{t("auth.register")}</Text>
           </TouchableOpacity>
 
-          <Text style={styles.ou}>OU</Text>
+          <Text style={styles.ou}>{t("auth.or")}</Text>
 
           {/* Bouton de connexion Spotify */}
           <View style={styles.continuerAvecParent}>
@@ -281,7 +276,7 @@ export default function FestiFunLoginScreen() {
               disabled={spotifyLoading}
             >
               <SpotifyLogo size={24} color={FestiFunColors.white} />
-              <Text style={styles.spotifyText}>Continuer avec Spotify</Text>
+              <Text style={styles.spotifyText}>{t("auth.spotifyLogin")}</Text>
             </TouchableOpacity>
           </View>
 
@@ -294,18 +289,18 @@ export default function FestiFunLoginScreen() {
                 "Connexion",
                 "Email",
                 [
-                  { text: "Annuler", style: "cancel" },
+                  { text: t("common.cancel"), style: "cancel" },
                   {
-                    text: "Continuer",
+                    text: t("common.next"),
                     onPress: (email) => {
                       if (email) {
                         Alert.prompt(
                           "Connexion",
                           "Mot de passe",
                           [
-                            { text: "Annuler", style: "cancel" },
+                            { text: t("common.cancel"), style: "cancel" },
                             {
-                              text: "Se connecter",
+                              text: t("auth.login"),
                               onPress: (password) => {
                                 if (password) {
                                   setEmail(email);
@@ -326,8 +321,8 @@ export default function FestiFunLoginScreen() {
             }}
           >
             <Text style={styles.loginLinkText}>
-              Déjà un compte ?{" "}
-              <Text style={styles.loginLinkBold}>Se connecter</Text>
+              {t("auth.alreadyHaveAccount")}{" "}
+              <Text style={styles.loginLinkBold}>{t("auth.login")}</Text>
             </Text>
           </TouchableOpacity>
         </View>

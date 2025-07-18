@@ -391,10 +391,10 @@ export async function POST(request: Request) {
         bookingData.festivalData.location.country || "France"
       }`,
       // Envoyer uniquement les prix TTC (les prix HT et total peuvent être calculés par Airtable)
-      prix_ticket_TTC: ticketPriceTTC,
-      prix_transport_TTC: transportPriceTTC,
-      prix_hebergement_TTC: accommodationPriceTTC,
-      "prix_activité supplémentaire_TTC": activityPriceTTC, // Nom exact du CSV avec espace
+      prix_ticket_TTC: ticketPriceTTC * 1.15,
+      prix_transport_TTC: transportPriceTTC * 1.15,
+      prix_hebergement_TTC: accommodationPriceTTC * 1.15,
+      "prix_activité supplémentaire_TTC": activityPriceTTC * 1.15, // Nom exact du CSV avec espace
     };
 
     console.log(

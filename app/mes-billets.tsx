@@ -19,6 +19,8 @@ import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
 import { useSession } from "../lib/auth-client";
 import Constants from "expo-constants";
 import BottomNavigation from "../components/BottomNavigation";
+import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
+import { useTranslation } from "../lib/useTranslation";
 
 // Types pour les réservations
 interface Booking {
@@ -51,9 +53,11 @@ interface Booking {
   createdTime: string;
 }
 
-const MesBillets = () => {
+const MesBilletsContent = () => {
   const router = useRouter();
   const { data: session } = useSession();
+  const { t } = useTranslation();
+  const stripe = useStripe();
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,10 +68,11 @@ const MesBillets = () => {
   const [isSigning, setIsSigning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
     null
   );
-  // States liés à la signature retirés
 
   // Fonction pour récupérer les réservations
   const fetchBookings = async (isRefresh = false) => {
@@ -255,7 +260,7 @@ const MesBillets = () => {
               </View>
             </View>
             <View style={styles.dateInfo}>
-              <Text style={styles.dateLabel}>Date</Text>
+              <Text style={styles.dateLabel}>{t("common.date")}</Text>
               <Text style={styles.dateValue}>
                 {formatFestivalPeriod(
                   booking.dateFestivalStart,
@@ -334,10 +339,126 @@ const MesBillets = () => {
     );
   }
 
-  const updateQuoteStatus = async (
-    bookingId: string,
-    status: "acceptée" | "refusée"
-  ) => {
+  const handleSignQuote = async (booking: Booking) => {
+    if (!session?.user?.id) {
+      Alert.alert("Utilisateur non authentifié");
+      return;
+    }
+
+    if (!booking.devisHtml) {
+      Alert.alert("Erreur", "Devis non disponible");
+      return;
+    }
+
+    try {
+      setIsSigning(true);
+      setCurrentBooking(booking);
+
+      const baseURL =
+        Constants.expoConfig?.extra?.betterAuthUrl || "http://localhost:8081";
+
+      // Créer le PaymentIntent
+      const res = await fetch(`${baseURL}/api/sign-quote-with-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingId: booking.id,
+          devisHtml: booking.devisHtml,
+          customerEmail: session.user.email || "client@festifun.fr",
+          userId: session.user.id,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Erreur lors de la création du paiement");
+      }
+
+      const data = await res.json();
+      setPaymentAmount(data.amountInEuros);
+      console.log(
+        "✅ PaymentIntent créé:",
+        data.clientSecret.substring(0, 20) + "..."
+      );
+
+      // Configuration de la PaymentSheet
+      const { error: initError } = await stripe.initPaymentSheet({
+        merchantDisplayName: "FESTIFUN",
+        paymentIntentClientSecret: data.clientSecret,
+        returnURL: "festifun://stripe-redirect",
+      });
+
+      if (initError) {
+        console.error("❌ Erreur initialisation PaymentSheet:", initError);
+        Alert.alert("Erreur", "Impossible d'initialiser le paiement");
+        return;
+      }
+
+      // Présentation de la PaymentSheet
+      const { error: presentError } = await stripe.presentPaymentSheet();
+
+      if (presentError) {
+        console.error("❌ Erreur présentation PaymentSheet:", presentError);
+        Alert.alert("Erreur", "Paiement annulé ou échoué");
+        return;
+      }
+
+      // Paiement réussi ! Maintenant confirmer le paiement côté serveur
+      console.log("✅ Paiement réussi, confirmation côté serveur...");
+
+      const confirmResponse = await fetch(
+        `${baseURL}/api/sign-quote-with-payment`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            paymentIntentId: data.paymentIntentId,
+            bookingId: booking.id,
+            devisHtml: booking.devisHtml,
+            customerEmail: session.user.email || "client@festifun.fr",
+            userId: session.user.id,
+          }),
+        }
+      );
+
+      if (!confirmResponse.ok) {
+        const confirmError = await confirmResponse.json();
+        throw new Error(
+          confirmError.error || "Erreur lors de la confirmation du paiement"
+        );
+      }
+
+      const confirmData = await confirmResponse.json();
+      console.log("✅ Paiement confirmé et devis signé:", confirmData);
+
+      Alert.alert(
+        "✅ Paiement réussi !",
+        `Paiement de ${data.amountInEuros}€ effectué avec succès !\n\nLe devis a été signé et la réservation est confirmée.`,
+        [
+          {
+            text: "Continuer",
+            onPress: () => {
+              setQuoteModalVisible(false);
+              setCurrentBooking(null);
+              setPaymentAmount(0);
+              // Rafraîchir la liste
+              fetchBookings(true);
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("❌ Erreur lors du paiement:", error);
+      Alert.alert(
+        "Erreur",
+        error instanceof Error ? error.message : "Erreur inconnue"
+      );
+    } finally {
+      setIsSigning(false);
+    }
+  };
+
+  const handleRefuseQuote = async (booking: Booking) => {
     if (!session?.user?.id) {
       Alert.alert("Utilisateur non authentifié");
       return;
@@ -353,9 +474,9 @@ const MesBillets = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          bookingId,
+          bookingId: booking.id,
           userId: session.user.id,
-          status,
+          status: "refusée",
         }),
       });
 
@@ -364,11 +485,7 @@ const MesBillets = () => {
         throw new Error(err.error || "Erreur lors de la signature du devis");
       }
 
-      const successMessage =
-        status === "acceptée"
-          ? "Merci d'avoir confirmé votre devis !"
-          : "Vous avez refusé ce devis.";
-      Alert.alert("Succès", successMessage);
+      Alert.alert("Succès", "Vous avez refusé ce devis.");
       setQuoteModalVisible(false);
 
       // Rafraîchir la liste
@@ -400,7 +517,7 @@ const MesBillets = () => {
         }
       >
         {/* Titre */}
-        <Text style={styles.title}>Mes billets</Text>
+        <Text style={styles.title}>{t("tickets.title")}</Text>
 
         {/* Onglets */}
         <View style={styles.tabContainer}>
@@ -419,7 +536,7 @@ const MesBillets = () => {
                   : styles.inactiveTabText,
               ]}
             >
-              À venir
+              {t("tickets.tabs.upcoming")}
             </Text>
           </Pressable>
           <Pressable
@@ -437,7 +554,7 @@ const MesBillets = () => {
                   : styles.inactiveTabText,
               ]}
             >
-              Passés
+              {t("tickets.tabs.past")}
             </Text>
           </Pressable>
         </View>
@@ -448,11 +565,11 @@ const MesBillets = () => {
             <View style={styles.emptyState}>
               <Text style={styles.emptyStateText}>
                 {activeTab === "upcoming"
-                  ? "Aucune réservation à venir"
-                  : "Aucune réservation passée"}
+                  ? t("tickets.emptyState.upcoming")
+                  : t("tickets.emptyState.past")}
               </Text>
               <Text style={styles.emptyStateSubtext}>
-                Vos réservations apparaîtront ici
+                {t("tickets.emptyState.subtitle")}
               </Text>
             </View>
           ) : (
@@ -543,7 +660,7 @@ const MesBillets = () => {
                   (b) => b.devisHtml === selectedQuoteHtml
                 );
                 if (currentBooking) {
-                  updateQuoteStatus(currentBooking.id, "refusée");
+                  handleRefuseQuote(currentBooking);
                 }
               }}
               style={{
@@ -576,7 +693,7 @@ const MesBillets = () => {
                   (b) => b.devisHtml === selectedQuoteHtml
                 );
                 if (currentBooking) {
-                  updateQuoteStatus(currentBooking.id, "acceptée");
+                  handleSignQuote(currentBooking);
                 }
               }}
               style={{
@@ -596,7 +713,9 @@ const MesBillets = () => {
                     fontSize: 16,
                   }}
                 >
-                  Signer le devis
+                  {paymentAmount > 0
+                    ? `Payer ${paymentAmount}€`
+                    : "Signer le devis"}
                 </Text>
               )}
             </Pressable>
@@ -869,5 +988,19 @@ const styles = StyleSheet.create({
     height: 70,
   },
 });
+
+// Wrapper avec StripeProvider
+const MesBillets = () => {
+  return (
+    <StripeProvider
+      publishableKey={
+        process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
+        "pk_test_51Qpq8wBSY0X9i4dEBr3Hz3rb7sHO4qtiLsLhRoWvhkbJ06ktGj9pId6JcYy0BeMR3eM5aSZzqu0VPnN31457PHhP00jlFpcSN0"
+      }
+    >
+      <MesBilletsContent />
+    </StripeProvider>
+  );
+};
 
 export default MesBillets;

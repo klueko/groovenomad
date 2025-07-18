@@ -28,11 +28,13 @@ import {
 } from "lucide-react-native";
 import { FestiFunColors, FestiFunTypography } from "../lib/design-system";
 import { FestivalMatch } from "../lib/festival-matcher";
+import { useTranslation } from "../lib/useTranslation";
 
 const { width } = Dimensions.get("window");
 
 export default function FestivalDetailScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
 
   // Récupérer les vraies données du festival depuis les paramètres
@@ -440,7 +442,9 @@ export default function FestivalDetailScreen() {
 
           {/* Section amis */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Retrouve tes Kopins</Text>
+            <Text style={styles.sectionTitle}>
+              {t("festivalDetail.friends.title")}
+            </Text>
             <View style={styles.friendsContainer}>
               <View style={styles.friendsAvatars}>
                 {mockFriends.map((friend, index) => (
@@ -456,21 +460,27 @@ export default function FestivalDetailScreen() {
                 ))}
               </View>
               <View style={styles.friendsInfo}>
-                <Text style={styles.friendsCount}>+ 3 personnes</Text>
-                <Text style={styles.friendsTotal}> et 10 905 persones</Text>
+                <Text style={styles.friendsCount}>
+                  {t("festivalDetail.friends.count")}
+                </Text>
+                <Text style={styles.friendsTotal}>
+                  {t("festivalDetail.friends.total")}
+                </Text>
               </View>
             </View>
           </View>
 
           {/* Section à propos */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>À propos</Text>
+            <Text style={styles.sectionTitle}>{t("festivalDetail.about")}</Text>
             <Text style={styles.description}>{festivalData.description}</Text>
           </View>
 
           {/* Line up */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Line up</Text>
+            <Text style={styles.sectionTitle}>
+              {t("festivalDetail.lineup")}
+            </Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -490,7 +500,9 @@ export default function FestivalDetailScreen() {
 
           {/* Genres */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Genre</Text>
+            <Text style={styles.sectionTitle}>
+              {t("festivalDetail.genres")}
+            </Text>
             <View style={styles.genresContainer}>
               {festivalData.genres.map((genre, index) => (
                 <View key={index} style={styles.genreTag}>
@@ -546,7 +558,7 @@ export default function FestivalDetailScreen() {
                     })}
                   </View>
                   <Text style={styles.reviewCount}>
-                    ({mockReviews.length} Avis)
+                    ({mockReviews.length} {t("festivalDetail.reviews")})
                   </Text>
                 </View>
               </View>
@@ -595,7 +607,9 @@ export default function FestivalDetailScreen() {
               })
             }
           >
-            <Text style={styles.reserveButtonText}>Réserver mon séjour</Text>
+            <Text style={styles.reserveButtonText}>
+              {t("festivalDetail.bookStay")}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
