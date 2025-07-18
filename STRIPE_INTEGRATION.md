@@ -50,18 +50,6 @@ Cette intégration permet aux utilisateurs de signer et payer leurs devis direct
 
 - Types pour les variables d'environnement Stripe
 
-## Variables d'environnement requises
-
-```env
-# Stripe Configuration
-STRIPE_PUBLIC_KEY=pk_test_51Qpq8wBSY0X9i4dEBr3Hz3rb7sHO4qtiLsLhRoWvhkbJ06ktGj9pId6JcYy0BeMR3eM5aSZzqu0VPnN31457PHhP00jlFpcSN0
-STRIPE_SECRET_KEY=sk_test_51Qpq8wBSY0X9i4dEUMS8t8sSqfa9nXLU3oPxPvO3fzkyeDlQIEh8ds8CJqrT9yhiaHFx5HZtsoFbLHRia8sXsZRF00G9vx17IU
-STRIPE_WEBHOOK_SECRET=whsec_318ef50d7f53ed35cdfa6afc16dcd5bdbd87b01b2b8977d7c9e73ba290ae48b6
-
-# Expo Public Keys (pour React Native)
-EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51Qpq8wBSY0X9i4dEBr3Hz3rb7sHO4qtiLsLhRoWvhkbJ06ktGj9pId6JcYy0BeMR3eM5aSZzqu0VPnN31457PHhP00jlFpcSN0
-```
-
 ## Flux de paiement
 
 1. **Affichage du devis** : L'utilisateur consulte son devis dans l'app

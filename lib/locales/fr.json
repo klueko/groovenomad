@@ -310,6 +310,20 @@
       "km": "km"
     }
   },
+  "travelConfig": {
+    "title": "Configurer un trajet",
+    "subtitle": "Converser pour sélectionner l'étape qui vous convient",
+    "inputPlaceholder": "Message...",
+    "transport": "transport",
+    "toolCalls": {
+      "searchAirports": "Recherche d'aéroports",
+      "searchFlights": "Recherche de vols",
+      "searchTrains": "Recherche de trains",
+      "searchBuses": "Recherche de bus",
+      "validation": "Option de",
+      "searching": "Recherche en cours..."
+    }
+  },
   "alerts": {
     "compris": "Compris",
     "modifier": "Modifier",

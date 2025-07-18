@@ -27,6 +27,7 @@ import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
 import { LinearGradient } from "expo-linear-gradient";
 import Markdown from "react-native-markdown-display";
 import { useChat } from "react-native-vercel-ai";
+import { useTranslation } from "../lib/useTranslation";
 
 // Types pour le chat
 type TravelOption = {
@@ -38,6 +39,7 @@ type TravelOption = {
 
 export default function TravelConfig() {
   const router = useRouter();
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -382,11 +384,11 @@ export default function TravelConfig() {
             >
               <ArrowLeft size={24} color={FestiFunColors.background} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Configurer un trajet</Text>
+            <Text style={styles.headerTitle}>{t("travelConfig.title")}</Text>
             <View style={styles.headerSpacer} />
           </View>
           <Text style={styles.headerSubtitle}>
-            Converser pour sélectionner l'étape qui vous convient
+            {t("travelConfig.subtitle")}
           </Text>
         </LinearGradient>
 
@@ -446,34 +448,44 @@ export default function TravelConfig() {
                                 const getToolLabel = () => {
                                   switch (toolCall.toolName) {
                                     case "searchAirports":
-                                      return `Recherche d'aéroports : ${
-                                        toolCall.args?.keyword || "..."
-                                      }`;
+                                      return `${t(
+                                        "travelConfig.toolCalls.searchAirports"
+                                      )} : ${toolCall.args?.keyword || "..."}`;
                                     case "searchFlights":
-                                      return `Recherche de vols : ${
+                                      return `${t(
+                                        "travelConfig.toolCalls.searchFlights"
+                                      )} : ${
                                         toolCall.args?.origin || "..."
                                       } → ${
                                         toolCall.args?.destination || "..."
                                       }`;
                                     case "searchTrains":
-                                      return `Recherche de trains : ${
+                                      return `${t(
+                                        "travelConfig.toolCalls.searchTrains"
+                                      )} : ${
                                         toolCall.args?.origin || "..."
                                       } → ${
                                         toolCall.args?.destination || "..."
                                       }`;
                                     case "searchBuses":
-                                      return `Recherche de bus : ${
+                                      return `${t(
+                                        "travelConfig.toolCalls.searchBuses"
+                                      )} : ${
                                         toolCall.args?.origin || "..."
                                       } → ${
                                         toolCall.args?.destination || "..."
                                       }`;
                                     case "createBookingValidation":
-                                      return `Option de ${
+                                      return `${t(
+                                        "travelConfig.toolCalls.validation"
+                                      )} ${
                                         toolCall.args?.transportType ||
-                                        "transport"
-                                      } sélectionnée`;
+                                        t("travelConfig.transport")
+                                      }`;
                                     default:
-                                      return "Recherche en cours...";
+                                      return t(
+                                        "travelConfig.toolCalls.searching"
+                                      );
                                   }
                                 };
 
@@ -686,7 +698,7 @@ export default function TravelConfig() {
                 style={styles.textInput}
                 value={input}
                 onChangeText={setInput}
-                placeholder="Message..."
+                placeholder={t("travelConfig.inputPlaceholder")}
                 placeholderTextColor={FestiFunColors.textOnDark + "60"}
                 multiline
                 maxLength={500}

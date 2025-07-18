@@ -310,6 +310,20 @@
       "km": "km"
     }
   },
+  "travelConfig": {
+    "title": "Configure a trip",
+    "subtitle": "Chat to select the step that suits you",
+    "inputPlaceholder": "Message...",
+    "transport": "transport",
+    "toolCalls": {
+      "searchAirports": "Airport search",
+      "searchFlights": "Flight search",
+      "searchTrains": "Train search",
+      "searchBuses": "Bus search",
+      "validation": "Option of",
+      "searching": "Searching..."
+    }
+  },
   "alerts": {
     "compris": "Got it",
     "modifier": "Edit",

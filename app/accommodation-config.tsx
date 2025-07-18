@@ -19,9 +19,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useChat } from "react-native-vercel-ai";
 import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
 import Markdown from "react-native-markdown-display";
+import { useTranslation } from "../lib/useTranslation";
 
 export default function AccommodationConfig() {
   const router = useRouter();
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const scrollViewRef = useRef<ScrollView>(null);
 

@@ -310,6 +310,20 @@
       "km": "km"
     }
   },
+  "travelConfig": {
+    "title": "Configurar un viaje",
+    "subtitle": "Conversa para seleccionar el paso que te conviene",
+    "inputPlaceholder": "Mensaje...",
+    "transport": "transporte",
+    "toolCalls": {
+      "searchAirports": "Búsqueda de aeropuertos",
+      "searchFlights": "Búsqueda de vuelos",
+      "searchTrains": "Búsqueda de trenes",
+      "searchBuses": "Búsqueda de autobuses",
+      "validation": "Opción de",
+      "searching": "Buscando..."
+    }
+  },
   "alerts": {
     "compris": "Entendido",
     "modifier": "Editar",
