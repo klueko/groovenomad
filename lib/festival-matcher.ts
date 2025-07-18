@@ -87,10 +87,6 @@ class FestivalMatcher {
     options: FestivalMatchingOptions = {}
   ): Promise<FestivalMatch[]> {
     try {
-      console.log(
-        "🎯 Recherche intelligente de festivals basée sur les préférences stockées"
-      );
-
       if (!storedPreferences) {
         console.error("❌ Aucune préférence musicale fournie");
         return [];
@@ -109,15 +105,9 @@ class FestivalMatcher {
       const userLocation = await geoSearchService.getUserLocation(
         musicPreferences.profile
       );
-      console.log("📍 Localisation utilisateur:", userLocation);
 
       // 3. Extraire les genres préférés
       const userGenres = this.extractGenresFromPreferences(musicPreferences);
-      console.log(
-        "🎵 Genres utilisateur:",
-        userGenres.slice(0, 10),
-        `... (${userGenres.length} total)`
-      );
 
       // 4. Effectuer une recherche concentrique (proche vers loin)
       const geoResults = await this.performIntelligentGeoSearch(
@@ -152,10 +142,6 @@ class FestivalMatcher {
       const uniqueMatches = this.removeDuplicateEvents(allMatches);
       const finalMatches = uniqueMatches.slice(0, options.maxResults || 20);
 
-      console.log(
-        `✅ ${finalMatches.length} festivals uniques sélectionnés sur ${allMatches.length} trouvés`
-      );
-
       return finalMatches;
     } catch (error) {
       console.error("❌ Erreur lors de la recherche de festivals:", error);
@@ -168,8 +154,6 @@ class FestivalMatcher {
     userGenres: string[],
     options: FestivalMatchingOptions
   ): Promise<GeoSearchResult<FestivalRecommendation>[]> {
-    console.log("🌍 Début de la recherche géographique concentrique...");
-
     // Fonction de recherche pour chaque zone
     const searchFunction = async (
       filters: FestivalSearchFilters
@@ -194,9 +178,6 @@ class FestivalMatcher {
       baseFilters
     );
 
-    console.log(
-      `🎯 Recherche concentrique terminée: ${results.length} zones avec résultats`
-    );
     return results;
   }
 
@@ -227,17 +208,9 @@ class FestivalMatcher {
         // Fusionner les événements multiples
         const mergedEvent = this.mergeFestivalEvents(events);
         merged.push(mergedEvent);
-        console.log(
-          `🔗 Fusion de ${
-            events.length
-          } événements pour "${this.extractFestivalMainName(events[0].name)}"`
-        );
       }
     }
 
-    console.log(
-      `🔄 Suppression et fusion des doublons: ${matches.length} -> ${merged.length} événements`
-    );
     return merged.sort((a, b) => b.matchScore - a.matchScore); // Re-trier par score
   }
 
@@ -555,12 +528,6 @@ class FestivalMatcher {
       const geographicBonus = (distanceScore - 0.5) * zoneMultiplier * 0.3; // Max 30% de bonus/malus
 
       score += geographicBonus;
-
-      console.log(
-        `🌍 Score géographique pour ${
-          event.name
-        } (${eventCity}, ${eventCountry}): ${geographicBonus.toFixed(2)}`
-      );
     }
 
     // Bonus saisonnier

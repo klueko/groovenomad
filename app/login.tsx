@@ -107,7 +107,13 @@ export default function FestiFunLoginScreen() {
 
     // Nettoyage lors du démontage
     return () => {
-      player.pause();
+      try {
+        if (player && typeof player.pause === "function") {
+          player.pause();
+        }
+      } catch (error) {
+        console.warn("⚠️ Erreur lors de l'arrêt de l'audio Pedro:", error);
+      }
     };
   }, [player]);
 

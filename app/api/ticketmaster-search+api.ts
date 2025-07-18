@@ -1,7 +1,5 @@
 export async function POST(request: Request) {
   try {
-    console.log("🎫 Recherche Ticketmaster côté serveur...");
-
     // Vérifier que la clé API est disponible côté serveur
     const apiKey = process.env.TICKETMASTER_API_KEY;
     if (!apiKey) {
@@ -26,14 +24,6 @@ export async function POST(request: Request) {
       startDate,
       endDate,
     } = body;
-
-    console.log("🔍 Paramètres de recherche:", {
-      genres: genres?.length || 0,
-      countryCode,
-      city,
-      size,
-      page,
-    });
 
     // Construire les paramètres de la requête Ticketmaster
     const params = new URLSearchParams({
@@ -198,7 +188,6 @@ export async function POST(request: Request) {
 
     // Faire l'appel à l'API Ticketmaster
     const ticketmasterUrl = `https://app.ticketmaster.com/discovery/v2/events.json?${params.toString()}`;
-    console.log("🌐 Appel Ticketmaster:", ticketmasterUrl);
 
     const ticketmasterResponse = await fetch(ticketmasterUrl);
 
@@ -217,8 +206,6 @@ export async function POST(request: Request) {
     }
 
     const data = await ticketmasterResponse.json();
-
-    console.log("✅ Événements trouvés:", data._embedded?.events?.length || 0);
 
     // Retourner les données (sans exposer la clé API)
     return new Response(JSON.stringify(data), {

@@ -168,7 +168,6 @@ class GeoSearchService {
       }
     }
 
-    console.log("📍 Localisation utilisateur déterminée:", location);
     return location;
   }
 
@@ -202,13 +201,7 @@ class GeoSearchService {
     const results: GeoSearchResult<T>[] = [];
     const zones = this.createPersonalizedSearchZones(userLocation);
 
-    console.log("🎯 Début de la recherche concentrique...");
-
     for (const zone of zones) {
-      console.log(
-        `🔍 Recherche dans la zone: ${zone.name} (${zone.description})`
-      );
-
       // Chercher dans chaque pays de la zone
       for (const countryCode of zone.countries) {
         try {
@@ -225,10 +218,6 @@ class GeoSearchService {
               zone,
               totalFound: items.length,
             });
-
-            console.log(
-              `✅ ${items.length} événements trouvés en ${countryCode}`
-            );
           }
         } catch (error) {
           console.error(`❌ Erreur recherche ${countryCode}:`, error);
@@ -244,9 +233,6 @@ class GeoSearchService {
         .reduce((sum, r) => sum + r.totalFound, 0);
 
       if (totalInZone >= 20) {
-        console.log(
-          `🎉 Assez de résultats trouvés dans ${zone.name}, arrêt des recherches étendues`
-        );
         break;
       }
     }
@@ -323,12 +309,6 @@ class GeoSearchService {
         if (distance < 100) baseScore += 0.2;
         else if (distance < 300) baseScore += 0.1;
         else if (distance < 500) baseScore += 0.05;
-
-        console.log(
-          `📏 Distance ${userLocation.city} -> ${eventCity}: ${Math.round(
-            distance
-          )}km (score: +${baseScore > 1 ? (baseScore - 1).toFixed(2) : "0"})`
-        );
       }
     }
 

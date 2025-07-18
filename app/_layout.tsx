@@ -117,19 +117,36 @@ export default function RootLayout() {
           presentation: "modal",
         }}
       />
-      <Stack.Screen
-        name="trip-planning-detail"
-        options={{
-          headerShown: false,
-          title: "Détail Planification de Voyage",
-        }}
-      />
+
       <Stack.Screen
         name="travel-config"
         options={{
           headerShown: false,
           title: "Configuration Voyage",
           presentation: "modal",
+        }}
+      />
+      <Stack.Screen
+        name="accommodation-config"
+        options={{
+          headerShown: false,
+          title: "Configuration Logement",
+          presentation: "modal",
+        }}
+      />
+      <Stack.Screen
+        name="activity-config"
+        options={{
+          headerShown: false,
+          title: "Configuration Activité",
+          presentation: "modal",
+        }}
+      />
+      <Stack.Screen
+        name="mes-billets"
+        options={{
+          headerShown: false,
+          title: "Mes Billets",
         }}
       />
     </Stack>

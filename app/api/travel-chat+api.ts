@@ -334,6 +334,67 @@ function getMockAirports(keyword: string) {
         country: "Netherlands",
       },
     ],
+    // Belgique
+    bruxelles: [
+      {
+        iataCode: "BRU",
+        name: "Brussels Airport",
+        city: "Brussels",
+        country: "Belgium",
+      },
+      {
+        iataCode: "CRL",
+        name: "Brussels South Charleroi Airport",
+        city: "Charleroi",
+        country: "Belgium",
+      },
+    ],
+    brussels: [
+      {
+        iataCode: "BRU",
+        name: "Brussels Airport",
+        city: "Brussels",
+        country: "Belgium",
+      },
+      {
+        iataCode: "CRL",
+        name: "Brussels South Charleroi Airport",
+        city: "Charleroi",
+        country: "Belgium",
+      },
+    ],
+    ostende: [
+      {
+        iataCode: "OST",
+        name: "Ostend-Bruges International Airport",
+        city: "Ostend",
+        country: "Belgium",
+      },
+    ],
+    ostend: [
+      {
+        iataCode: "OST",
+        name: "Ostend-Bruges International Airport",
+        city: "Ostend",
+        country: "Belgium",
+      },
+    ],
+    nieuwpoort: [
+      {
+        iataCode: "OST",
+        name: "Ostend-Bruges International Airport",
+        city: "Ostend",
+        country: "Belgium",
+      },
+    ],
+    toulouse: [
+      {
+        iataCode: "TLS",
+        name: "Toulouse-Blagnac Airport",
+        city: "Toulouse",
+        country: "France",
+      },
+    ],
   };
 
   // Recherche exacte
@@ -378,11 +439,8 @@ const searchAirports = tool({
     keyword: z.string().describe("Ville ou nom d'aéroport à rechercher"),
   }),
   execute: async ({ keyword }) => {
-    console.log(`🏢 [searchAirports] Début recherche pour: "${keyword}"`);
     try {
-      console.log("🔑 [searchAirports] Récupération token Amadeus...");
       const token = await getAmadeusToken();
-      console.log("✅ [searchAirports] Token obtenu");
 
       const params = new URLSearchParams({
         keyword: keyword,
@@ -456,12 +514,21 @@ const searchAirports = tool({
         return mockResult;
       }
 
-      console.log("💥 [searchAirports] Retour d'erreur - pas de données");
-      return {
-        success: false,
-        error: "Impossible de rechercher les aéroports pour le moment",
-        airports: [],
+      console.log(
+        "🔄 [searchAirports] Erreur API - Utilisation de données mock"
+      );
+      const mockAirports = getMockAirports(keyword);
+      const mockResult = {
+        success: true,
+        airports: mockAirports,
+        message: `Aéroports trouvés pour "${keyword}" (données de démonstration)`,
       };
+      console.log(
+        `🎭 [searchAirports] Mock result:`,
+        mockResult.airports.length,
+        "aéroports"
+      );
+      return mockResult;
     }
   },
 });
@@ -543,23 +610,39 @@ const searchBuses = tool({
 // Tool pour créer un bouton de validation de réservation
 const createBookingValidation = tool({
   description:
-    "Créer un bouton de validation pour permettre à l'utilisateur de confirmer et réserver une option de transport spécifique. Utilise cette fonction quand l'utilisateur exprime une préférence pour une option particulière ou demande à réserver/valider un choix.",
+    "UNIQUEMENT utiliser quand l'utilisateur a explicitement choisi une option spécifique parmi celles proposées. NE PAS utiliser avec des données inventées ou génériques. L'utilisateur doit avoir dit quelque chose comme 'je prends l'option 1', 'je choisis le vol de 8h30', etc.",
   parameters: z.object({
     transportType: z
       .enum(["flight", "train", "bus"])
-      .describe("Type de transport choisi"),
+      .describe("Type de transport choisi par l'utilisateur"),
     optionDetails: z
       .object({
-        id: z.string().describe("Identifiant de l'option choisie"),
-        company: z.string().describe("Compagnie de transport"),
-        price: z.string().describe("Prix affiché (ex: '98,16€')"),
-        departureTime: z.string().describe("Heure de départ"),
-        arrivalTime: z.string().describe("Heure d'arrivée"),
-        duration: z.string().describe("Durée du trajet"),
-        origin: z.string().describe("Lieu de départ"),
-        destination: z.string().describe("Lieu d'arrivée"),
+        id: z
+          .string()
+          .describe(
+            "ID EXACT de l'option choisie par l'utilisateur (pas d'invention)"
+          ),
+        company: z
+          .string()
+          .describe("Compagnie RÉELLE de l'option sélectionnée"),
+        price: z
+          .string()
+          .describe("Prix EXACT affiché dans l'option sélectionnée"),
+        departureTime: z
+          .string()
+          .describe("Heure de départ EXACTE de l'option sélectionnée"),
+        arrivalTime: z
+          .string()
+          .describe("Heure d'arrivée EXACTE de l'option sélectionnée"),
+        duration: z.string().describe("Durée EXACTE de l'option sélectionnée"),
+        origin: z.string().describe("Origine EXACTE de l'option sélectionnée"),
+        destination: z
+          .string()
+          .describe("Destination EXACTE de l'option sélectionnée"),
       })
-      .describe("Détails de l'option de transport sélectionnée"),
+      .describe(
+        "Détails EXACTS de l'option réellement sélectionnée par l'utilisateur"
+      ),
     contextInfo: z
       .object({
         festivalName: z.string().describe("Nom du festival"),
@@ -577,6 +660,26 @@ const createBookingValidation = tool({
       `✅ [createBookingValidation] Validation créée pour ${transportType}:`,
       optionDetails
     );
+
+    // Vérifier que les données ne sont pas génériques/inventées
+    const isGenericData =
+      optionDetails.id.includes("user-selection") ||
+      optionDetails.company.includes("Option sélectionnée") ||
+      optionDetails.price.includes("Prix confirmé") ||
+      optionDetails.departureTime.includes("Heure confirmée");
+
+    if (isGenericData) {
+      console.warn(
+        "⚠️ [createBookingValidation] Données génériques détectées - validation annulée"
+      );
+      return {
+        success: false,
+        error:
+          "Données génériques détectées. L'utilisateur doit d'abord choisir une option spécifique.",
+        message:
+          "Peux-tu d'abord me dire quelle option tu souhaites choisir parmi celles que je t'ai proposées ?",
+      };
+    }
 
     return {
       success: true,
@@ -679,39 +782,26 @@ Contexte du voyage :
       })
     );
 
-    const systemPrompt = `Tu es Pedro, l'assistant IA de FestiFun, expert en planification de voyages pour festivals.
-
-Tu aides les utilisateurs à configurer leurs trajets avec enthusiasme et expertise. Tu DOIS OBLIGATOIREMENT utiliser les outils disponibles pour rechercher des options de transport.
+    const systemPrompt = `Tu es Pedro, assistant voyage pour festivals. Utilise les outils UNIQUEMENT quand c'est nécessaire et avec de vraies données.
 
 ${travelContext}
 
-Instructions IMPORTANTES :
-1. Sois enthousiaste et utilise des emojis
-2. DÈS que l'utilisateur mentionne UNE SEULE ville/aéroport, utilise IMMÉDIATEMENT searchAirports
-3. Si l'utilisateur mentionne 2 villes (origine + destination), recherche les aéroports pour les DEUX immédiatement
-4. Pour les vols : utilise TOUJOURS searchFlights avec les codes IATA
-5. Pour les trains : utilise TOUJOURS searchTrains avec les noms de villes
-6. Pour les bus : utilise TOUJOURS searchBuses avec les noms de villes
-7. Présente les résultats de manière claire et attractive
-8. QUAND l'utilisateur exprime une préférence pour une option spécifique (ex: "je prends l'option 1", "je choisis le vol à 98€", "je veux le train de 10h"), utilise IMMÉDIATEMENT createBookingValidation avec tous les détails de l'option choisie
-9. N'hésite JAMAIS à utiliser les outils - c'est ton travail principal !
-10. RÈGLE ABSOLUE : Tu DOIS TOUJOURS écrire un message d'accompagnement même quand tu utilises des outils. Ne jamais laisser le message vide !
+RÈGLES D'UTILISATION DES OUTILS :
+1. searchAirports → SEULEMENT si l'utilisateur mentionne une ville et que tu ne connais pas le code IATA
+2. searchFlights/searchTrains/searchBuses → SEULEMENT si l'utilisateur veut chercher des trajets entre 2 lieux précis
+3. createBookingValidation → SEULEMENT si l'utilisateur a explicitement choisi UNE option parmi celles proposées
 
-Outils OBLIGATOIRES à utiliser :
-- searchAirports : TOUJOURS utiliser pour trouver des codes d'aéroport
-- searchFlights : TOUJOURS utiliser pour rechercher des vols avec codes IATA
-- searchTrains : TOUJOURS utiliser pour rechercher des trains
-- searchBuses : TOUJOURS utiliser pour rechercher des bus
-- createBookingValidation : UTILISER quand l'utilisateur exprime une préférence pour une option spécifique ou demande à valider/réserver un choix
+INTERDICTIONS ABSOLUES :
+- Ne JAMAIS utiliser createBookingValidation avec des données inventées ou génériques
+- Ne JAMAIS dire "je valide" sans que l'utilisateur ait choisi une option spécifique
+- Ne JAMAIS créer de validation automatique juste parce que l'utilisateur dit "oui" de manière générale
+- Ne JAMAIS écrire de JSON ou <!-- TOOL_CALLS --> dans ta réponse
 
-RÈGLE ABSOLUE : Si l'utilisateur demande une recherche de transport, tu DOIS utiliser les outils correspondants. Ne jamais donner de réponse générique sans recherche.
+VALIDATION UNIQUEMENT SI :
+- L'utilisateur dit "je prends l'option 1" ou "je choisis le vol de 8h30" ou similaire
+- Tu as les données EXACTES de l'option qu'il a choisie (prix réel, horaires réels, etc.)
 
-IMPORTANT : Même quand tu utilises des outils, tu DOIS toujours écrire un message pour expliquer ce que tu fais. Exemples :
-- "✈️ Super ! Je recherche les aéroports pour Paris et Toulouse..."
-- "🔍 Parfait ! Je cherche des vols pour toi..."
-- "🚆 Excellente idée le train ! Je regarde les horaires..."
-
-Réponds toujours en français avec un ton amical et professionnel.`;
+Si l'utilisateur dit juste "oui" ou "ok" sans préciser quelle option, demande-lui de clarifier son choix.`;
 
     if (isReactNative) {
       // Pour React Native : utiliser generateText (sans streaming)
@@ -770,13 +860,65 @@ Réponds toujours en français avec un ton amical et professionnel.`;
 
       console.log("📋 [Tool Calls] Total capturés:", toolCallsData.length);
 
+      // Nettoyer le contenu de l'IA pour supprimer les marqueurs manuels qu'elle aurait pu générer
+      let cleanedText = result.text;
+
+      // Détecter et supprimer les marqueurs manuels générés par l'IA
+      const manualMarkerMatch = cleanedText.match(
+        /<!-- TOOL_CALLS:\s*\[.*?\]\s*-->/s
+      );
+      if (manualMarkerMatch) {
+        console.log(
+          "⚠️ [API] IA a généré un marqueur manuel - suppression:",
+          manualMarkerMatch[0].substring(0, 100) + "..."
+        );
+        cleanedText = cleanedText
+          .replace(/<!-- TOOL_CALLS:\s*\[.*?\]\s*-->/gs, "")
+          .trim();
+
+        // Si l'IA a généré manuellement un marqueur mais qu'on n'a pas de vrais tool calls,
+        // on peut essayer de parser son marqueur pour récupérer l'intention
+        if (toolCallsData.length === 0) {
+          try {
+            const manualToolCallsJson =
+              manualMarkerMatch[0].match(/\[(.*)\]/s)?.[1];
+            if (manualToolCallsJson) {
+              console.log(
+                "🔧 [API] Tentative de récupération du tool call manuel:",
+                manualToolCallsJson
+              );
+              const manualToolCalls = JSON.parse(
+                "[" + manualToolCallsJson + "]"
+              );
+              toolCallsData.push(
+                ...manualToolCalls.map((call: any, index: number) => ({
+                  id: call.id || `manual-${index}`,
+                  toolName: call.toolName,
+                  args: call.args,
+                  state: "result",
+                }))
+              );
+              console.log(
+                "✅ [API] Tool calls manuels récupérés:",
+                toolCallsData.length
+              );
+            }
+          } catch (error) {
+            console.log(
+              "❌ [API] Impossible de parser le marqueur manuel:",
+              error
+            );
+          }
+        }
+      }
+
       // Créer un marqueur spécial dans le contenu pour les tool calls
-      let enhancedContent = result.text;
+      let enhancedContent = cleanedText;
       if (toolCallsData.length > 0) {
         const toolCallsMarker = `\n\n<!-- TOOL_CALLS:${JSON.stringify(
           toolCallsData
         )} -->`;
-        enhancedContent = toolCallsMarker + "\n\n" + result.text;
+        enhancedContent = toolCallsMarker + "\n\n" + cleanedText;
       }
 
       // Retourner le format attendu par react-native-vercel-ai

@@ -201,8 +201,6 @@ class TicketmasterService {
     filters: FestivalSearchFilters = {}
   ): Promise<TicketmasterResponse | null> {
     try {
-      console.log("🎫 Recherche de festivals via notre API sécurisée...");
-
       // Préparer les paramètres pour notre API
       const searchParams = {
         genres: filters.genres || [],
@@ -213,8 +211,6 @@ class TicketmasterService {
         startDate: filters.startDate,
         endDate: filters.endDate,
       };
-
-      console.log("🔍 Paramètres de recherche:", searchParams);
 
       // Appeler notre API sécurisée au lieu de Ticketmaster directement
       const baseURL =
@@ -234,7 +230,6 @@ class TicketmasterService {
       }
 
       const data = await response.json();
-      console.log("✅ Festivals trouvés:", data._embedded?.events?.length || 0);
 
       return data;
     } catch (error) {
@@ -248,11 +243,6 @@ class TicketmasterService {
     filters: FestivalSearchFilters = {}
   ): Promise<FestivalRecommendation[]> {
     try {
-      console.log(
-        "🎵 Recherche de recommandations basées sur les genres:",
-        userGenres
-      );
-
       const searchFilters = {
         ...filters,
         genres: userGenres,
@@ -282,7 +272,6 @@ class TicketmasterService {
       // Trier par score de correspondance décroissant
       recommendations.sort((a, b) => b.matchScore - a.matchScore);
 
-      console.log("✅ Recommandations générées:", recommendations.length);
       return recommendations;
     } catch (error) {
       console.error(

@@ -26,6 +26,9 @@ export default function BottomNavigation({
         case "home":
           router.push("/home");
           break;
+        case "tickets":
+          router.push("/mes-billets");
+          break;
         case "profile":
           router.push("/music-profile");
           break;
@@ -68,11 +71,7 @@ export default function BottomNavigation({
           <Map size={24} color="#ad9cbb" />,
           <Map size={24} color={FestiFunColors.background} />
         )}
-        {renderNavItem(
-          "search",
-          <Search size={24} color="#ad9cbb" />,
-          <Search size={24} color={FestiFunColors.background} />
-        )}
+
         {renderNavItem(
           "tickets",
           <Ticket size={24} color="#ad9cbb" />,

@@ -25,6 +25,7 @@ import {
 } from "../lib/festival-matcher";
 import { userPreferencesService } from "../lib/user-preferences-service";
 import * as Location from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Import des nouveaux composants
 import BottomNavigation from "../components/BottomNavigation";
@@ -32,6 +33,10 @@ import FestivalCard from "../components/FestivalCard";
 import DateRangePicker from "../components/DateRangePicker";
 
 const { width, height } = Dimensions.get("window");
+
+// Constantes pour le cache
+const CACHE_KEY_PREFIX = "festival_cache_";
+const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 heures en millisecondes
 
 interface UserLocation {
   city: string;
@@ -41,6 +46,14 @@ interface UserLocation {
     latitude: number;
     longitude: number;
   };
+}
+
+interface CachedFestivalData {
+  festivals: FestivalMatch[];
+  availableGenres: string[];
+  userArtists: any[];
+  timestamp: number;
+  userId: string;
 }
 
 interface DateRange {
@@ -74,6 +87,86 @@ export default function HomeScreen() {
   // Fonction pour capitaliser la première lettre
   const capitalizeFirst = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
+
+  // Fonctions utilitaires pour le cache
+  const getCacheKey = (userId: string) => `${CACHE_KEY_PREFIX}${userId}`;
+
+  const isCacheValid = (timestamp: number): boolean => {
+    const now = Date.now();
+    return now - timestamp < CACHE_DURATION;
+  };
+
+  const saveFestivalsToCache = async (
+    userId: string,
+    festivals: FestivalMatch[],
+    availableGenres: string[],
+    userArtists: any[]
+  ) => {
+    try {
+      const cacheData: CachedFestivalData = {
+        festivals,
+        availableGenres,
+        userArtists,
+        timestamp: Date.now(),
+        userId,
+      };
+      await AsyncStorage.setItem(
+        getCacheKey(userId),
+        JSON.stringify(cacheData)
+      );
+      console.log(
+        "🗂️ [Cache] Données sauvegardées en cache pour l'utilisateur:",
+        userId
+      );
+    } catch (error) {
+      console.error("❌ [Cache] Erreur sauvegarde cache:", error);
+    }
+  };
+
+  const loadFestivalsFromCache = async (
+    userId: string
+  ): Promise<CachedFestivalData | null> => {
+    try {
+      const cachedData = await AsyncStorage.getItem(getCacheKey(userId));
+      if (!cachedData) {
+        console.log("🗂️ [Cache] Aucune donnée en cache trouvée");
+        return null;
+      }
+
+      const parsedData: CachedFestivalData = JSON.parse(cachedData);
+
+      // Vérifier si le cache est valide
+      if (!isCacheValid(parsedData.timestamp)) {
+        console.log("🗂️ [Cache] Cache expiré, suppression...");
+        await AsyncStorage.removeItem(getCacheKey(userId));
+        return null;
+      }
+
+      // Vérifier si c'est le bon utilisateur
+      if (parsedData.userId !== userId) {
+        console.log(
+          "🗂️ [Cache] Cache pour un autre utilisateur, suppression..."
+        );
+        await AsyncStorage.removeItem(getCacheKey(userId));
+        return null;
+      }
+
+      console.log("🗂️ [Cache] Données valides trouvées en cache");
+      return parsedData;
+    } catch (error) {
+      console.error("❌ [Cache] Erreur lecture cache:", error);
+      return null;
+    }
+  };
+
+  const clearFestivalsCache = async (userId: string) => {
+    try {
+      await AsyncStorage.removeItem(getCacheKey(userId));
+      console.log("🗂️ [Cache] Cache supprimé pour l'utilisateur:", userId);
+    } catch (error) {
+      console.error("❌ [Cache] Erreur suppression cache:", error);
+    }
   };
 
   // Fonction pour obtenir la géolocalisation
@@ -172,11 +265,26 @@ export default function HomeScreen() {
     }
   };
 
-  const loadHomeData = async () => {
+  const loadHomeData = async (forceRefresh: boolean = false) => {
     if (!session?.user) return;
 
     try {
       setLoading(true);
+
+      // Essayer de charger depuis le cache d'abord (sauf si refresh forcé)
+      if (!forceRefresh) {
+        const cachedData = await loadFestivalsFromCache(session.user.id);
+        if (cachedData) {
+          console.log("🗂️ [Cache] Utilisation des données en cache");
+          setFestivals(cachedData.festivals);
+          setAvailableGenres(cachedData.availableGenres);
+          setUserArtists(cachedData.userArtists);
+          setLoading(false);
+          return;
+        }
+      }
+
+      console.log("🔄 [API] Chargement des données depuis l'API...");
 
       // Récupérer les préférences utilisateur
       const preferences = await userPreferencesService.getUserMusicPreferences(
@@ -244,8 +352,6 @@ export default function HomeScreen() {
       // Trier par score de match décroissant
       uniqueFestivals.sort((a, b) => b.matchScore - a.matchScore);
 
-      setFestivals(uniqueFestivals);
-
       // Extraire les genres disponibles des festivals récupérés (filtres intelligents)
       const genresFromFestivals = new Set<string>();
       uniqueFestivals.forEach((festival) => {
@@ -261,12 +367,24 @@ export default function HomeScreen() {
         "Tous",
         ...Array.from(genresFromFestivals).sort(),
       ];
-      setAvailableGenres(availableGenresList);
 
-      // Charger tous les artistes de l'utilisateur (liste complète)
-      if (preferences?.selectedArtists) {
-        setUserArtists(preferences.selectedArtists);
-      }
+      // Préparer les artistes utilisateur
+      const userArtistsList = preferences?.selectedArtists || [];
+
+      // Mettre à jour l'état
+      setFestivals(uniqueFestivals);
+      setAvailableGenres(availableGenresList);
+      setUserArtists(userArtistsList);
+
+      // Sauvegarder en cache
+      await saveFestivalsToCache(
+        session.user.id,
+        uniqueFestivals,
+        availableGenresList,
+        userArtistsList
+      );
+
+      console.log("✅ [API] Données chargées et sauvegardées en cache");
     } catch (error) {
       console.error("❌ Erreur chargement données home:", error);
     } finally {
@@ -277,7 +395,7 @@ export default function HomeScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     await initializeLocation(); // Réactualiser aussi la localisation
-    await loadHomeData();
+    await loadHomeData(true); // Forcer le rechargement depuis l'API
     setRefreshing(false);
   };
 
@@ -320,7 +438,7 @@ export default function HomeScreen() {
       .slice(0, 8);
   };
 
-  const handleLocationChange = () => {
+  const handleLocationChange = async () => {
     if (newLocationCity.trim() && newLocationCountry.trim()) {
       setUserLocation({
         city: newLocationCity.trim(),
@@ -331,8 +449,13 @@ export default function HomeScreen() {
       setNewLocationCity("");
       setNewLocationCountry("");
 
+      // Vider le cache car la localisation a changé
+      if (session?.user) {
+        await clearFestivalsCache(session.user.id);
+      }
+
       // Recharger les données avec la nouvelle localisation
-      loadHomeData();
+      loadHomeData(true); // Forcer le rechargement
     } else {
       Alert.alert("Erreur", "Veuillez renseigner la ville et le pays");
     }
@@ -593,7 +716,11 @@ export default function HomeScreen() {
                 const location = await getCurrentLocation();
                 if (location) {
                   setUserLocation(location);
-                  loadHomeData();
+                  // Vider le cache car la localisation a changé
+                  if (session?.user) {
+                    await clearFestivalsCache(session.user.id);
+                  }
+                  loadHomeData(true); // Forcer le rechargement
                 }
               }}
             >
@@ -612,6 +739,8 @@ export default function HomeScreen() {
         onTabPress={(tab) => {
           if (tab === "profile") {
             router.push("/music-profile");
+          } else if (tab === "tickets") {
+            router.push("/mes-billets");
           }
           // Ajouter d'autres navigations au fur et à mesure
         }}

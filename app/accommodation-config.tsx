@@ -6,49 +6,34 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
+  TextInput,
+  Alert,
   Image,
   ImageBackground,
-  Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import {
-  ArrowLeft,
-  Plus,
-  Plane,
-  Train,
-  Bus,
-  Send,
-  Mic,
-} from "lucide-react-native";
-import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
+import { ArrowLeft, Send, Hotel, Plus, Mic } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import Markdown from "react-native-markdown-display";
 import { useChat } from "react-native-vercel-ai";
+import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
+import Markdown from "react-native-markdown-display";
 
-// Types pour le chat
-type TravelOption = {
-  type: "flight" | "train" | "bus";
-  icon: React.ReactNode;
-  label: string;
-  image: any;
-};
-
-export default function TravelConfig() {
+export default function AccommodationConfig() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Construire le contexte de voyage à partir des paramètres
-  const travelContext = {
+  // Construire le contexte de logement à partir des paramètres
+  const accommodationContext = {
     festivalName: params.festivalName,
     festivalLocation: params.festivalLocation,
-    departurePoint: params.departurePoint,
-    arrivalDate: params.arrivalDate,
-    departureDate: params.departureDate,
-    direction: params.direction,
+    cityCode: params.cityCode,
+    checkInDate: params.checkInDate,
+    checkOutDate: params.checkOutDate,
+    guests: params.guests,
+    rooms: params.rooms,
   };
 
   // État pour stocker les tool calls séparément
@@ -56,29 +41,34 @@ export default function TravelConfig() {
     Record<string, any[]>
   >({});
 
-  // Fonction pour gérer la validation d'une option de transport
+  // Fonction pour gérer la validation d'une option de logement
   const handleValidateOption = (validationCall: any) => {
     console.log("🎯 [Validation] Option sélectionnée:", validationCall);
 
-    // Extraire les détails du transport et du contexte
-    const { transportType, optionDetails, contextInfo } = validationCall.args;
+    // Adapter la structure des données pour correspondre à l'API actuelle
+    const args = validationCall.args;
+    const hotelInfo = {
+      hotelId: args.hotelId,
+      hotelName: args.hotelName,
+      rating: args.rating,
+      amenities: args.amenities,
+    };
+    const offerDetails = {
+      offerId: args.offerId,
+      roomType: args.roomType,
+      roomDescription: args.roomDescription,
+      price: args.price,
+      pricePerNight: args.pricePerNight,
+      checkInDate: args.checkInDate,
+      checkOutDate: args.checkOutDate,
+      nights: args.nights,
+      guests: args.guests,
+      cancellationPolicy: args.cancellationPolicy,
+    };
 
-    // Afficher un message de confirmation positif
     Alert.alert(
-      "🎉 Super choix !",
-      `Ton ${
-        transportType === "flight"
-          ? "vol"
-          : transportType === "train"
-          ? "train"
-          : "bus"
-      } avec ${optionDetails.company} est sélectionné !\n\n✈️ Prix: ${
-        optionDetails.price
-      }\n🗓️ Départ: ${optionDetails.departureTime}\n📍 ${
-        optionDetails.origin
-      } → ${
-        optionDetails.destination
-      }\n\nPassons maintenant à l'organisation de ton voyage !`,
+      "🏨 Super choix !",
+      `Ton logement ${hotelInfo.hotelName} est sélectionné !\n\n💰 Prix: ${offerDetails.price}\n🛏️ ${offerDetails.roomDescription}\n📅 ${offerDetails.checkInDate} → ${offerDetails.checkOutDate}\n\nPassons maintenant à l'organisation de ton voyage !`,
       [
         {
           text: "Continuer",
@@ -89,7 +79,7 @@ export default function TravelConfig() {
             );
 
             // Utiliser le context original au lieu du contextInfo incomplet de l'IA
-            const originalContext = travelContext;
+            const originalContext = accommodationContext;
 
             // ===== PRÉSERVER LES PARAMÈTRES EXISTANTS =====
             // Récupérer tous les paramètres actuels pour ne pas écraser les validations précédentes
@@ -104,46 +94,58 @@ export default function TravelConfig() {
               // ===== PRÉSERVER TOUS LES PARAMÈTRES EXISTANTS =====
               ...existingParams,
 
-              // ===== MISE À JOUR DES PARAMÈTRES DE BASE =====
-              // Paramètres du festival (individuels pour éviter les erreurs JSON)
-              festivalName: originalContext.festivalName,
-              festivalVenue: originalContext.festivalLocation,
-              festivalCity: originalContext.festivalLocation,
-              festivalCountry: "Belgique",
-              festivalStartDate: originalContext.arrivalDate, // 18 juillet (début du festival)
-              festivalEndDate: originalContext.departureDate, // 21 juillet (fin du festival)
+              // ===== ASSURER LA COMPATIBILITÉ AVEC TRIP-PLANNING =====
+              // Si pas de festivalVenue mais festivalLocation, l'ajouter pour la compatibilité
+              festivalVenue:
+                existingParams.festivalVenue || existingParams.festivalLocation,
+              festivalCity:
+                existingParams.festivalCity || existingParams.festivalLocation,
+              festivalCountry: existingParams.festivalCountry || "Belgique",
 
-              // Paramètres du voyage complet (requis par trip-planning)
-              arrivalDate: originalContext.arrivalDate, // 18 juillet (arrivée au festival)
-              departureDate: originalContext.departureDate, // 21 juillet (départ du festival)
-              personCount: existingParams.personCount || "1",
+              // ===== MAPPING DES DATES POUR LA COMPATIBILITÉ =====
+              // S'assurer que arrivalDate et departureDate sont présents
+              arrivalDate:
+                existingParams.arrivalDate || existingParams.checkInDate,
+              departureDate:
+                existingParams.departureDate || existingParams.checkOutDate,
+
+              // Dates du festival pour trip-planning
+              festivalStartDate:
+                existingParams.festivalStartDate ||
+                existingParams.arrivalDate ||
+                existingParams.checkInDate,
+              festivalEndDate:
+                existingParams.festivalEndDate ||
+                existingParams.departureDate ||
+                existingParams.checkOutDate,
+
+              // Paramètres requis pour trip-planning si manquants
+              personCount:
+                existingParams.personCount || existingParams.guests || "1",
               selectedTime: existingParams.selectedTime || "flexible",
-              departurePoint: optionDetails.origin,
+              departurePoint: existingParams.departurePoint || "Ma position",
 
-              // ===== NOUVELLES INFORMATIONS DE TRANSPORT =====
-              transportValidated: "true",
-              transportDirection: originalContext.direction, // "outbound" ou "return"
-              transportType: transportType,
-              transportCompany: optionDetails.company,
-              transportPrice: optionDetails.price,
-              transportDepartureTime: optionDetails.departureTime,
-              transportArrivalTime: optionDetails.arrivalTime,
-              transportDuration: optionDetails.duration,
-              transportOrigin: optionDetails.origin,
-              transportDestination: optionDetails.destination,
+              // ===== AJOUTER UNIQUEMENT LES NOUVELLES INFORMATIONS DE LOGEMENT =====
+              accommodationValidated: "true",
+              accommodationHotelId: hotelInfo.hotelId,
+              accommodationHotelName: hotelInfo.hotelName,
+              accommodationRating: hotelInfo.rating?.toString() || "0",
+              accommodationOfferId: offerDetails.offerId,
+              accommodationRoomType: offerDetails.roomType,
+              accommodationRoomDescription: offerDetails.roomDescription,
+              accommodationPrice: offerDetails.price,
+              accommodationPricePerNight: offerDetails.pricePerNight,
+              accommodationCheckIn: offerDetails.checkInDate,
+              accommodationCheckOut: offerDetails.checkOutDate,
+              accommodationNights: offerDetails.nights.toString(),
+              accommodationGuests: offerDetails.guests.toString(),
+              accommodationAmenities: hotelInfo.amenities?.join(",") || "",
+              accommodationCancellation: offerDetails.cancellationPolicy,
             };
 
             console.log(
               "📤 [Navigation] Paramètres envoyés:",
               JSON.stringify(navParams, null, 2)
-            );
-            console.log(
-              "🔍 [Context Info] ContextInfo de l'IA (incomplet):",
-              JSON.stringify(contextInfo, null, 2)
-            );
-            console.log(
-              "✅ [Original Context] Context original utilisé:",
-              JSON.stringify(originalContext, null, 2)
             );
 
             // Navigation vers l'écran d'organisation principal avec les détails validés
@@ -157,7 +159,7 @@ export default function TravelConfig() {
     );
   };
 
-  // Chat avec Vercel AI SDK
+  // Chat avec Vercel AI SDK (CORRIGÉ : même format que travel-config)
   const {
     messages,
     input,
@@ -167,19 +169,23 @@ export default function TravelConfig() {
     append,
     setInput,
   } = useChat({
-    api: "/api/travel-chat",
+    api: "/api/accommodation-chat",
     headers: {
       "X-Client-Platform": "react-native",
-      "X-Travel-Context": JSON.stringify(travelContext),
+      "X-Accommodation-Context": JSON.stringify(accommodationContext),
     },
     initialMessages: [
       {
         id: "1",
         role: "assistant",
-        content:
-          travelContext.direction === "outbound"
-            ? `🎉 Super choix !\n\nTu as sélectionné ${travelContext.festivalName} comme festival, et franchement… je valide à 100% ! 🔥\n\nDit moi avec quel moyen de locomotion tu veux voyager.`
-            : `🏠 Parfait ! Maintenant organisons ton trajet de retour !\n\nTu as passé un super moment au ${travelContext.festivalName} à ${travelContext.festivalLocation} ! 🎵\n\nComment veux-tu rentrer chez toi ? Dis-moi ton moyen de transport préféré !`,
+        content: `🏨 Parfait ! Recherchons le logement idéal pour ton séjour au ${accommodationContext.festivalName} ! 🎉
+
+📍 **Destination :** ${accommodationContext.festivalLocation}
+📅 **Dates :** ${accommodationContext.checkInDate} → ${accommodationContext.checkOutDate}
+👥 **Invités :** ${accommodationContext.guests} personne(s)
+🛏️ **Chambres :** ${accommodationContext.rooms}
+
+Dis-moi quel type de logement tu recherches !`,
       },
     ],
     onFinish: (message) => {
@@ -220,6 +226,7 @@ export default function TravelConfig() {
 
             console.log("🧹 [Cleaned Tool Calls JSON]:", cleanedJson);
             toolCalls = JSON.parse(cleanedJson);
+            console.log("✅ [JSON] Parsing après nettoyage réussi");
           }
 
           console.log("🔧 [Tool Calls] Extraits du marqueur:", toolCalls);
@@ -228,56 +235,55 @@ export default function TravelConfig() {
             toolCalls.length
           );
 
-          // Vérifier si on a des validations avec plus de logs
-          const validationCalls = toolCalls.filter(
-            (call: any) => call.toolName === "createBookingValidation"
-          );
-
+          // Vérifier et logger les validations spécifiquement
           console.log("🔍 [Validation] Recherche de validations...");
-          console.log(
-            "🔍 [Validation] Tool calls trouvés:",
-            toolCalls.map((call: any) => call.toolName)
+          const toolCallTypes = toolCalls.map((tc: any) => tc.toolName);
+          console.log("🔍 [Validation] Tool calls trouvés:", toolCallTypes);
+
+          const validationCalls = toolCalls.filter(
+            (tc: any) => tc.toolName === "createAccommodationValidation"
           );
           console.log("🔍 [Validation] Calls de validation:", validationCalls);
 
-          const hasValidation = validationCalls.length > 0;
-
-          if (hasValidation) {
+          if (validationCalls.length > 0) {
             console.log(
               "✅ [Validation] Tool calls de validation trouvés:",
               validationCalls.length
             );
-            validationCalls.forEach((call: any, index: number) => {
-              console.log(`✅ [Validation ${index}] Détails validation:`, call);
+            validationCalls.forEach((validation: any, index: number) => {
+              console.log(
+                `✅ [Validation ${index}] Détails validation:`,
+                validation
+              );
             });
           } else {
             console.log("❌ [Validation] Aucun tool call de validation trouvé");
-            toolCalls.forEach((call: any, index: number) => {
-              console.log(
-                `🔍 [Tool Call ${index}] Type: ${call.toolName}, Args:`,
-                call.args
-              );
-            });
           }
 
-          // Sauvegarder les tool calls dans le state
-          setMessageToolCalls((prev) => {
-            const newState = {
-              ...prev,
-              [message.id]: toolCalls,
-            };
-            console.log("💾 [State] Mise à jour messageToolCalls:", newState);
-            return newState;
+          // Logger chaque tool call individuellement pour debug
+          toolCalls.forEach((toolCall: any, index: number) => {
+            console.log(
+              `🔍 [Tool Call ${index}] Type: ${toolCall.toolName}, Args:`,
+              toolCall.args
+            );
           });
 
+          setMessageToolCalls((prev) => ({
+            ...prev,
+            [message.id]: toolCalls,
+          }));
+
           // Nettoyer le contenu du message en supprimant le marqueur
-          const cleanContent = content
-            .replace(/<!-- TOOL_CALLS:.*? -->\s*/s, "")
-            .trim();
+          const cleanContent = content.replace(/<!-- TOOL_CALLS:.*? -->/s, "");
           console.log(
             "🧹 [Content] Contenu nettoyé:",
             cleanContent.substring(0, 100) + "..."
           );
+
+          console.log("💾 [State] Mise à jour messageToolCalls:", {
+            ...messageToolCalls,
+            [message.id]: toolCalls,
+          });
         } catch (error) {
           console.error("❌ [Tool Calls] Erreur parsing:", error);
           console.error(
@@ -288,62 +294,41 @@ export default function TravelConfig() {
         }
       } else {
         console.log("❌ [Tool Calls] Aucun marqueur trouvé dans le message");
-        console.log(
-          "🔍 [Tool Calls] Contenu du message (300 premiers chars):",
-          content.substring(0, 300) + "..."
-        );
-
-        // Vérifier s'il y a des mentions de validation dans le texte
-        const hasValidationText =
-          content.toLowerCase().includes("validation") ||
-          content.toLowerCase().includes("valider") ||
-          content.toLowerCase().includes("réservation");
-        if (hasValidationText) {
-          console.log(
-            "⚠️ [Tool Calls] Le message mentionne une validation mais pas de marqueur trouvé"
-          );
-        }
       }
     },
     body: {
       context: {
         festivalName: params.festivalName,
         festivalLocation: params.festivalLocation,
-        departurePoint: params.departurePoint,
-        arrivalDate: params.arrivalDate,
-        departureDate: params.departureDate,
-        direction: params.direction,
+        cityCode: params.cityCode,
+        checkInDate: params.checkInDate,
+        checkOutDate: params.checkOutDate,
+        guests: params.guests,
+        rooms: params.rooms,
       },
     },
   });
 
-  // Options de transport
-  const travelOptions: TravelOption[] = [
+  // Options de logement rapides
+  const accommodationTypes = [
     {
-      type: "flight",
-      icon: <Plane size={24} color={FestiFunColors.background} />,
-      label: "Avion",
-      image: require("../app/assets/pedro.mp3"), // Placeholder
+      type: "economique",
+      label: "💰 Économique",
+      description: "Auberges et hôtels budget",
     },
+    { type: "confort", label: "🌟 Confort", description: "Hôtels 3-4 étoiles" },
     {
-      type: "train",
-      icon: <Train size={24} color={FestiFunColors.background} />,
-      label: "Train",
-      image: require("../app/assets/pedro.mp3"), // Placeholder
-    },
-    {
-      type: "bus",
-      icon: <Bus size={24} color={FestiFunColors.background} />,
-      label: "Bus",
-      image: require("../app/assets/pedro.mp3"), // Placeholder
+      type: "luxe",
+      label: "✨ Luxe",
+      description: "Hôtels 5 étoiles et suites",
     },
   ];
 
-  // Fonction pour sélectionner un moyen de transport
-  const selectTransport = (type: string, label: string) => {
+  // Fonction pour sélectionner un type de logement
+  const selectAccommodationType = (type: string, label: string) => {
     append({
       role: "user",
-      content: `Je veux voyager en ${label.toLowerCase()}`,
+      content: `Je cherche un logement ${label.toLowerCase()}`,
     });
   };
 
@@ -382,11 +367,11 @@ export default function TravelConfig() {
             >
               <ArrowLeft size={24} color={FestiFunColors.background} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Configurer un trajet</Text>
+            <Text style={styles.headerTitle}>Trouver un logement</Text>
             <View style={styles.headerSpacer} />
           </View>
           <Text style={styles.headerSubtitle}>
-            Converser pour sélectionner l'étape qui vous convient
+            Converser pour sélectionner l'hébergement qui vous convient
           </Text>
         </LinearGradient>
 
@@ -398,8 +383,6 @@ export default function TravelConfig() {
           showsVerticalScrollIndicator={false}
         >
           {messages.map((message) => {
-            // Debug: Afficher la structure du message dans la console
-
             return (
               <View key={message.id} style={styles.messageWrapper}>
                 {message.role === "assistant" && (
@@ -428,15 +411,9 @@ export default function TravelConfig() {
                               (toolCall: any, index: number) => {
                                 const getToolIcon = () => {
                                   switch (toolCall.toolName) {
-                                    case "searchAirports":
-                                      return "🏢";
-                                    case "searchFlights":
-                                      return "✈️";
-                                    case "searchTrains":
-                                      return "🚆";
-                                    case "searchBuses":
-                                      return "🚌";
-                                    case "createBookingValidation":
+                                    case "searchHotels":
+                                      return "🏨";
+                                    case "createAccommodationValidation":
                                       return "✅";
                                     default:
                                       return "🔍";
@@ -445,33 +422,14 @@ export default function TravelConfig() {
 
                                 const getToolLabel = () => {
                                   switch (toolCall.toolName) {
-                                    case "searchAirports":
-                                      return `Recherche d'aéroports : ${
-                                        toolCall.args?.keyword || "..."
+                                    case "searchHotels":
+                                      return `Recherche d'hôtels : ${
+                                        toolCall.args?.cityCode || "..."
                                       }`;
-                                    case "searchFlights":
-                                      return `Recherche de vols : ${
-                                        toolCall.args?.origin || "..."
-                                      } → ${
-                                        toolCall.args?.destination || "..."
+                                    case "createAccommodationValidation":
+                                      return `Logement sélectionné : ${
+                                        toolCall.args?.hotelName || "..."
                                       }`;
-                                    case "searchTrains":
-                                      return `Recherche de trains : ${
-                                        toolCall.args?.origin || "..."
-                                      } → ${
-                                        toolCall.args?.destination || "..."
-                                      }`;
-                                    case "searchBuses":
-                                      return `Recherche de bus : ${
-                                        toolCall.args?.origin || "..."
-                                      } → ${
-                                        toolCall.args?.destination || "..."
-                                      }`;
-                                    case "createBookingValidation":
-                                      return `Option de ${
-                                        toolCall.args?.transportType ||
-                                        "transport"
-                                      } sélectionnée`;
                                     default:
                                       return "Recherche en cours...";
                                   }
@@ -534,31 +492,42 @@ export default function TravelConfig() {
                           return false;
                         }
 
-                        // Chercher spécifiquement les validations
-                        const validationToolCalls = toolCallsForMessage.filter(
-                          (toolCall: any) => {
+                        // Chercher les validations
+                        const validations = toolCallsForMessage.filter(
+                          (toolCall: any) =>
+                            toolCall.toolName ===
+                            "createAccommodationValidation"
+                        );
+
+                        // Logger chaque tool call pour debug
+                        toolCallsForMessage.forEach(
+                          (toolCall: any, index: number) => {
                             console.log(
                               `🔍 [Tool Call Check] Type: ${toolCall.toolName}, ID: ${toolCall.id}`
-                            );
-                            return (
-                              toolCall.toolName === "createBookingValidation"
                             );
                           }
                         );
 
-                        const hasValidation = validationToolCalls.length > 0;
-
+                        const hasValidation = validations.length > 0;
                         console.log(
                           `🎯 [Validation Button Check] Message ${message.id} - hasValidation: ${hasValidation}`
                         );
                         console.log(
-                          `🎯 [Validation Button Check] Nombre de validations trouvées: ${validationToolCalls.length}`
+                          `🎯 [Validation Button Check] Nombre de validations trouvées: ${validations.length}`
                         );
 
                         if (hasValidation) {
                           console.log(
                             `✅ [Validation Button Check] Validations trouvées:`,
-                            validationToolCalls
+                            validations
+                          );
+                          validations.forEach(
+                            (validation: any, index: number) => {
+                              console.log(
+                                `🎯 [Validation] Logement sélectionné:`,
+                                validation
+                              );
+                            }
                           );
                         } else {
                           console.log(
@@ -576,11 +545,12 @@ export default function TravelConfig() {
                           {messageToolCalls[message.id]
                             .filter(
                               (toolCall: any) =>
-                                toolCall.toolName === "createBookingValidation"
+                                toolCall.toolName ===
+                                "createAccommodationValidation"
                             )
                             .map((validationCall: any, index: number) => {
                               console.log(
-                                `🎯 [Validation] Activité sélectionnée:`,
+                                `🎯 [Validation] Option sélectionnée:`,
                                 validationCall
                               );
                               return (
@@ -596,19 +566,15 @@ export default function TravelConfig() {
                                       validationStyles.validationButtonText
                                     }
                                   >
-                                    ✅ Valider cette option
+                                    🏨 Valider ce logement
                                   </Text>
                                   <Text
                                     style={
                                       validationStyles.validationButtonSubtext
                                     }
                                   >
-                                    {
-                                      validationCall.args?.optionDetails
-                                        ?.company
-                                    }{" "}
-                                    •{" "}
-                                    {validationCall.args?.optionDetails?.price}
+                                    {validationCall.args?.hotelName} •{" "}
+                                    {validationCall.args?.price}
                                   </Text>
                                 </TouchableOpacity>
                               );
@@ -630,14 +596,16 @@ export default function TravelConfig() {
             );
           })}
 
-          {/* Options de transport (seulement après le premier message) */}
+          {/* Options de logement (seulement après le premier message) */}
           {messages.length === 1 && (
             <View style={styles.transportOptions}>
-              {travelOptions.map((option) => (
+              {accommodationTypes.map((option) => (
                 <TouchableOpacity
                   key={option.type}
                   style={styles.transportCard}
-                  onPress={() => selectTransport(option.type, option.label)}
+                  onPress={() =>
+                    selectAccommodationType(option.type, option.label)
+                  }
                 >
                   <ImageBackground
                     style={styles.transportCardBackground}
@@ -651,7 +619,6 @@ export default function TravelConfig() {
                       style={styles.transportCardOverlay}
                     >
                       <View style={styles.transportCardContent}>
-                        {option.icon}
                         <Text style={styles.transportLabel}>
                           {option.label}
                         </Text>
@@ -844,29 +811,6 @@ const styles = StyleSheet.create({
     color: FestiFunColors.background,
     fontFamily: FestiFunFonts.variants.poppinsRegular,
   },
-  loadingContainer: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  loadingDots: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#ad9cbb",
-  },
-  dot1: {
-    opacity: 0.4,
-  },
-  dot2: {
-    opacity: 0.7,
-  },
-  dot3: {
-    opacity: 1,
-  },
   inputContainer: {
     paddingHorizontal: 20,
     paddingVertical: 16,
@@ -943,9 +887,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: FestiFunColors.accent,
   },
+  loadingContainer: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  loadingDots: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#ad9cbb",
+  },
+  dot1: {
+    opacity: 0.4,
+  },
+  dot2: {
+    opacity: 0.7,
+  },
+  dot3: {
+    opacity: 1,
+  },
 });
 
-// Styles pour le markdown
+// Styles pour le markdown (IDENTIQUE À TRAVEL-CONFIG)
 const markdownStyles = {
   body: {
     fontSize: 16,

@@ -50,7 +50,7 @@
     },
     "extra": {
       "router": {},
-      "betterAuthUrl": "http://10.186.166.166:8081",
+      "betterAuthUrl": "http://10.134.199.206:8081",
       "eas": {
         "projectId": "05a3ff07-4480-45c9-9f97-6bc3a9f29e0f"
       }

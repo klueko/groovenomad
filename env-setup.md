@@ -23,6 +23,16 @@ BETTER_AUTH_URL=http://localhost:8081/api/auth
 
 # Configuration Base de données
 DATABASE_URL=postgresql://postgres.zjkmcqmovbovuafwygbh:ton_mot_de_passe_db@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
+
+# Configuration APIs externes
+TICKETMASTER_API_KEY=ton_api_key_ticketmaster_ici
+TICKETMASTER_SECRET=ton_secret_ticketmaster_ici
+GROQ_API_KEY=ton_api_key_groq_ici
+AMADEUS_CLIENT_ID=ton_client_id_amadeus_ici
+AMADEUS_CLIENT_SECRET=ton_secret_amadeus_ici
+OPENTRIPMAP_API_KEY=ton_api_key_opentripmap_ici
+MAPBOX_API_KEY=ton_api_key_mapbox_ici
+EXPO_PUBLIC_MAPBOX_API_KEY=ton_api_key_mapbox_ici
 ```
 
 ## 🎯 Points importants :
@@ -47,6 +57,16 @@ DATABASE_URL=postgresql://postgres.zjkmcqmovbovuafwygbh:ton_mot_de_passe_db@aws-
 # Dans ton terminal
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
+
+## 🗺️ Obtenir la clé OpenTripMap (pour Pedro Activités) :
+
+1. Va sur https://opentripmap.io/docs
+2. Clique sur "Get API Key" et crée un compte gratuit
+3. Confirme ton email et connecte-toi
+4. Va dans ton profil pour récupérer ta clé API
+5. Copie la clé dans `OPENTRIPMAP_API_KEY=ta_cle_ici`
+
+**Note :** OpenTripMap est gratuit sans limite stricte, parfait pour les activités touristiques !
 
 ---
 

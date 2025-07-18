@@ -52,6 +52,7 @@ export const auth = betterAuth({
     process.env.BETTER_AUTH_URL || "http://localhost:8081",
     "http://10.186.166.166:8081",
     "http://10.224.162.166:8081",
+    "http://10.134.199.206:8081",
 
     "festifun://",
     "festifun://*",
@@ -63,5 +64,5 @@ export const auth = betterAuth({
     "exp://10.224.162.166:8081/--/*",
   ],
   secret: process.env.BETTER_AUTH_SECRET!,
-  baseURL: process.env.BETTER_AUTH_URL || "http://10.186.166.166:8081",
+  baseURL: process.env.BETTER_AUTH_URL || "http://10.134.199.206:8081",
 });

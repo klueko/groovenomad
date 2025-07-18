@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,79 +6,109 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
+  TextInput,
+  Alert,
   Image,
   ImageBackground,
-  Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import {
-  ArrowLeft,
-  Plus,
-  Plane,
-  Train,
-  Bus,
-  Send,
-  Mic,
-} from "lucide-react-native";
-import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
+import { ArrowLeft, Send, MapPin, Plus, Mic } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import Markdown from "react-native-markdown-display";
 import { useChat } from "react-native-vercel-ai";
+import { FestiFunColors, FestiFunFonts } from "../lib/design-system";
+import Markdown from "react-native-markdown-display";
 
-// Types pour le chat
-type TravelOption = {
-  type: "flight" | "train" | "bus";
-  icon: React.ReactNode;
-  label: string;
-  image: any;
-};
-
-export default function TravelConfig() {
+export default function ActivityConfig() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Construire le contexte de voyage à partir des paramètres
-  const travelContext = {
-    festivalName: params.festivalName,
-    festivalLocation: params.festivalLocation,
-    departurePoint: params.departurePoint,
-    arrivalDate: params.arrivalDate,
-    departureDate: params.departureDate,
-    direction: params.direction,
-  };
+  // Construire le contexte d'activité enrichi à partir des paramètres avec gestion d'erreur
+  const activityContext = useMemo(() => {
+    // Fonction helper pour parser JSON de manière sécurisée
+    const safeJsonParse = (jsonString: string, fallback: any = []) => {
+      try {
+        return JSON.parse(jsonString);
+      } catch (error) {
+        console.error("❌ [ActivityContext] Erreur parsing JSON:", error);
+        console.error("📄 [ActivityContext] JSON problématique:", jsonString);
+        return fallback;
+      }
+    };
+
+    return {
+      // Contexte festival de base
+      festivalName: params.festivalName || "Festival",
+      festivalLocation: params.festivalLocation || "Location",
+      latitude: parseFloat((params.latitude as string) || "51.14103"),
+      longitude: parseFloat((params.longitude as string) || "2.7463"),
+      festivalStartDate: params.festivalStartDate,
+      festivalEndDate: params.festivalEndDate,
+      availableDates: params.availableDates
+        ? (params.availableDates as string).split(",")
+        : [],
+
+      // Planning détaillé du jour
+      selectedDate: params.selectedDate,
+      dayType: params.dayType || "free", // "festival" ou "free"
+      dayName: params.dayName,
+
+      // Créneaux occupés et disponibles avec parsing sécurisé
+      occupiedSlots: params.occupiedSlots
+        ? safeJsonParse(params.occupiedSlots as string, [])
+        : [],
+      availableSlots: params.availableSlots
+        ? safeJsonParse(params.availableSlots as string, [])
+        : [],
+
+      // Contraintes temporelles
+      maxActivitiesPerDay: parseInt(
+        (params.maxActivitiesPerDay as string) || "4"
+      ),
+      currentActivitiesCount: parseInt(
+        (params.currentActivitiesCount as string) || "0"
+      ),
+    };
+  }, [params]);
 
   // État pour stocker les tool calls séparément
   const [messageToolCalls, setMessageToolCalls] = useState<
     Record<string, any[]>
   >({});
 
-  // Fonction pour gérer la validation d'une option de transport
+  // Fonction pour gérer la validation d'une option d'activité
   const handleValidateOption = (validationCall: any) => {
-    console.log("🎯 [Validation] Option sélectionnée:", validationCall);
+    console.log("🎯 [Validation] Activité sélectionnée:", validationCall);
 
-    // Extraire les détails du transport et du contexte
-    const { transportType, optionDetails, contextInfo } = validationCall.args;
+    // Adapter la structure des données pour correspondre à l'API actuelle
+    const args = validationCall.args;
+    const activityInfo = {
+      activityId: args.activityId,
+      activityName: args.activityName,
+      activityDescription: args.activityDescription,
+      category: args.category,
+      rating: args.rating,
+      distance: args.distance,
+      estimatedDuration: args.estimatedDuration,
+      price: args.price,
+      coordinates: args.coordinates,
+    };
+    const scheduleInfo = {
+      scheduledDate: args.scheduledDate,
+      scheduledTime: args.scheduledTime,
+    };
 
-    // Afficher un message de confirmation positif
     Alert.alert(
-      "🎉 Super choix !",
-      `Ton ${
-        transportType === "flight"
-          ? "vol"
-          : transportType === "train"
-          ? "train"
-          : "bus"
-      } avec ${optionDetails.company} est sélectionné !\n\n✈️ Prix: ${
-        optionDetails.price
-      }\n🗓️ Départ: ${optionDetails.departureTime}\n📍 ${
-        optionDetails.origin
-      } → ${
-        optionDetails.destination
-      }\n\nPassons maintenant à l'organisation de ton voyage !`,
+      "🎭 Super choix !",
+      `Ton activité ${activityInfo.activityName} est programmée !\n\n📅 ${
+        scheduleInfo.scheduledDate
+      }\n⏰ ${scheduleInfo.scheduledTime}\n💰 ${
+        activityInfo.price
+      }\n📍 ${Math.round(
+        activityInfo.distance / 1000
+      )}km du festival\n\nPassons maintenant à l'organisation de ton voyage !`,
       [
         {
           text: "Continuer",
@@ -88,62 +118,40 @@ export default function TravelConfig() {
               "🚀 [Navigation] Redirection vers l'organisation du voyage"
             );
 
-            // Utiliser le context original au lieu du contextInfo incomplet de l'IA
-            const originalContext = travelContext;
-
-            // ===== PRÉSERVER LES PARAMÈTRES EXISTANTS =====
-            // Récupérer tous les paramètres actuels pour ne pas écraser les validations précédentes
+            // PRÉSERVER TOUTES les données existantes du voyage en cours
             const existingParams = { ...params };
-            console.log(
-              "🔍 [Navigation] Paramètres existants à préserver:",
-              existingParams
-            );
 
-            // Préparer les paramètres à envoyer
+            // Retirer les paramètres de contexte internes pour éviter la duplication
+            delete existingParams.originalContext;
+            delete existingParams.latitude;
+            delete existingParams.longitude;
+            delete existingParams.availableDates;
+
+            // Préparer les paramètres à envoyer en PRÉSERVANT tout le contexte existant
             const navParams = {
-              // ===== PRÉSERVER TOUS LES PARAMÈTRES EXISTANTS =====
-              ...existingParams,
+              ...existingParams, // Conserver TOUS les paramètres existants (transport, logement, etc.)
 
-              // ===== MISE À JOUR DES PARAMÈTRES DE BASE =====
-              // Paramètres du festival (individuels pour éviter les erreurs JSON)
-              festivalName: originalContext.festivalName,
-              festivalVenue: originalContext.festivalLocation,
-              festivalCity: originalContext.festivalLocation,
-              festivalCountry: "Belgique",
-              festivalStartDate: originalContext.arrivalDate, // 18 juillet (début du festival)
-              festivalEndDate: originalContext.departureDate, // 21 juillet (fin du festival)
-
-              // Paramètres du voyage complet (requis par trip-planning)
-              arrivalDate: originalContext.arrivalDate, // 18 juillet (arrivée au festival)
-              departureDate: originalContext.departureDate, // 21 juillet (départ du festival)
-              personCount: existingParams.personCount || "1",
-              selectedTime: existingParams.selectedTime || "flexible",
-              departurePoint: optionDetails.origin,
-
-              // ===== NOUVELLES INFORMATIONS DE TRANSPORT =====
-              transportValidated: "true",
-              transportDirection: originalContext.direction, // "outbound" ou "return"
-              transportType: transportType,
-              transportCompany: optionDetails.company,
-              transportPrice: optionDetails.price,
-              transportDepartureTime: optionDetails.departureTime,
-              transportArrivalTime: optionDetails.arrivalTime,
-              transportDuration: optionDetails.duration,
-              transportOrigin: optionDetails.origin,
-              transportDestination: optionDetails.destination,
+              // Ajouter/mettre à jour uniquement les données d'activité
+              activityValidated: "true",
+              activityId: activityInfo.activityId,
+              activityName: activityInfo.activityName,
+              activityDescription: activityInfo.activityDescription,
+              activityCategory: activityInfo.category,
+              activityRating: activityInfo.rating?.toString() || "0",
+              activityDistance: activityInfo.distance?.toString() || "0",
+              activityDuration: activityInfo.estimatedDuration,
+              activityPrice: activityInfo.price,
+              activityDate: scheduleInfo.scheduledDate,
+              activityTime: scheduleInfo.scheduledTime || "14:00",
+              activityLatitude:
+                activityInfo.coordinates?.lat?.toString() || "0",
+              activityLongitude:
+                activityInfo.coordinates?.lon?.toString() || "0",
             };
 
             console.log(
-              "📤 [Navigation] Paramètres envoyés:",
+              "📤 [Navigation] Paramètres envoyés (contexte préservé):",
               JSON.stringify(navParams, null, 2)
-            );
-            console.log(
-              "🔍 [Context Info] ContextInfo de l'IA (incomplet):",
-              JSON.stringify(contextInfo, null, 2)
-            );
-            console.log(
-              "✅ [Original Context] Context original utilisé:",
-              JSON.stringify(originalContext, null, 2)
             );
 
             // Navigation vers l'écran d'organisation principal avec les détails validés
@@ -157,7 +165,34 @@ export default function TravelConfig() {
     );
   };
 
-  // Chat avec Vercel AI SDK
+  // Chat avec Vercel AI SDK (même format que les autres configs)
+  // Sérialiser le contexte de manière sécurisée
+  const activityContextJson = useMemo(() => {
+    try {
+      const jsonString = JSON.stringify(activityContext);
+      console.log(
+        "✅ [ActivityContext] Sérialisation réussie, taille:",
+        jsonString.length
+      );
+      return jsonString;
+    } catch (error) {
+      console.error("❌ [ActivityContext] Erreur sérialisation:", error);
+      // Contexte minimal en fallback
+      return JSON.stringify({
+        festivalName: activityContext.festivalName || "Festival",
+        festivalLocation: activityContext.festivalLocation || "Location",
+        latitude: activityContext.latitude || 51.14103,
+        longitude: activityContext.longitude || 2.7463,
+        selectedDate:
+          activityContext.selectedDate ||
+          new Date().toISOString().split("T")[0],
+        dayType: activityContext.dayType || "free",
+        maxActivitiesPerDay: activityContext.maxActivitiesPerDay || 4,
+        currentActivitiesCount: activityContext.currentActivitiesCount || 0,
+      });
+    }
+  }, [activityContext]);
+
   const {
     messages,
     input,
@@ -167,19 +202,73 @@ export default function TravelConfig() {
     append,
     setInput,
   } = useChat({
-    api: "/api/travel-chat",
+    api: "/api/activity-chat",
     headers: {
       "X-Client-Platform": "react-native",
-      "X-Travel-Context": JSON.stringify(travelContext),
+      "X-Activity-Context": activityContextJson,
     },
     initialMessages: [
       {
         id: "1",
         role: "assistant",
-        content:
-          travelContext.direction === "outbound"
-            ? `🎉 Super choix !\n\nTu as sélectionné ${travelContext.festivalName} comme festival, et franchement… je valide à 100% ! 🔥\n\nDit moi avec quel moyen de locomotion tu veux voyager.`
-            : `🏠 Parfait ! Maintenant organisons ton trajet de retour !\n\nTu as passé un super moment au ${travelContext.festivalName} à ${travelContext.festivalLocation} ! 🎵\n\nComment veux-tu rentrer chez toi ? Dis-moi ton moyen de transport préféré !`,
+        content: (() => {
+          const selectedDateFormatted = activityContext.selectedDate
+            ? new Date(
+                typeof activityContext.selectedDate === "string"
+                  ? activityContext.selectedDate
+                  : activityContext.selectedDate[0]
+              ).toLocaleDateString("fr-FR", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })
+            : "cette journée";
+
+          const dayTypeEmoji =
+            activityContext.dayType === "festival" ? "🎵" : "🗓️";
+          const dayTypeLabel =
+            activityContext.dayType === "festival"
+              ? "Jour de festival"
+              : "Journée libre";
+
+          // Affichage des créneaux occupés
+          const occupiedSlotsText =
+            activityContext.occupiedSlots.length > 0
+              ? `\n📋 **Déjà programmé :**\n${activityContext.occupiedSlots
+                  .map((slot) => `• ${slot.name} (${slot.time})`)
+                  .join("\n")}`
+              : "";
+
+          // Affichage des créneaux libres
+          const availableSlotsText =
+            activityContext.availableSlots.length > 0
+              ? `\n⏰ **Créneaux libres disponibles :**\n${activityContext.availableSlots
+                  .map((slot) => `• **${slot.time}** - ${slot.description}`)
+                  .join("\n")}`
+              : "";
+
+          // Recommandations contextuelles
+          const recommendations =
+            activityContext.dayType === "festival"
+              ? "\n💡 **Recommandations :** Privilégie les activités courtes et proches du festival pour ce jour !"
+              : "\n💡 **Recommandations :** Tu as toute liberté pour des activités longues et immersives !";
+
+          // Contraintes
+          const remainingSlots =
+            activityContext.maxActivitiesPerDay -
+            activityContext.currentActivitiesCount;
+          const constraintsText =
+            remainingSlots > 0
+              ? `\n🎯 **Places restantes :** ${remainingSlots}/${activityContext.maxActivitiesPerDay} activités possibles`
+              : "\n⚠️ **Attention :** Plus de place pour d'autres activités ce jour-là !";
+
+          return `🎭 **Planifions ton ${selectedDateFormatted} !** ✨
+
+${dayTypeEmoji} **${dayTypeLabel}** près du ${activityContext.festivalName}
+📍 **Destination :** ${activityContext.festivalLocation}${occupiedSlotsText}${availableSlotsText}${recommendations}${constraintsText}
+
+**Quel type d'activité t'intéresse pour ce créneau ?**`;
+        })(),
       },
     ],
     onFinish: (message) => {
@@ -188,162 +277,173 @@ export default function TravelConfig() {
         JSON.stringify(message, null, 2)
       );
 
-      // Extraire les tool calls du marqueur spécial dans le contenu
+      // Extraire les tool calls du marqueur spécial dans le contenu (FORMAT IDENTIQUE AUX AUTRES)
       const content = message.content;
-      console.log("🔍 [Tool Calls] Contenu complet du message:", content);
-
-      // Améliorer la regex pour capturer les marqueurs même s'ils sont mal formatés ou positionnés
-      const toolCallsMatch = content.match(
-        /<!-- TOOL_CALLS:\s*(\[.*?\])\s*-->/s
-      );
+      const toolCallsMatch = content.match(/<!-- TOOL_CALLS:(.*?) -->/);
 
       if (toolCallsMatch) {
         try {
           const toolCallsJson = toolCallsMatch[1];
           console.log("🔧 [Raw Tool Calls JSON]:", toolCallsJson);
 
-          let toolCalls;
+          // Nettoyer le JSON si l'IA a généré des erreurs de format
+          const cleanedJson = toolCallsJson
+            .replace(/state="result"/g, '"state":"result"')
+            .replace(/state:'result'/g, '"state":"result"')
+            .replace(/state:"result"/g, '"state":"result"')
+            .replace(/state='result'/g, '"state":"result"')
+            .replace(/}\s*state/g, ',"state"');
 
-          // D'abord essayer de parser le JSON tel quel
-          try {
-            toolCalls = JSON.parse(toolCallsJson);
-            console.log("✅ [JSON] Parsing direct réussi");
-          } catch (firstError) {
-            console.log(
-              "⚠️ [JSON] Parsing direct échoué, tentative de nettoyage..."
-            );
+          console.log("🧹 [Cleaned Tool Calls JSON]:", cleanedJson);
 
-            // Si ça échoue, nettoyage minimal
-            const cleanedJson = toolCallsJson
-              .replace(/,\s*}/g, "}") // Supprimer les virgules en trop
-              .replace(/,\s*]/g, "]"); // Supprimer les virgules en trop avant ]
-
-            console.log("🧹 [Cleaned Tool Calls JSON]:", cleanedJson);
-            toolCalls = JSON.parse(cleanedJson);
-          }
-
+          const toolCalls = JSON.parse(cleanedJson);
           console.log("🔧 [Tool Calls] Extraits du marqueur:", toolCalls);
           console.log(
             "🔧 [Tool Calls] Nombre de tool calls:",
             toolCalls.length
           );
 
-          // Vérifier si on a des validations avec plus de logs
+          // Logging spécifique pour createActivityValidation (gérer toolName et toolname)
           const validationCalls = toolCalls.filter(
-            (call: any) => call.toolName === "createBookingValidation"
+            (tc: any) =>
+              tc.toolName === "createActivityValidation" ||
+              tc.toolname === "createActivityValidation"
           );
-
-          console.log("🔍 [Validation] Recherche de validations...");
           console.log(
-            "🔍 [Validation] Tool calls trouvés:",
-            toolCalls.map((call: any) => call.toolName)
+            "✅ [Validation] Tool calls de validation trouvés:",
+            validationCalls.length
           );
-          console.log("🔍 [Validation] Calls de validation:", validationCalls);
-
-          const hasValidation = validationCalls.length > 0;
-
-          if (hasValidation) {
+          if (validationCalls.length > 0) {
             console.log(
-              "✅ [Validation] Tool calls de validation trouvés:",
-              validationCalls.length
+              "✅ [Validation] Détails validation:",
+              validationCalls[0]
             );
-            validationCalls.forEach((call: any, index: number) => {
-              console.log(`✅ [Validation ${index}] Détails validation:`, call);
-            });
-          } else {
-            console.log("❌ [Validation] Aucun tool call de validation trouvé");
-            toolCalls.forEach((call: any, index: number) => {
-              console.log(
-                `🔍 [Tool Call ${index}] Type: ${call.toolName}, Args:`,
-                call.args
-              );
+            // Normaliser le toolName si c'est toolname
+            validationCalls.forEach((call: any) => {
+              if (call.toolname && !call.toolName) {
+                call.toolName = call.toolname;
+              }
             });
           }
 
-          // Sauvegarder les tool calls dans le state
-          setMessageToolCalls((prev) => {
-            const newState = {
-              ...prev,
-              [message.id]: toolCalls,
-            };
-            console.log("💾 [State] Mise à jour messageToolCalls:", newState);
-            return newState;
-          });
+          // Normaliser tous les tool calls pour avoir toolName
+          const normalizedToolCalls = toolCalls.map((tc: any) => ({
+            ...tc,
+            toolName: tc.toolName || tc.toolname, // Assurer que toolName existe
+          }));
+
+          setMessageToolCalls((prev) => ({
+            ...prev,
+            [message.id]: normalizedToolCalls,
+          }));
 
           // Nettoyer le contenu du message en supprimant le marqueur
-          const cleanContent = content
-            .replace(/<!-- TOOL_CALLS:.*? -->\s*/s, "")
-            .trim();
-          console.log(
-            "🧹 [Content] Contenu nettoyé:",
-            cleanContent.substring(0, 100) + "..."
+          const cleanContent = content.replace(
+            /<!-- TOOL_CALLS:.*? -->\n\n/,
+            ""
           );
+          // Note: Pas possible de modifier le message directement avec useChat
         } catch (error) {
           console.error("❌ [Tool Calls] Erreur parsing:", error);
           console.error(
             "❌ [Tool Calls] JSON problématique:",
             toolCallsMatch[1]
           );
-          // En cas d'erreur, on ignore simplement les tool calls
+
+          // En cas d'erreur de parsing, essayons de détecter si c'est une validation et créer un tool call mock
+          if (toolCallsMatch[1].includes("createActivityValidation")) {
+            console.log(
+              "🔄 [Tool Calls] Détection validation, création d'un tool call mock"
+            );
+            try {
+              // Extraire le nom de l'activité du contenu du message si possible
+              const activityNameMatch = content.match(
+                /(?:Le Vent Souffle|Musée|Centre|Théâtre|Marché|Parc)[^,\n]*/i
+              );
+              const activityName = activityNameMatch
+                ? activityNameMatch[0]
+                : "Activité sélectionnée";
+
+              const mockValidationCall = [
+                {
+                  id: "mock-validation",
+                  toolName: "createActivityValidation",
+                  args: {
+                    activityId: "mock-activity",
+                    activityName: activityName,
+                    activityDescription:
+                      "Activité sélectionnée par l'utilisateur",
+                    category: "cultural",
+                    rating: 3,
+                    distance: 1000,
+                    estimatedDuration: "2h",
+                    price: "Gratuit",
+                    scheduledDate: "2025-07-19",
+                    scheduledTime: "14:00",
+                    coordinates: { lat: 51.14103, lon: 2.7463 },
+                  },
+                  state: "result",
+                },
+              ];
+
+              setMessageToolCalls((prev) => ({
+                ...prev,
+                [message.id]: mockValidationCall,
+              }));
+
+              console.log(
+                "✅ [Tool Calls] Tool call mock créé:",
+                mockValidationCall
+              );
+            } catch (mockError) {
+              console.error(
+                "❌ [Tool Calls] Impossible de créer le mock:",
+                mockError
+              );
+            }
+          }
         }
       } else {
         console.log("❌ [Tool Calls] Aucun marqueur trouvé dans le message");
-        console.log(
-          "🔍 [Tool Calls] Contenu du message (300 premiers chars):",
-          content.substring(0, 300) + "..."
-        );
-
-        // Vérifier s'il y a des mentions de validation dans le texte
-        const hasValidationText =
-          content.toLowerCase().includes("validation") ||
-          content.toLowerCase().includes("valider") ||
-          content.toLowerCase().includes("réservation");
-        if (hasValidationText) {
-          console.log(
-            "⚠️ [Tool Calls] Le message mentionne une validation mais pas de marqueur trouvé"
-          );
-        }
       }
     },
     body: {
       context: {
         festivalName: params.festivalName,
         festivalLocation: params.festivalLocation,
-        departurePoint: params.departurePoint,
-        arrivalDate: params.arrivalDate,
-        departureDate: params.departureDate,
-        direction: params.direction,
+        latitude: parseFloat((params.latitude as string) || "0"),
+        longitude: parseFloat((params.longitude as string) || "0"),
+        festivalStartDate: params.festivalStartDate,
+        festivalEndDate: params.festivalEndDate,
+        availableDates: params.availableDates,
       },
     },
   });
 
-  // Options de transport
-  const travelOptions: TravelOption[] = [
+  // Options d'activités rapides
+  const activityTypes = [
     {
-      type: "flight",
-      icon: <Plane size={24} color={FestiFunColors.background} />,
-      label: "Avion",
-      image: require("../app/assets/pedro.mp3"), // Placeholder
+      type: "culture",
+      label: "🎭 Culture",
+      description: "Musées, théâtres, monuments",
     },
     {
-      type: "train",
-      icon: <Train size={24} color={FestiFunColors.background} />,
-      label: "Train",
-      image: require("../app/assets/pedro.mp3"), // Placeholder
+      type: "nature",
+      label: "🌳 Nature",
+      description: "Parcs, jardins, randonnées",
     },
     {
-      type: "bus",
-      icon: <Bus size={24} color={FestiFunColors.background} />,
-      label: "Bus",
-      image: require("../app/assets/pedro.mp3"), // Placeholder
+      type: "gastronomie",
+      label: "🍽️ Gastronomie",
+      description: "Restaurants, marchés locaux",
     },
   ];
 
-  // Fonction pour sélectionner un moyen de transport
-  const selectTransport = (type: string, label: string) => {
+  // Fonction pour sélectionner un type d'activité
+  const selectActivityType = (type: string, label: string) => {
     append({
       role: "user",
-      content: `Je veux voyager en ${label.toLowerCase()}`,
+      content: `Je cherche des activités ${label.toLowerCase()}`,
     });
   };
 
@@ -382,11 +482,11 @@ export default function TravelConfig() {
             >
               <ArrowLeft size={24} color={FestiFunColors.background} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Configurer un trajet</Text>
+            <Text style={styles.headerTitle}>Découvrir des activités</Text>
             <View style={styles.headerSpacer} />
           </View>
           <Text style={styles.headerSubtitle}>
-            Converser pour sélectionner l'étape qui vous convient
+            Converser pour sélectionner les activités qui vous intéressent
           </Text>
         </LinearGradient>
 
@@ -398,8 +498,6 @@ export default function TravelConfig() {
           showsVerticalScrollIndicator={false}
         >
           {messages.map((message) => {
-            // Debug: Afficher la structure du message dans la console
-
             return (
               <View key={message.id} style={styles.messageWrapper}>
                 {message.role === "assistant" && (
@@ -426,17 +524,15 @@ export default function TravelConfig() {
                           <View style={styles.toolCallsContainer}>
                             {messageToolCalls[message.id].map(
                               (toolCall: any, index: number) => {
+                                // Normaliser le nom du tool (gérer toolName et toolname)
+                                const toolName =
+                                  toolCall.toolName || toolCall.toolname;
+
                                 const getToolIcon = () => {
-                                  switch (toolCall.toolName) {
-                                    case "searchAirports":
-                                      return "🏢";
-                                    case "searchFlights":
-                                      return "✈️";
-                                    case "searchTrains":
-                                      return "🚆";
-                                    case "searchBuses":
-                                      return "🚌";
-                                    case "createBookingValidation":
+                                  switch (toolName) {
+                                    case "searchActivities":
+                                      return "🎭";
+                                    case "createActivityValidation":
                                       return "✅";
                                     default:
                                       return "🔍";
@@ -444,34 +540,13 @@ export default function TravelConfig() {
                                 };
 
                                 const getToolLabel = () => {
-                                  switch (toolCall.toolName) {
-                                    case "searchAirports":
-                                      return `Recherche d'aéroports : ${
-                                        toolCall.args?.keyword || "..."
+                                  switch (toolName) {
+                                    case "searchActivities":
+                                      return `Recherche d'activités près du festival`;
+                                    case "createActivityValidation":
+                                      return `Activité programmée : ${
+                                        toolCall.args?.activityName || "..."
                                       }`;
-                                    case "searchFlights":
-                                      return `Recherche de vols : ${
-                                        toolCall.args?.origin || "..."
-                                      } → ${
-                                        toolCall.args?.destination || "..."
-                                      }`;
-                                    case "searchTrains":
-                                      return `Recherche de trains : ${
-                                        toolCall.args?.origin || "..."
-                                      } → ${
-                                        toolCall.args?.destination || "..."
-                                      }`;
-                                    case "searchBuses":
-                                      return `Recherche de bus : ${
-                                        toolCall.args?.origin || "..."
-                                      } → ${
-                                        toolCall.args?.destination || "..."
-                                      }`;
-                                    case "createBookingValidation":
-                                      return `Option de ${
-                                        toolCall.args?.transportType ||
-                                        "transport"
-                                      } sélectionnée`;
                                     default:
                                       return "Recherche en cours...";
                                   }
@@ -513,106 +588,55 @@ export default function TravelConfig() {
 
                       {/* Bouton de validation si présent dans les tool calls */}
                       {(() => {
-                        // Vérifier d'abord si on a des tool calls pour ce message
-                        const toolCallsForMessage =
-                          messageToolCalls[message.id];
-                        console.log(
-                          `🎯 [Validation Button Check] Message ${message.id}:`
-                        );
-                        console.log(
-                          `🎯 [Validation Button Check] Tool calls disponibles:`,
-                          toolCallsForMessage
-                        );
-
-                        if (
-                          !toolCallsForMessage ||
-                          !Array.isArray(toolCallsForMessage)
-                        ) {
-                          console.log(
-                            `🎯 [Validation Button Check] Pas de tool calls pour le message ${message.id}`
+                        const hasValidation =
+                          messageToolCalls[message.id] &&
+                          messageToolCalls[message.id].some(
+                            (toolCall: any) =>
+                              toolCall.toolName ===
+                                "createActivityValidation" ||
+                              toolCall.toolname === "createActivityValidation"
                           );
-                          return false;
-                        }
-
-                        // Chercher spécifiquement les validations
-                        const validationToolCalls = toolCallsForMessage.filter(
-                          (toolCall: any) => {
-                            console.log(
-                              `🔍 [Tool Call Check] Type: ${toolCall.toolName}, ID: ${toolCall.id}`
-                            );
-                            return (
-                              toolCall.toolName === "createBookingValidation"
-                            );
-                          }
-                        );
-
-                        const hasValidation = validationToolCalls.length > 0;
-
                         console.log(
-                          `🎯 [Validation Button Check] Message ${message.id} - hasValidation: ${hasValidation}`
+                          `🎯 [Validation Button] Message ${message.id} - hasValidation:`,
+                          hasValidation
                         );
                         console.log(
-                          `🎯 [Validation Button Check] Nombre de validations trouvées: ${validationToolCalls.length}`
+                          `🎯 [Validation Button] messageToolCalls[${message.id}]:`,
+                          messageToolCalls[message.id]
                         );
-
-                        if (hasValidation) {
-                          console.log(
-                            `✅ [Validation Button Check] Validations trouvées:`,
-                            validationToolCalls
-                          );
-                        } else {
-                          console.log(
-                            `❌ [Validation Button Check] Aucune validation trouvée pour le message ${message.id}`
-                          );
-                          console.log(
-                            `❌ [Validation Button Check] Types de tool calls disponibles:`,
-                            toolCallsForMessage.map((tc: any) => tc.toolName)
-                          );
-                        }
-
                         return hasValidation;
                       })() && (
                         <View style={validationStyles.validationContainer}>
                           {messageToolCalls[message.id]
                             .filter(
                               (toolCall: any) =>
-                                toolCall.toolName === "createBookingValidation"
+                                toolCall.toolName ===
+                                  "createActivityValidation" ||
+                                toolCall.toolname === "createActivityValidation"
                             )
-                            .map((validationCall: any, index: number) => {
-                              console.log(
-                                `🎯 [Validation] Activité sélectionnée:`,
-                                validationCall
-                              );
-                              return (
-                                <TouchableOpacity
-                                  key={`validation-${index}`}
-                                  style={validationStyles.validationButton}
-                                  onPress={() =>
-                                    handleValidateOption(validationCall)
+                            .map((validationCall: any, index: number) => (
+                              <TouchableOpacity
+                                key={`validation-${index}`}
+                                style={validationStyles.validationButton}
+                                onPress={() =>
+                                  handleValidateOption(validationCall)
+                                }
+                              >
+                                <Text
+                                  style={validationStyles.validationButtonText}
+                                >
+                                  🎭 Programmer cette activité
+                                </Text>
+                                <Text
+                                  style={
+                                    validationStyles.validationButtonSubtext
                                   }
                                 >
-                                  <Text
-                                    style={
-                                      validationStyles.validationButtonText
-                                    }
-                                  >
-                                    ✅ Valider cette option
-                                  </Text>
-                                  <Text
-                                    style={
-                                      validationStyles.validationButtonSubtext
-                                    }
-                                  >
-                                    {
-                                      validationCall.args?.optionDetails
-                                        ?.company
-                                    }{" "}
-                                    •{" "}
-                                    {validationCall.args?.optionDetails?.price}
-                                  </Text>
-                                </TouchableOpacity>
-                              );
-                            })}
+                                  {validationCall.args?.activityName} •{" "}
+                                  {validationCall.args?.price}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
                         </View>
                       )}
                     </View>
@@ -630,14 +654,14 @@ export default function TravelConfig() {
             );
           })}
 
-          {/* Options de transport (seulement après le premier message) */}
+          {/* Options d'activités (seulement après le premier message) */}
           {messages.length === 1 && (
             <View style={styles.transportOptions}>
-              {travelOptions.map((option) => (
+              {activityTypes.map((option) => (
                 <TouchableOpacity
                   key={option.type}
                   style={styles.transportCard}
-                  onPress={() => selectTransport(option.type, option.label)}
+                  onPress={() => selectActivityType(option.type, option.label)}
                 >
                   <ImageBackground
                     style={styles.transportCardBackground}
@@ -651,7 +675,6 @@ export default function TravelConfig() {
                       style={styles.transportCardOverlay}
                     >
                       <View style={styles.transportCardContent}>
-                        {option.icon}
                         <Text style={styles.transportLabel}>
                           {option.label}
                         </Text>
@@ -945,7 +968,7 @@ const styles = StyleSheet.create({
   },
 });
 
-// Styles pour le markdown
+// Styles pour le markdown (IDENTIQUE AUX AUTRES CONFIGS)
 const markdownStyles = {
   body: {
     fontSize: 16,

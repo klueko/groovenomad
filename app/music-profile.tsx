@@ -314,6 +314,8 @@ export default function ProfileScreen() {
         onTabPress={(tab) => {
           if (tab === "home") {
             router.push("/home");
+          } else if (tab === "tickets") {
+            router.push("/mes-billets");
           }
           // Ajouter d'autres navigations au fur et à mesure
         }}
